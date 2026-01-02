@@ -33,6 +33,12 @@ import android.widget.Toast;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
+import com.beamng.remotecontrol.input.ButtonInputHandler;
+import com.beamng.remotecontrol.input.InputHandlerFactory;
+import com.beamng.remotecontrol.input.SliderInputHandler;
+import com.beamng.remotecontrol.input.SteeringInputHandler;
+import com.beamng.remotecontrol.settings.SettingsManager;
+
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -120,6 +126,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int NUMBER_OF_CORES;
     private InetAddress hostAddress;
 
+    // Modüler Input Sistemi
+    private SettingsManager settingsManager;
+    private SteeringInputHandler steeringInputHandler;
+    private LinearLayout buttonControlsContainer;
+    private Button btnSteerLeft;
+    private Button btnSteerRight;
+    private SeekBar steeringSlider;
 
     public static final String prefsName = "UserSettings";
 
@@ -301,6 +314,64 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //initListeners();
 
         mHandler = new Handler();
+        
+        // === MODÜLER INPUT SİSTEMİ BAŞLATMA ===
+        settingsManager = SettingsManager.getInstance(this);
+        
+        // UI elemanlarını bul
+        buttonControlsContainer = findViewById(R.id.buttonControlsContainer);
+        btnSteerLeft = findViewById(R.id.btnSteerLeft);
+        btnSteerRight = findViewById(R.id.btnSteerRight);
+        steeringSlider = findViewById(R.id.steeringSlider);
+        
+        // Input handler'ı oluştur ve UI'ı ayarla
+        setupInputHandler();
+    }
+    
+    /**
+     * Ayarlara göre doğru input handler'ı oluşturur ve UI'ı günceller.
+     */
+    private void setupInputHandler() {
+        // Önce mevcut handler'ı durdur
+        if (steeringInputHandler != null) {
+            steeringInputHandler.stop();
+        }
+        
+        // Yeni handler oluştur
+        steeringInputHandler = InputHandlerFactory.createHandler(this);
+        
+        // Tüm alternatif kontrolleri gizle
+        buttonControlsContainer.setVisibility(View.GONE);
+        steeringSlider.setVisibility(View.GONE);
+        
+        // Seçilen kontrol tipine göre UI'ı göster
+        int controlType = settingsManager.getControlType();
+        
+        if (controlType == SettingsManager.CONTROL_BUTTONS) {
+            buttonControlsContainer.setVisibility(View.VISIBLE);
+            // Buton listener'ları bağla
+            ButtonInputHandler buttonHandler = (ButtonInputHandler) steeringInputHandler;
+            btnSteerLeft.setOnTouchListener(buttonHandler.getLeftButtonListener());
+            btnSteerRight.setOnTouchListener(buttonHandler.getRightButtonListener());
+            
+        } else if (controlType == SettingsManager.CONTROL_SLIDER) {
+            steeringSlider.setVisibility(View.VISIBLE);
+            // Slider'ı bağla
+            SliderInputHandler sliderHandler = (SliderInputHandler) steeringInputHandler;
+            sliderHandler.attachSlider(steeringSlider);
+        }
+        // GYROSCOPE için ekstra UI gerekmez, sensörler onResume'da başlatılacak
+        
+        // Ayarlardan hassasiyet ve birim ayarlarını da oku
+        sensitivitySetting = settingsManager.getSensitivity();
+        useKMH = settingsManager.useMetricUnits() ? 1 : 0;
+        if (useKMH == 1) {
+            textUnit.setText("Km/h");
+            unitToggle.setChecked(true);
+        } else {
+            textUnit.setText("MPH");
+            unitToggle.setChecked(false);
+        }
     }
 
 
@@ -355,11 +426,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // unregister sensor listeners to prevent the activity from draining the device's battery.
         mSensorManager.unregisterListener(this);
         stopUdpTasks();
+        
+        // Input handler'ı durdur
+        if (steeringInputHandler != null) {
+            steeringInputHandler.stop();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        
+        // Ayarlar değişmiş olabilir, handler'ı yeniden oluştur
+        setupInputHandler();
+        
+        // Input handler'ı başlat
+        if (steeringInputHandler != null) {
+            steeringInputHandler.start();
+        }
+        
         initListeners();
         startUdpTasks();
     }
@@ -515,7 +600,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             e.printStackTrace();
                         }
                         //Log.i("Sensitivity", ": " + sensitivitySetting);
-                        sendpacket.setSteeringAngle(Math.min(Math.max((angle *sensitivitySetting * orientationhandler) / 75, -0.5f), 0.5f) + 0.5f);
+                        // Modüler input sisteminden direksiyon değerini al
+                        float steeringValue = 0.5f; // Varsayılan: orta
+                        if (steeringInputHandler != null) {
+                            // getSteeringValue() -1 ile 1 arasında döner, bunu 0-1 arasına çevir
+                            steeringValue = (steeringInputHandler.getSteeringValue() + 1f) / 2f;
+                        }
+                        sendpacket.setSteeringAngle(steeringValue);
                         sendpacket.setThrottle(thrpushed);
                         sendpacket.setBreaks(brpushed);
                         sendpacket.setID(pID);
