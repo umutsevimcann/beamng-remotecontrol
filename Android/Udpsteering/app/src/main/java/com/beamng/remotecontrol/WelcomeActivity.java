@@ -33,5 +33,10 @@ public class WelcomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, QRCodeScanner.class);
         startActivity(intent);
     }
+    
+    public void onSettingsClick(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
 }
 

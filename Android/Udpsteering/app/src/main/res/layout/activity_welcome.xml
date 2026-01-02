@@ -50,6 +50,17 @@
                     android:layout_marginTop="15dp"
                     android:layout_below="@+id/textView" />
 
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Settings"
+                    android:id="@+id/buttonSettings"
+                    android:onClick="onSettingsClick"
+                    android:layout_alignRight="@+id/button2"
+                    android:layout_alignEnd="@+id/button2"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/button2" />
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
