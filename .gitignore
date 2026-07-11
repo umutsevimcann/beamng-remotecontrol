@@ -29,3 +29,14 @@
 
 # Mac
 .DS_Store
+
+# Secrets / signing (public repo - never commit)
+*.jks
+*.keystore
+*.p12
+local.properties
+
+# IDE
+.idea/
+*.iml
+
