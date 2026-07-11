@@ -30,6 +30,9 @@ import com.beamng.remotecontrol.input.ButtonInputHandler
 import com.beamng.remotecontrol.input.InputHandlerFactory
 import com.beamng.remotecontrol.input.SliderInputHandler
 import com.beamng.remotecontrol.input.SteeringInputHandler
+import com.beamng.remotecontrol.protocol.Ports
+import com.beamng.remotecontrol.protocol.Receivepacket
+import com.beamng.remotecontrol.protocol.Sendpacket
 import com.beamng.remotecontrol.settings.SettingsManager
 
 import java.io.IOException
@@ -141,13 +144,12 @@ class MainActivity : AppCompatActivity() {
         textDelay = findViewById(R.id.Textdelay)
 
         lightViews = arrayOfNulls(11)
-        // Index = bit position in the game's showLights field. Stock OutGauge has no
-        // low-beam bit (index 0 is the shift light), so there is no headlight icon.
-        lightViews[10] = findViewById(R.id.light_abs)
-        lightViews[2] = findViewById(R.id.light_break)
-        lightViews[1] = findViewById(R.id.light_fullbeam)
-        lightViews[5] = findViewById(R.id.light_leftindicator)
-        lightViews[6] = findViewById(R.id.light_rightindicator)
+        // Stock OutGauge has no low-beam bit, so there is no headlight icon.
+        lightViews[Receivepacket.INDEX_ABS] = findViewById(R.id.light_abs)
+        lightViews[Receivepacket.INDEX_HANDBRAKE] = findViewById(R.id.light_break)
+        lightViews[Receivepacket.INDEX_FULLBEAM] = findViewById(R.id.light_fullbeam)
+        lightViews[Receivepacket.INDEX_SIGNAL_L] = findViewById(R.id.light_leftindicator)
+        lightViews[Receivepacket.INDEX_SIGNAL_R] = findViewById(R.id.light_rightindicator)
 
         throttle = findViewById(R.id.throttlecontrol)
         breaks = findViewById(R.id.breakcontrol)
@@ -398,7 +400,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         val buffer = sendpacket.sendingByteArray
-                        socket.send(DatagramPacket(buffer, buffer.size, receiverAddress, SEND_PORT))
+                        socket.send(DatagramPacket(buffer, buffer.size, receiverAddress, Ports.GAME))
                     }
                 }
             } catch (e: IOException) {
@@ -432,7 +434,7 @@ class MainActivity : AppCompatActivity() {
                 val sock = DatagramSocket(null)
                 socket = sock
                 sock.reuseAddress = true
-                sock.bind(InetSocketAddress(RECEIVE_PORT))
+                sock.bind(InetSocketAddress(Ports.APP))
                 sock.soTimeout = 2000
 
                 val buf = ByteArray(128)
@@ -457,7 +459,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: IOException) {
-                Log.e(TAG, "Cannot bind to port $RECEIVE_PORT", e)
+                Log.e(TAG, "Cannot bind to port ${Ports.APP}", e)
             } finally {
                 socket?.let { if (!it.isClosed) it.close() }
             }
@@ -521,8 +523,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "BeamNG"
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
-        private const val SEND_PORT = 4444
-        private const val RECEIVE_PORT = 4445 // BeamNG sends OutGauge here (listenPort + 1)
 
         @JvmField
         var id: String = ""

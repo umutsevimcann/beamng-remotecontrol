@@ -1,10 +1,14 @@
-package com.beamng.remotecontrol
+package com.beamng.remotecontrol.network
 
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import com.beamng.remotecontrol.MainActivity
+import com.beamng.remotecontrol.OnUdpConnected
+import com.beamng.remotecontrol.QRCodeScanner
+import com.beamng.remotecontrol.RemoteControlApplication
 import java.net.InetAddress
 
 @Suppress("DEPRECATION")

@@ -1,5 +1,7 @@
 package com.beamng.remotecontrol
 
+import com.beamng.remotecontrol.protocol.Receivepacket
+import com.beamng.remotecontrol.protocol.Sendpacket
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

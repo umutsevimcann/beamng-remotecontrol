@@ -1,9 +1,11 @@
-package com.beamng.remotecontrol
+package com.beamng.remotecontrol.network
 
 import android.content.Context
 import android.os.AsyncTask
 import android.os.Build
 import android.util.Log
+import com.beamng.remotecontrol.OnUdpConnected
+import com.beamng.remotecontrol.protocol.Ports
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -24,8 +26,8 @@ class UdpExploreSender(
     @Suppress("UNUSED_PARAMETER") ctx: Context
 ) : AsyncTask<String, String, String>() {
 
-    private val hostPORT = 4444
-    private val localPORT = hostPORT + 1
+    private val hostPORT = Ports.GAME
+    private val localPORT = Ports.APP
     private var hostadress: InetAddress? = null
 
     private val deviceName: String

@@ -3,7 +3,6 @@ package com.beamng.remotecontrol
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.util.Locale
+import com.beamng.remotecontrol.network.NetworkUtils
 
 class WelcomeActivity : AppCompatActivity() {
 
@@ -44,10 +43,11 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val ip = NetworkUtils.wifiIpv4String(this) ?: "(connect phone to Wi-Fi)"
         findViewById<TextView>(R.id.textTelemetryHint)?.text =
             "In BeamNG: Options → Other → OutGauge support\n" +
                 "Enable it and set:\n" +
-                "IP: ${wifiIpAddress()}     Port: 4445"
+                "IP: $ip     Port: 4445"
     }
 
     override fun onRequestPermissionsResult(
@@ -62,22 +62,6 @@ class WelcomeActivity : AppCompatActivity() {
         ) {
             startActivity(Intent(this, QRCodeScanner::class.java))
         }
-    }
-
-    private fun wifiIpAddress(): String {
-        try {
-            val wm = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-            @Suppress("DEPRECATION")
-            val ip = wm.connectionInfo.ipAddress
-            if (ip != 0) {
-                return String.format(
-                    Locale.US, "%d.%d.%d.%d",
-                    ip and 0xff, ip shr 8 and 0xff, ip shr 16 and 0xff, ip shr 24 and 0xff
-                )
-            }
-        } catch (ignored: Exception) {
-        }
-        return "(connect phone to Wi-Fi)"
     }
 
     companion object {

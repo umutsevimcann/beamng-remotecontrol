@@ -1,4 +1,4 @@
-package com.beamng.remotecontrol
+package com.beamng.remotecontrol.protocol
 
 import android.util.Log
 import org.apache.commons.io.EndianUtils
@@ -122,6 +122,17 @@ class Receivepacket(data: ByteArray, length: Int) {
         // Stock BeamNG OutGauge (Options > Other) sends the standard 96-byte LFS struct;
         // the companion mod appends a 4-byte odometer (100 bytes). Accept both.
         const val MIN_PACKET_LENGTH = 96
+
+        // Indices into activeLightsArr (= bit positions in the game's showLights).
+        // UI code maps icons with these instead of magic numbers.
+        const val INDEX_SHIFT = 0
+        const val INDEX_FULLBEAM = 1
+        const val INDEX_HANDBRAKE = 2
+        const val INDEX_SIGNAL_L = 5
+        const val INDEX_SIGNAL_R = 6
+        const val INDEX_OILWARN = 8
+        const val INDEX_BATTERY = 9
+        const val INDEX_ABS = 10
 
         private const val FLAG_KMH = 16384
 

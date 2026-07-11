@@ -1,20 +1,16 @@
 package com.beamng.remotecontrol
 
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.beamng.remotecontrol.network.NetworkUtils
+import com.beamng.remotecontrol.network.UdpExploreSenderFragment
 import com.google.zxing.ResultPoint
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
-import java.net.InetAddress
-import java.net.InterfaceAddress
-import java.net.NetworkInterface
-import java.net.SocketException
-import java.util.Locale
 
 class QRCodeScanner : AppCompatActivity() {
 
@@ -100,20 +96,13 @@ class QRCodeScanner : AppCompatActivity() {
             return
         }
 
-        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-
         try {
-            @Suppress("DEPRECATION")
-            val ipAddress = wifiManager.connectionInfo.ipAddress
-            val ip = String.format(
-                Locale.US, "%d.%d.%d.%d",
-                ipAddress and 0xff, ipAddress shr 8 and 0xff,
-                ipAddress shr 16 and 0xff, ipAddress shr 24 and 0xff
-            )
+            val ip = NetworkUtils.wifiIpv4String(this)
+                ?: throw IllegalStateException("Wi-Fi is down")
 
             (application as RemoteControlApplication).ip = ip
 
-            val broadcastAddress = getBroadcastAddress(ipAddress())!!
+            val broadcastAddress = NetworkUtils.broadcastAddress(NetworkUtils.localInetAddress())!!
             Log.i("Broadcast Address", broadcastAddress.hostAddress ?: "?")
 
             exploreSenderFragment.execute(broadcastAddress, this, ip, securityCode)
@@ -122,41 +111,6 @@ class QRCodeScanner : AppCompatActivity() {
             Toast.makeText(this, "You must be connected to the same WiFi as your PC", Toast.LENGTH_LONG).show()
             barcodeView.resume()
         }
-    }
-
-    private fun getBroadcastAddress(inetAddr: InetAddress?): InetAddress? {
-        try {
-            val temp = NetworkInterface.getByInetAddress(inetAddr) ?: return null
-
-            val addresses: List<InterfaceAddress> = temp.interfaceAddresses
-            for (interfaceAddress in addresses) {
-                if (interfaceAddress.broadcast != null) {
-                    return interfaceAddress.broadcast
-                }
-            }
-        } catch (e: SocketException) {
-            e.printStackTrace()
-        }
-        return null
-    }
-
-    private fun ipAddress(): InetAddress? {
-        try {
-            for (singleInterface in NetworkInterface.getNetworkInterfaces()) {
-                for (inetAddress in singleInterface.inetAddresses) {
-                    if (!inetAddress.isLoopbackAddress &&
-                        (singleInterface.displayName.contains("wlan0") ||
-                            singleInterface.displayName.contains("eth0") ||
-                            singleInterface.displayName.contains("ap0"))
-                    ) {
-                        return inetAddress
-                    }
-                }
-            }
-        } catch (ex: SocketException) {
-            ex.printStackTrace()
-        }
-        return null
     }
 
     fun onError(message: String?) {

@@ -1,4 +1,4 @@
-package com.beamng.remotecontrol
+package com.beamng.remotecontrol.protocol
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
