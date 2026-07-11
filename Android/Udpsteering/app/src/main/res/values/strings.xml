@@ -36,6 +36,26 @@
     <string name="toast_wifi_required">You must be connected to the same Wi-Fi as your PC</string>
 
     <!-- Settings -->
-    <string name="toast_settings_saved">Settings saved!</string>
+    <string name="settings_eyebrow">SETTINGS</string>
+    <string name="settings_title">Controls &amp; Dashboard</string>
+    <string name="settings_control_type">CONTROL TYPE</string>
+    <string name="control_buttons">Buttons</string>
+    <string name="control_slider">Slider</string>
+    <string name="control_gyro">Gyro</string>
+    <string name="settings_sensitivity">Sensitivity</string>
+    <string name="settings_sensitivity_sub">Gyro steering ratio</string>
+    <string name="settings_dead_zone">Dead zone</string>
+    <string name="settings_dead_zone_sub">Center tolerance</string>
+    <string name="settings_units">Units</string>
+    <string name="settings_units_sub">Speedometer</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_mph">mph</string>
+    <string name="settings_dashboard_only">Dashboard-only</string>
+    <string name="settings_dashboard_only_sub">Controls off, gauges only</string>
+    <string name="settings_haptics">Haptics</string>
+    <string name="settings_haptics_sub">Gear &amp; impact feedback</string>
+    <string name="settings_analog_pedals">Analog pedals</string>
+    <string name="settings_analog_pedals_sub">Pressure by touch position (PC mod)</string>
+    <string name="settings_instant_save">changes save instantly</string>
 
 </resources>

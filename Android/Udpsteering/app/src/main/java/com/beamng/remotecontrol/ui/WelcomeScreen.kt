@@ -149,12 +149,14 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
             .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(14.dp))
             .padding(16.dp),
     ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.TextFaint,
-        )
-        Spacer(Modifier.height(10.dp))
+        if (title.isNotEmpty()) {
+            Text(
+                title,
+                style = MaterialTheme.typography.labelSmall,
+                color = NightGarage.TextFaint,
+            )
+            Spacer(Modifier.height(10.dp))
+        }
         content()
     }
 }

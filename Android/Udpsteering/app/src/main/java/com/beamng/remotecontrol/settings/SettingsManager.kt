@@ -56,6 +56,13 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_ANALOG_PEDALS, DEFAULT_ANALOG_PEDALS)
         set(analog) = prefs.edit().putBoolean(KEY_ANALOG_PEDALS, analog).apply()
 
+    // ==================== DASHBOARD-ONLY MODE ====================
+
+    /** Controls hidden, phone acts as a pure telemetry dashboard. */
+    var isDashboardOnly: Boolean
+        get() = prefs.getBoolean(KEY_DASHBOARD_ONLY, DEFAULT_DASHBOARD_ONLY)
+        set(enabled) = prefs.edit().putBoolean(KEY_DASHBOARD_ONLY, enabled).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -73,6 +80,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_LAST_IP = "last_ip"
         const val KEY_DEAD_ZONE = "dead_zone"
         const val KEY_ANALOG_PEDALS = "analog_pedals"
+        const val KEY_DASHBOARD_ONLY = "dashboard_only"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0
@@ -86,6 +94,7 @@ class SettingsManager private constructor(context: Context) {
         private const val DEFAULT_HAPTIC_ENABLED = true
         private const val DEFAULT_DEAD_ZONE = 3.0f
         private const val DEFAULT_ANALOG_PEDALS = true
+        private const val DEFAULT_DASHBOARD_ONLY = false
 
         @Volatile
         private var instance: SettingsManager? = null
