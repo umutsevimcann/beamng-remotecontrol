@@ -13,7 +13,7 @@ public class SliderInputHandler implements SteeringInputHandler {
 
     private final SettingsManager settings;
     
-    private float currentSteering = 0f;
+    private volatile float currentSteering = 0f;
     private SeekBar steeringSlider;
     
     public SliderInputHandler(Context context) {
@@ -22,8 +22,7 @@ public class SliderInputHandler implements SteeringInputHandler {
     
     @Override
     public float getSteeringValue() {
-        float sensitivity = settings.getSensitivity();
-        return currentSteering * sensitivity;
+        return currentSteering; // Full range ±1.0
     }
     
     @Override
@@ -57,7 +56,7 @@ public class SliderInputHandler implements SteeringInputHandler {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    // 0-100 aralığını -1 ile 1 arasına dönüştür
+                    // 0-100 aralığını 1 ile -1 arasına dönüştür (Tersine çevrildi)
                     currentSteering = (progress - 50) / 50f;
                 }
             }
