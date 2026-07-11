@@ -17,4 +17,14 @@ class TelemetryUiState {
     var turbo by mutableFloatStateOf(0f)      // BAR
     var hasTurbo by mutableStateOf(false)
     val lights = mutableStateListOf(*Array(11) { false })
+
+    // What the game actually applies (input echo, useful in dashboard-only mode)
+    var throttleEcho by mutableFloatStateOf(0f)
+    var brakeEcho by mutableFloatStateOf(0f)
+    var clutchEcho by mutableFloatStateOf(0f)
+
+    // 0-100 km/h performance timer (opt-in via settings)
+    var timerLiveSec by mutableStateOf<Float?>(null)
+    var timerLastSec by mutableStateOf<Float?>(null)
+    var timerBestSec by mutableStateOf<Float?>(null)
 }

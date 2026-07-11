@@ -48,6 +48,8 @@ class Receivepacket(data: ByteArray, length: Int) {
     @get:JvmName("getBrake")
     var brake = 0f; private set
 
+    var clutch = 0f; private set
+
     @get:JvmName("getOdometer")
     var odometer = 0; private set
 
@@ -72,6 +74,7 @@ class Receivepacket(data: ByteArray, length: Int) {
                 fuel = EndianUtils.readSwappedFloat(data, 28)
                 throttle = EndianUtils.readSwappedFloat(data, 48)
                 brake = EndianUtils.readSwappedFloat(data, 52)
+                clutch = EndianUtils.readSwappedFloat(data, 56)
                 showLights = EndianUtils.readSwappedInteger(data, 44)
                 id = EndianUtils.readSwappedInteger(data, 92)
                 odometer = if (length >= 100) EndianUtils.readSwappedInteger(data, 96) else 0
@@ -89,6 +92,7 @@ class Receivepacket(data: ByteArray, length: Int) {
             if ((showLights and FLAG_SHIFTLIGHT) == FLAG_SHIFTLIGHT) lightsArray[0] = true
             if ((showLights and FLAG_FULLBEAM) == FLAG_FULLBEAM) lightsArray[1] = true
             if ((showLights and FLAG_HANDBREAK) == FLAG_HANDBREAK) lightsArray[2] = true
+            if ((showLights and FLAG_TC) == FLAG_TC) lightsArray[4] = true
             if ((showLights and FLAG_SIGNAL_L) == FLAG_SIGNAL_L) lightsArray[5] = true
             if ((showLights and FLAG_SIGNAL_R) == FLAG_SIGNAL_R) lightsArray[6] = true
             // FLAG_SIGNAL_ANY (128) intentionally not mapped: BeamNG never sets it.
@@ -116,6 +120,7 @@ class Receivepacket(data: ByteArray, length: Int) {
         const val INDEX_SHIFT = 0
         const val INDEX_FULLBEAM = 1
         const val INDEX_HANDBRAKE = 2
+        const val INDEX_TC = 4
         const val INDEX_SIGNAL_L = 5
         const val INDEX_SIGNAL_R = 6
         const val INDEX_OILWARN = 8
@@ -128,7 +133,8 @@ class Receivepacket(data: ByteArray, length: Int) {
         // Bit values from the game's lua/vehicle/protocols/outgauge.lua (DL_x constants).
         private const val FLAG_SHIFTLIGHT = 1
         private const val FLAG_FULLBEAM = 2
-        private const val FLAG_HANDBREAK = 4 // DL_HANDBRAKE = 2^2; 16 is DL_TC
+        private const val FLAG_HANDBREAK = 4 // DL_HANDBRAKE = 2^2
+        private const val FLAG_TC = 16       // DL_TC — traction control active/off
         private const val FLAG_SIGNAL_L = 32
         private const val FLAG_SIGNAL_R = 64
         private const val FLAG_OILWARN = 256

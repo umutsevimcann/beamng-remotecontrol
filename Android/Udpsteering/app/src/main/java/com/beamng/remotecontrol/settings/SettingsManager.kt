@@ -57,6 +57,12 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_DASHBOARD_ONLY, DEFAULT_DASHBOARD_ONLY)
         set(enabled) = prefs.edit().putBoolean(KEY_DASHBOARD_ONLY, enabled).apply()
 
+    // ==================== 0-100 PERFORMANCE TIMER ====================
+
+    var isPerfTimerEnabled: Boolean
+        get() = prefs.getBoolean(KEY_PERF_TIMER, DEFAULT_PERF_TIMER)
+        set(enabled) = prefs.edit().putBoolean(KEY_PERF_TIMER, enabled).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -74,6 +80,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_LAST_IP = "last_ip"
         const val KEY_DEAD_ZONE = "dead_zone"
         const val KEY_DASHBOARD_ONLY = "dashboard_only"
+        const val KEY_PERF_TIMER = "perf_timer"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0
@@ -87,6 +94,7 @@ class SettingsManager private constructor(context: Context) {
         private const val DEFAULT_HAPTIC_ENABLED = true
         private const val DEFAULT_DEAD_ZONE = 3.0f
         private const val DEFAULT_DASHBOARD_ONLY = false
+        private const val DEFAULT_PERF_TIMER = false
 
         @Volatile
         private var instance: SettingsManager? = null

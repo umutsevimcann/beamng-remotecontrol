@@ -30,15 +30,23 @@ object UdpDiscovery {
     private const val MAX_TRIES = 10
     private const val RETRY_DELAY_MS = 1000L
 
+    /**
+     * Discovery/heartbeat payload: "beamng|<deviceName>|<code>". Also sent
+     * periodically by the drive screen so the game re-registers the virtual
+     * device after its 10s idle timeout (mod-free auto-reconnect).
+     */
+    fun buildHello(securityCode: String): ByteArray {
+        val safeName = deviceName().replace(Regex("[|#\\n\\r]"), "_")
+        return "beamng|$safeName|$securityCode".toByteArray()
+    }
+
     /** Runs the handshake on IO; cancellable via normal coroutine cancellation. */
     suspend fun discover(
         broadcastAddress: InetAddress,
         localIp: String,
         securityCode: String
     ): Result = withContext(Dispatchers.IO) {
-        val safeName = deviceName().replace(Regex("[|#\\n\\r]"), "_")
-        val sendString = "beamng|$safeName|$securityCode"
-        val buffer = sendString.toByteArray()
+        val buffer = buildHello(securityCode)
 
         var socketS: DatagramSocket? = null
         var channel: DatagramChannel? = null

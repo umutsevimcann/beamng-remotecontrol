@@ -14,6 +14,12 @@
     <string name="speed_kmh">KM/H</string>
     <string name="speed_mph">MPH</string>
     <string name="drive_gyro_hint">Tilt to steer — hold level to center</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">READY</string>
+    <string name="drive_timer_best">BEST</string>
+    <string name="drive_thr">THR</string>
+    <string name="drive_brk">BRK</string>
+    <string name="drive_clt">CLT</string>
 
     <!-- Brand -->
     <string name="brand_name">BeamNG</string>
@@ -69,6 +75,8 @@
     <string name="settings_dashboard_only_sub">Controls off, gauges only</string>
     <string name="settings_haptics">Haptics</string>
     <string name="settings_haptics_sub">Gear &amp; impact feedback</string>
+    <string name="settings_perf_timer">0-100 timer</string>
+    <string name="settings_perf_timer_sub">Launch times on the dash, session best</string>
     <string name="settings_instant_save">changes save instantly</string>
 
 </resources>

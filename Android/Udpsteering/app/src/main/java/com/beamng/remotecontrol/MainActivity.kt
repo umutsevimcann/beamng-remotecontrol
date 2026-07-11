@@ -31,6 +31,7 @@ import com.beamng.remotecontrol.input.ButtonInputHandler
 import com.beamng.remotecontrol.input.InputHandlerFactory
 import com.beamng.remotecontrol.input.SliderInputHandler
 import com.beamng.remotecontrol.input.SteeringInputHandler
+import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
@@ -56,6 +57,11 @@ class MainActivity : ComponentActivity() {
     private var controlType by mutableIntStateOf(SettingsManager.CONTROL_GYROSCOPE)
     private var dashboardOnly by mutableStateOf(false)
     private var metricUnits by mutableStateOf(true)
+    private var perfTimer by mutableStateOf(false)
+
+    // 0-100 timer state machine (UI thread only)
+    private var timerArmed = false
+    private var timerStartMs = 0L
 
     // Thread-safe control values (written UI thread, read sender coroutine)
     @Volatile private var thrpushed = 0f
@@ -110,6 +116,7 @@ class MainActivity : ComponentActivity() {
                     metricUnits = metricUnits,
                     controlType = controlType,
                     dashboardOnly = dashboardOnly,
+                    perfTimerEnabled = perfTimer,
                     onThrottle = { pressed -> thrpushed = if (pressed) 1f else 0f },
                     onBrake = { pressed -> brpushed = if (pressed) 1f else 0f },
                     onSteerLeft = { pressed ->
@@ -140,6 +147,7 @@ class MainActivity : ComponentActivity() {
         metricUnits = settingsManager.useMetricUnits()
         dashboardOnly = settingsManager.isDashboardOnly
         controlType = settingsManager.controlType
+        perfTimer = settingsManager.isPerfTimerEnabled
 
         setupInputHandler()
         steeringInputHandler?.start()
@@ -248,8 +256,18 @@ class MainActivity : ComponentActivity() {
         try {
             DatagramSocket().use { socket ->
                 val sendpacket = Sendpacket()
+                // Reconnect heartbeat: the game deletes idle devices after 10s
+                // (e.g. app backgrounded). Re-sending the discovery hello makes
+                // remoteController.lua re-register us and is a no-op otherwise.
+                val hello = (application as RemoteControlApplication).securityCode
+                    ?.let { UdpDiscovery.buildHello(it) }
+                var tick = 0
                 while (true) {
                     delay(sendingTimeout) // also our cancellation point
+
+                    if (hello != null && tick++ % HEARTBEAT_EVERY_TICKS == 0) {
+                        socket.send(DatagramPacket(hello, hello.size, host, Ports.GAME))
+                    }
 
                     var steeringValue = 0.5f
                     val handler = steeringInputHandler
@@ -325,6 +343,11 @@ class MainActivity : ComponentActivity() {
         telemetry.engTemp = p.engineTemp
         telemetry.turbo = p.turbo
         telemetry.hasTurbo = p.hasTurbo
+        telemetry.throttleEcho = p.throttle
+        telemetry.brakeEcho = p.brake
+        telemetry.clutchEcho = p.clutch
+
+        if (perfTimer) updatePerfTimer(3.6f * p.speed)
 
         val lightsarray = p.activeLightsArr
         for (i in 0 until 11) {
@@ -341,8 +364,36 @@ class MainActivity : ComponentActivity() {
         processHapticFeedback(p, newSpeed)
     }
 
+    /** 0-100 km/h stopwatch: arms at standstill, stops at 100, keeps session best. */
+    private fun updatePerfTimer(kmh: Float) {
+        val now = System.currentTimeMillis()
+        when {
+            kmh < 1f -> {
+                timerArmed = true
+                timerStartMs = 0L
+                telemetry.timerLiveSec = null
+            }
+            timerArmed && timerStartMs == 0L && kmh >= 3f -> {
+                timerStartMs = now
+            }
+            timerStartMs > 0L -> {
+                val live = (now - timerStartMs) / 1000f
+                telemetry.timerLiveSec = live
+                if (kmh >= 100f) {
+                    telemetry.timerLastSec = live
+                    telemetry.timerBestSec =
+                        telemetry.timerBestSec?.let { minOf(it, live) } ?: live
+                    timerStartMs = 0L
+                    timerArmed = false
+                    telemetry.timerLiveSec = null
+                }
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "BeamNG"
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
+        private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
     }
 }

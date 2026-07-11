@@ -49,6 +49,7 @@ fun SettingsScreen(settings: SettingsManager) {
     var metric by remember { mutableStateOf(settings.useMetricUnits()) }
     var dashboardOnly by remember { mutableStateOf(settings.isDashboardOnly) }
     var haptics by remember { mutableStateOf(settings.isHapticEnabled) }
+    var perfTimer by remember { mutableStateOf(settings.isPerfTimerEnabled) }
 
     Column(
         modifier = Modifier
@@ -159,6 +160,14 @@ fun SettingsScreen(settings: SettingsManager) {
             ) {
                 haptics = it
                 settings.isHapticEnabled = it
+            }
+            ToggleRow(
+                title = stringResource(R.string.settings_perf_timer),
+                subtitle = stringResource(R.string.settings_perf_timer_sub),
+                checked = perfTimer,
+            ) {
+                perfTimer = it
+                settings.isPerfTimerEnabled = it
             }
         }
 

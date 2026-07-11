@@ -102,7 +102,9 @@ class QRCodeScanner : ComponentActivity() {
                 when (val result = UdpDiscovery.discover(broadcastAddress, ip, securityCode)) {
                     is UdpDiscovery.Result.Connected -> {
                         connecting = false
-                        (application as RemoteControlApplication).hostAddress = result.host
+                        val app = application as RemoteControlApplication
+                        app.hostAddress = result.host
+                        app.securityCode = securityCode
                         startActivity(Intent(this@QRCodeScanner, MainActivity::class.java))
                     }
                     is UdpDiscovery.Result.Failed -> onError(result.message)

@@ -75,7 +75,8 @@ class GoldenProtocolTest {
         buf.putFloat(12, 27.5f)                 // speed m/s
         buf.putFloat(16, 3500f)                 // rpm
         if (turbo) buf.putFloat(20, 0.8f)       // turbo BAR
-        buf.putInt(44, 4 or 32)                 // showLights: HANDBRAKE(4) | SIGNAL_L(32)
+        buf.putFloat(56, 0.3f)                  // clutch
+        buf.putInt(44, 4 or 16 or 32)           // showLights: HANDBRAKE(4) | TC(16) | SIGNAL_L(32)
         buf.putInt(92, 42)                      // id
         if (size >= 100) buf.putInt(96, 1284)   // odometer (companion mod extension)
         return buf.array()
@@ -100,11 +101,13 @@ class GoldenProtocolTest {
         assertEquals(3500f, p.rpm)
         assertEquals(42, p.id)
         assertEquals(0, p.odometer) // no odometer in the stock 96-byte packet
+        assertEquals(0.3f, p.clutch)
         val lights = p.activeLightsArr
         assertTrue("handbrake (bit 4) must map to index 2", lights[2])
+        assertTrue("TC (bit 16) must map to index 4", lights[4])
         assertTrue("left signal (bit 32) must map to index 5", lights[5])
         assertFalse("full beam must stay off", lights[1])
-        assertFalse("TC bit (16) must NOT light the handbrake slot", lights[10])
+        assertFalse("ABS must stay off", lights[10])
     }
 
     @Test

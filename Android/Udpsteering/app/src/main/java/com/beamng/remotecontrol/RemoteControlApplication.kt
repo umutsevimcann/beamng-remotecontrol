@@ -6,4 +6,7 @@ import java.net.InetAddress
 class RemoteControlApplication : Application() {
     var hostAddress: InetAddress? = null
     var ip: String? = null
+
+    /** QR security code of the current session — fuels the reconnect heartbeat. */
+    var securityCode: String? = null
 }
