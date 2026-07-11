@@ -1,8 +1,8 @@
 package com.beamng.remotecontrol
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +11,7 @@ import com.beamng.remotecontrol.ui.SetupGuideScreen
 import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 
 /** Personalized in-app setup documentation (real IP, exact ports). */
-class SetupGuideActivity : ComponentActivity() {
+class SetupGuideActivity : AppCompatActivity() {
 
     private var phoneIp by mutableStateOf<String?>(null)
 

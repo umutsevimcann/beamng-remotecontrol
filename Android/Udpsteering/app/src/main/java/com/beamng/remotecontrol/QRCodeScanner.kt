@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -20,7 +20,7 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class QRCodeScanner : ComponentActivity() {
+class QRCodeScanner : AppCompatActivity() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
     private var connecting by mutableStateOf(false)

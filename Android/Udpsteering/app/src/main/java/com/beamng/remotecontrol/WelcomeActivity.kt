@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,7 +15,7 @@ import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.ui.WelcomeScreen
 import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 
-class WelcomeActivity : ComponentActivity() {
+class WelcomeActivity : AppCompatActivity() {
 
     private var phoneIp by mutableStateOf<String?>(null)
 

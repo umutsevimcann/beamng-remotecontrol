@@ -71,6 +71,20 @@ fun SettingsScreen(settings: SettingsManager) {
         )
         Spacer(Modifier.height(18.dp))
 
+        GarageCard(title = stringResource(R.string.settings_language)) {
+            var current by remember { mutableStateOf(AppLanguage.current()) }
+            AppLanguage.entries.forEach { language ->
+                LanguageRow(
+                    language = language,
+                    selected = language == current,
+                ) {
+                    current = language
+                    AppLanguage.apply(language)
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+
         GarageCard(title = stringResource(R.string.settings_control_type)) {
             SegmentedRow(
                 options = listOf(
@@ -182,6 +196,39 @@ fun SettingsScreen(settings: SettingsManager) {
 }
 
 // ==================== rows & controls ====================
+
+@Composable
+private fun LanguageRow(language: AppLanguage, selected: Boolean, onSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onSelect)
+            .padding(vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(end = 12.dp)
+                .height(16.dp)
+                .width(16.dp)
+                .background(
+                    if (selected) {
+                        Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00)))
+                    } else {
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF100C08), Color(0xFF100C08)),
+                        )
+                    },
+                    androidx.compose.foundation.shape.CircleShape,
+                ),
+        )
+        Text(
+            language.nativeName,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (selected) NightGarage.TextBright else NightGarage.TextDim,
+        )
+    }
+}
 
 @Composable
 private fun SettingRow(

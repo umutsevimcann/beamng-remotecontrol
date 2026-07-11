@@ -24,9 +24,7 @@
     <string name="drive_clt">CLT</string>
 
     <!-- Brand -->
-    <string name="brand_name">BeamNG</string>
     <string name="brand_subtitle">REMOTE CONTROL</string>
-    <string name="version_label">v3.0 — Night Garage</string>
 
     <!-- Welcome: connect card -->
     <string name="connect_card_title">CONNECT</string>
@@ -95,6 +93,7 @@
 
     <!-- Settings -->
     <string name="settings_eyebrow">SETTINGS</string>
+    <string name="settings_language">LANGUAGE</string>
     <string name="settings_title">Controls &amp; Dashboard</string>
     <string name="settings_control_type">CONTROL TYPE</string>
     <string name="control_buttons">Buttons</string>

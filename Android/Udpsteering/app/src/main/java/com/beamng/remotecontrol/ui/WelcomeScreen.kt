@@ -1,5 +1,6 @@
 package com.beamng.remotecontrol.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,25 +63,12 @@ fun WelcomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // ===== Brand =====
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(Color(0xFF4A3A26), Color(0xFF241A0F)),
-                    ),
-                    CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("⟲", color = NightGarage.Amber, fontSize = 26.sp)
-        }
-        Spacer(Modifier.height(10.dp))
-        Text(
-            stringResource(R.string.brand_name),
-            style = MaterialTheme.typography.titleLarge,
-            color = NightGarage.TextBright,
+        Image(
+            painter = painterResource(R.drawable.logo_beamng),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier.size(88.dp),
         )
+        Spacer(Modifier.height(8.dp))
         Text(
             stringResource(R.string.brand_subtitle),
             style = MaterialTheme.typography.labelSmall,
@@ -114,13 +103,6 @@ fun WelcomeScreen(
         GhostButton(stringResource(R.string.guide_button), onClick = onGuideClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.settings_button), onClick = onSettingsClick)
-        Spacer(Modifier.height(20.dp))
-
-        Text(
-            stringResource(R.string.version_label),
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp),
-            color = NightGarage.TextFaint,
-        )
     }
 }
 

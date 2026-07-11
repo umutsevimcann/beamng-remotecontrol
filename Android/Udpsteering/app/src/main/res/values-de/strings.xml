@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BeamNG.drive Fernsteuerung</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">BREMSE</string>
+    <string name="drive_gas">GAS</string>
+    <string name="drive_gear">GANG</string>
+    <string name="drive_rpm_x1000">×1000 U/MIN</string>
+    <string name="drive_fuel">TANK</string>
+    <string name="drive_temp">TEMP</string>
+    <string name="drive_boost">LADEDRUCK</string>
+    <string name="speed_kmh">KM/H</string>
+    <string name="speed_mph">MPH</string>
+    <string name="drive_gyro_hint">Zum Lenken das Handy neigen — gerade halten zum Zentrieren</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">BEREIT</string>
+    <string name="drive_timer_best">REKORD</string>
+    <string name="drive_drift">DRIFT</string>
+    <string name="drive_drift_max">MAX</string>
+    <string name="drive_thr">GAS</string>
+    <string name="drive_brk">BRE</string>
+    <string name="drive_clt">KUP</string>
+
+    <!-- Brand -->
+    <string name="brand_subtitle">FERNSTEUERUNG</string>
+
+    <!-- Welcome: connect card -->
+    <string name="connect_card_title">VERBINDEN</string>
+    <string name="connect_step_1">BeamNG.drive am PC starten</string>
+    <string name="connect_step_2">Controls → Hardware → QR</string>
+    <string name="connect_step_3">Scannen &amp; losfahren</string>
+
+    <!-- Welcome: extras card -->
+    <string name="extras_card_title">OPTIONALE EXTRAS — IM SPIEL AKTIVIEREN</string>
+    <string name="extras_dashboard_line">OutGauge → Live-Cockpit: Tempo, Drehzahl, Gang, Tank, Warnleuchten, Crash-Vibration</string>
+    <string name="extras_drift_line">MotionSim → Drift-Anzeige mit Sitzungsrekord</string>
+    <string name="extras_guide_hint">Schritt für Schritt mit DEINEN Werten:</string>
+
+    <!-- Welcome: actions -->
+    <string name="scan_qr_button">QR-CODE SCANNEN</string>
+    <string name="settings_button">EINSTELLUNGEN</string>
+    <string name="guide_button">EINRICHTUNGSANLEITUNG</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">ANLEITUNG</string>
+    <string name="guide_title">Einrichtung</string>
+    <string name="guide_intro">Diese Seite zeigt DEINE echten Werte. Einfach exakt so ins Spiel eintragen — kein Raten, kein Abschreiben von Screenshots.</string>
+    <string name="guide_ip_label">IP-ADRESSE DEINES HANDYS</string>
+    <string name="guide_ip_missing">— Handy mit dem WLAN verbinden, dann füllt sich dieses Feld —</string>
+    <string name="guide_value_address">Adresse (Address)</string>
+    <string name="guide_value_port">Port</string>
+    <string name="guide_value_rate">Aktualisierungsrate</string>
+
+    <string name="guide_connect_title">1 · VERBINDEN — ERFORDERLICH</string>
+    <string name="guide_connect_what">Lenken, Gas geben und bremsen direkt vom Handy.</string>
+    <string name="guide_connect_s1">Handy und PC müssen im selben WLAN sein</string>
+    <string name="guide_connect_s2">Im Spiel: Options → Controls → Hardware → Remote-Control-QR anzeigen</string>
+    <string name="guide_connect_s3">QR-CODE SCANNEN antippen und die Kamera auf den Code richten — fertig</string>
+
+    <string name="guide_dash_title">2 · LIVE-COCKPIT — OPTIONAL</string>
+    <string name="guide_dash_what">Schaltet auf dem Fahrbildschirm frei: Tempo, Drehzahlnadel, Gang, Tank, Motortemperatur, Ladedruck, echte Warnleuchten (Blinker, Fernlicht, Handbremse, ABS, TC, Öl, Batterie) und Crash-Vibration.</string>
+    <string name="guide_dash_s1">Im Spiel: Options → Other → zum Abschnitt Protocols scrollen</string>
+    <string name="guide_dash_s2">„OutGauge support“ anhaken und die Werte unten eintragen</string>
+    <string name="guide_dash_s3">Fahrzeug einmal neu laden (Strg+R) — das Spiel liest die Einstellung beim Spawnen</string>
+
+    <string name="guide_drift_title">3 · DRIFT-ANZEIGE — OPTIONAL</string>
+    <string name="guide_drift_what">Zeigt beim Driften den Live-Winkel über dem Tacho plus deinen Sitzungsrekord. Passt perfekt zum 0-100-Timer (in den App-Einstellungen aktivieren).</string>
+    <string name="guide_drift_s1">Im Spiel: Options → Other → Protocols (gleiche Stelle)</string>
+    <string name="guide_drift_s2">„MotionSim enabled“ anhaken und die Werte unten eintragen</string>
+    <string name="guide_drift_s3">Fahrzeug einmal neu laden (Strg+R)</string>
+
+    <string name="guide_trouble_title">FEHLERSUCHE</string>
+    <string name="guide_trouble_1">Es kommt nichts an? BeamNG.drive in der Windows-Firewall zulassen.</string>
+    <string name="guide_trouble_2">Gäste-/Hotel-WLAN blockiert oft die Verbindung zwischen Handy und PC — eigenes Netz oder Handy-Hotspot verwenden.</string>
+    <string name="guide_trouble_3">Router hat dem Handy eine neue IP gegeben? Diese Seite prüfen, den Wert im Spiel aktualisieren, dann Strg+R.</string>
+    <string name="guide_trouble_4">Anzeigen nach einem Spiel-Update eingefroren? Häkchen neu setzen — Einstellungen werden gelegentlich zurückgesetzt.</string>
+
+    <!-- Scanner -->
+    <string name="scan_eyebrow">VERBINDEN</string>
+    <string name="scan_title">QR scannen</string>
+    <string name="scan_hint">Den Code aus dem Spiel in den Rahmen halten — verbindet sich automatisch</string>
+    <string name="scan_camera_note">Kamera nur auf diesem Bildschirm aktiv</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">Verbinde mit BeamNG.drive</string>
+    <string name="status_connected">Verbunden</string>
+    <string name="toast_no_connection">Keine Verbindung — zuerst den QR-Code scannen</string>
+    <string name="toast_invalid_qr">Ungültiger QR-Code</string>
+    <string name="toast_invalid_qr_format">Ungültiges QR-Code-Format</string>
+    <string name="toast_wifi_required">Handy und PC müssen im selben WLAN sein</string>
+
+    <!-- Settings -->
+    <string name="settings_eyebrow">EINSTELLUNGEN</string>
+    <string name="settings_language">SPRACHE</string>
+    <string name="settings_title">Steuerung &amp; Cockpit</string>
+    <string name="settings_control_type">STEUERUNGSART</string>
+    <string name="control_buttons">Tasten</string>
+    <string name="control_slider">Schieberegler</string>
+    <string name="control_gyro">Gyroskop</string>
+    <string name="settings_sensitivity">Empfindlichkeit</string>
+    <string name="settings_sensitivity_sub">Gyro-Lenkübersetzung</string>
+    <string name="settings_dead_zone">Totzone</string>
+    <string name="settings_dead_zone_sub">Toleranz um die Mitte</string>
+    <string name="settings_units">Einheiten</string>
+    <string name="settings_units_sub">Tacho</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_mph">mph</string>
+    <string name="settings_dashboard_only">Nur Cockpit</string>
+    <string name="settings_dashboard_only_sub">Steuerung aus, nur Anzeigen</string>
+    <string name="settings_haptics">Vibration</string>
+    <string name="settings_haptics_sub">Gang- und Aufprall-Feedback</string>
+    <string name="settings_perf_timer">0-100-Timer</string>
+    <string name="settings_perf_timer_sub">Startzeiten auf dem Display, Sitzungsrekord</string>
+    <string name="settings_instant_save">Änderungen werden sofort gespeichert</string>
+
+</resources>

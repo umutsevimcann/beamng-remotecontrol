@@ -9,8 +9,8 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +51,7 @@ import kotlin.coroutines.coroutineContext
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     // Compose-observed state
     private val telemetry = TelemetryUiState()

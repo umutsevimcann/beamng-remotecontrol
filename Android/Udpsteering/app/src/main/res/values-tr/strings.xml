@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BeamNG.drive Uzaktan Kumanda</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">FREN</string>
+    <string name="drive_gas">GAZ</string>
+    <string name="drive_gear">VİTES</string>
+    <string name="drive_rpm_x1000">×1000 RPM</string>
+    <string name="drive_fuel">YAKIT</string>
+    <string name="drive_temp">SICAKLIK</string>
+    <string name="drive_boost">TURBO</string>
+    <string name="speed_kmh">KM/S</string>
+    <string name="speed_mph">MPH</string>
+    <string name="drive_gyro_hint">Direksiyon için telefonu eğ — ortalamak için düz tut</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">HAZIR</string>
+    <string name="drive_timer_best">REKOR</string>
+    <string name="drive_drift">DRIFT</string>
+    <string name="drive_drift_max">MAKS</string>
+    <string name="drive_thr">GAZ</string>
+    <string name="drive_brk">FRN</string>
+    <string name="drive_clt">DBR</string>
+
+    <!-- Brand -->
+    <string name="brand_subtitle">UZAKTAN KUMANDA</string>
+
+    <!-- Welcome: connect card -->
+    <string name="connect_card_title">BAĞLANTI</string>
+    <string name="connect_step_1">PC\'de BeamNG.drive\'ı aç</string>
+    <string name="connect_step_2">Kontroller → Donanım → QR</string>
+    <string name="connect_step_3">Tarat ve sür</string>
+
+    <!-- Welcome: extras card -->
+    <string name="extras_card_title">OYUNDAN AÇILAN EKSTRALAR</string>
+    <string name="extras_dashboard_line">OutGauge → canlı gösterge paneli: hız, devir, vites, yakıt, uyarı ışıkları, kaza titreşimi</string>
+    <string name="extras_drift_line">MotionSim → seans rekorlu drift metre</string>
+    <string name="extras_guide_hint">Adım adım, SENİN değerlerinle:</string>
+
+    <!-- Welcome: actions -->
+    <string name="scan_qr_button">QR KODU TARA</string>
+    <string name="settings_button">AYARLAR</string>
+    <string name="guide_button">KURULUM REHBERİ</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">NASIL YAPILIR</string>
+    <string name="guide_title">Kurulum Rehberi</string>
+    <string name="guide_intro">Bu sayfa SENİN gerçek değerlerini gösterir. Oyuna aynen yazman yeterli — tahmin yok, ekran görüntüsünden kopya yok.</string>
+    <string name="guide_ip_label">TELEFONUNUN IP ADRESİ</string>
+    <string name="guide_ip_missing">— telefonu Wi-Fi\'a bağla, bu alan kendiliğinden dolacak —</string>
+    <string name="guide_value_address">Adres (Address)</string>
+    <string name="guide_value_port">Port</string>
+    <string name="guide_value_rate">Güncelleme hızı</string>
+
+    <string name="guide_connect_title">1 · BAĞLANTI — ZORUNLU</string>
+    <string name="guide_connect_what">Direksiyon, gaz ve fren telefondan kontrol edilir.</string>
+    <string name="guide_connect_s1">Telefon ve PC aynı Wi-Fi ağında olmalı</string>
+    <string name="guide_connect_s2">Oyunda: Seçenekler → Kontroller → Donanım → Uzaktan Kumanda QR kodunu aç</string>
+    <string name="guide_connect_s3">QR KODU TARA\'ya bas ve kamerayı koda tut — bu kadar</string>
+
+    <string name="guide_dash_title">2 · CANLI GÖSTERGE — İSTEĞE BAĞLI</string>
+    <string name="guide_dash_what">Sürüş ekranında açılır: canlı hız, devir ibresi, vites, yakıt, motor sıcaklığı, turbo basıncı, gerçek uyarı ışıkları (sinyaller, uzun far, el freni, ABS, TC, yağ, akü) ve kaza titreşimi.</string>
+    <string name="guide_dash_s1">Oyunda: Seçenekler → Diğer → Protocols bölümüne in</string>
+    <string name="guide_dash_s2">“Dış Gösterge desteği” kutusunu işaretle ve aşağıdaki değerleri gir</string>
+    <string name="guide_dash_s3">Aracı bir kez yenile (Ctrl+R) — oyun bu ayarı araç yüklenirken okur</string>
+
+    <string name="guide_drift_title">3 · DRIFT METRE — İSTEĞE BAĞLI</string>
+    <string name="guide_drift_what">Savrulurken hız göstergesinin üstünde canlı drift açısı ve seans rekorunu gösterir. 0-100 kronometresiyle (uygulama Ayarları\'ndan aç) çok yakışır.</string>
+    <string name="guide_drift_s1">Oyunda: Seçenekler → Diğer → Protocols (aynı yer)</string>
+    <string name="guide_drift_s2">“MotionSim etkinleştirildi” kutusunu işaretle ve aşağıdaki değerleri gir</string>
+    <string name="guide_drift_s3">Aracı bir kez yenile (Ctrl+R)</string>
+
+    <string name="guide_trouble_title">SORUN GİDERME</string>
+    <string name="guide_trouble_1">Hiçbir şey gelmiyor mu? Windows Güvenlik Duvarı\'nda BeamNG.drive\'a izin ver.</string>
+    <string name="guide_trouble_2">Misafir/otel Wi-Fi ağları telefonla PC\'nin konuşmasını çoğu zaman engeller — kendi ağını ya da telefonun hotspot\'unu kullan.</string>
+    <string name="guide_trouble_3">Modem telefona yeni IP mi verdi? Bu sayfayı yeniden kontrol et, oyundaki değeri güncelle, sonra Ctrl+R.</string>
+    <string name="guide_trouble_4">Oyun güncellemesinden sonra göstergeler dondu mu? Kutuları yeniden işaretle — ayarlar bazen sıfırlanır.</string>
+
+    <!-- Scanner -->
+    <string name="scan_eyebrow">BAĞLAN</string>
+    <string name="scan_title">QR Tara</string>
+    <string name="scan_hint">Oyundaki kodu çerçeveye hizala — bağlantı kendiliğinden kurulur</string>
+    <string name="scan_camera_note">kamera yalnızca bu ekranda açık</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">BeamNG.drive\'a bağlanılıyor</string>
+    <string name="status_connected">Bağlı</string>
+    <string name="toast_no_connection">Bağlantı yok — önce QR kodu tarat</string>
+    <string name="toast_invalid_qr">Geçersiz QR kodu</string>
+    <string name="toast_invalid_qr_format">Geçersiz QR kod biçimi</string>
+    <string name="toast_wifi_required">Telefon, PC ile aynı Wi-Fi ağında olmalı</string>
+
+    <!-- Settings -->
+    <string name="settings_eyebrow">AYARLAR</string>
+    <string name="settings_language">DİL</string>
+    <string name="settings_title">Kontroller ve Gösterge</string>
+    <string name="settings_control_type">KONTROL TİPİ</string>
+    <string name="control_buttons">Butonlar</string>
+    <string name="control_slider">Kaydırıcı</string>
+    <string name="control_gyro">Jiroskop</string>
+    <string name="settings_sensitivity">Hassasiyet</string>
+    <string name="settings_sensitivity_sub">Jiroskop direksiyon oranı</string>
+    <string name="settings_dead_zone">Ölü bölge</string>
+    <string name="settings_dead_zone_sub">Merkez toleransı</string>
+    <string name="settings_units">Birimler</string>
+    <string name="settings_units_sub">Hız göstergesi</string>
+    <string name="unit_kmh">km/s</string>
+    <string name="unit_mph">mph</string>
+    <string name="settings_dashboard_only">Salt gösterge</string>
+    <string name="settings_dashboard_only_sub">Kontroller kapalı, yalnızca göstergeler</string>
+    <string name="settings_haptics">Titreşim</string>
+    <string name="settings_haptics_sub">Vites ve çarpma geri bildirimi</string>
+    <string name="settings_perf_timer">0-100 kronometresi</string>
+    <string name="settings_perf_timer_sub">Kalkış süreleri ekranda, seans rekoru tutulur</string>
+    <string name="settings_instant_save">değişiklikler anında kaydedilir</string>
+
+</resources>
