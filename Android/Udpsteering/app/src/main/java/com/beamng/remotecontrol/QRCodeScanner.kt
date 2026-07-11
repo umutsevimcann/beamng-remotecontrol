@@ -3,69 +3,63 @@ package com.beamng.remotecontrol
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
-import com.google.zxing.ResultPoint
+import com.beamng.remotecontrol.ui.ScanScreen
+import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class QRCodeScanner : AppCompatActivity() {
+class QRCodeScanner : ComponentActivity() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
-    private lateinit var progressDialogFragment: ProgressDialogFragment
+    private var connecting by mutableStateOf(false)
     private var discoveryJob: Job? = null
 
     private val callback = object : BarcodeCallback {
         override fun barcodeResult(result: BarcodeResult) {
-            if (result.text == null) return
+            if (result.text == null || connecting) return
 
             barcodeView.pause()
             handleScanResult(result.text)
         }
-
-        override fun possibleResultPoints(resultPoints: List<ResultPoint>) {}
     }
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
-        setContentView(R.layout.activity_qr_scanner)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        barcodeView = findViewById(R.id.barcode_scanner)
-        barcodeView.decodeContinuous(callback)
-
-        progressDialogFragment =
-            (supportFragmentManager.findFragmentByTag("progressDialog") as? ProgressDialogFragment)
-                ?: ProgressDialogFragment()
-        progressDialogFragment.onCancelAction = { cancelDiscovery() }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
+        barcodeView = DecoratedBarcodeView(this).apply {
+            setStatusText("")
+            decodeContinuous(callback)
         }
-        return super.onOptionsItemSelected(item)
+
+        setContent {
+            NightGarageTheme {
+                ScanScreen(
+                    barcodeView = barcodeView,
+                    connecting = connecting,
+                    onCancelConnecting = ::cancelDiscovery,
+                )
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        barcodeView.resume()
-
-        if (discoveryJob?.isActive != true) {
-            if (progressDialogFragment.isShowing) {
-                progressDialogFragment.dismiss()
-            }
-        } else {
+        if (connecting) {
             barcodeView.pause()
+        } else {
+            barcodeView.resume()
         }
     }
 
@@ -73,6 +67,7 @@ class QRCodeScanner : AppCompatActivity() {
         super.onPause()
         if (!isChangingConfigurations) {
             discoveryJob?.cancel()
+            connecting = false
         }
         barcodeView.pause()
     }
@@ -102,10 +97,11 @@ class QRCodeScanner : AppCompatActivity() {
             val broadcastAddress = NetworkUtils.broadcastAddress(NetworkUtils.localInetAddress())!!
             Log.i("Broadcast Address", broadcastAddress.hostAddress ?: "?")
 
-            progressDialogFragment.show(supportFragmentManager, "progressDialog")
+            connecting = true
             discoveryJob = lifecycleScope.launch {
                 when (val result = UdpDiscovery.discover(broadcastAddress, ip, securityCode)) {
                     is UdpDiscovery.Result.Connected -> {
+                        connecting = false
                         (application as RemoteControlApplication).hostAddress = result.host
                         startActivity(Intent(this@QRCodeScanner, MainActivity::class.java))
                     }
@@ -123,13 +119,11 @@ class QRCodeScanner : AppCompatActivity() {
         onError(null)
     }
 
-    fun onError(message: String?) {
+    private fun onError(message: String?) {
         if (message != null) {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
-        if (progressDialogFragment.isShowing) {
-            progressDialogFragment.dismiss()
-        }
+        connecting = false
         barcodeView.resume()
     }
 }

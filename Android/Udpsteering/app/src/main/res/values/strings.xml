@@ -26,6 +26,12 @@
     <string name="scan_qr_button">SCAN QR CODE</string>
     <string name="settings_button">SETTINGS</string>
 
+    <!-- Scanner -->
+    <string name="scan_eyebrow">CONNECT</string>
+    <string name="scan_title">Scan QR</string>
+    <string name="scan_hint">Align the code shown in the game — connects automatically</string>
+    <string name="scan_camera_note">camera active only on this screen</string>
+
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
     <string name="status_connected">Connected</string>
