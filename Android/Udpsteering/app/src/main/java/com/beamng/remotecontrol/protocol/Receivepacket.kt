@@ -20,14 +20,9 @@ import java.nio.ByteBuffer
  */
 class Receivepacket(data: ByteArray, length: Int) {
 
-    private var time = 0
-    private var flags = 0
-    private val flagsarray = BooleanArray(5)
     private var gearByte: Byte = 0
     private val lightsArray = BooleanArray(11)
-    private val dasharray = BooleanArray(11)
     private var showLights = 0
-    private var dashLightsRaw = 0
 
     @get:JvmName("getSpeed")
     var speed = 0f; private set
@@ -62,8 +57,6 @@ class Receivepacket(data: ByteArray, length: Int) {
         } else {
             try {
                 val bb = ByteBuffer.wrap(data)
-                time = Integer.reverseBytes(bb.getInt(0))
-                flags = EndianUtils.readSwappedUnsignedShort(data, 8)
                 gearByte = bb.get(10)
                 speed = EndianUtils.readSwappedFloat(data, 12)
                 rpm = EndianUtils.readSwappedFloat(data, 16)
@@ -71,7 +64,6 @@ class Receivepacket(data: ByteArray, length: Int) {
                 fuel = EndianUtils.readSwappedFloat(data, 28)
                 throttle = EndianUtils.readSwappedFloat(data, 48)
                 brake = EndianUtils.readSwappedFloat(data, 52)
-                dashLightsRaw = EndianUtils.readSwappedInteger(data, 40)
                 showLights = EndianUtils.readSwappedInteger(data, 44)
                 id = EndianUtils.readSwappedInteger(data, 92)
                 odometer = if (length >= 100) EndianUtils.readSwappedInteger(data, 96) else 0
@@ -81,18 +73,6 @@ class Receivepacket(data: ByteArray, length: Int) {
             }
         }
     }
-
-    val flagsArray: BooleanArray
-        get() {
-            flagsarray.fill(false)
-            if ((flags and FLAG_KMH) == FLAG_KMH) {
-                flagsarray[3] = true
-            }
-            return flagsarray
-        }
-
-    val dashUsedArr: BooleanArray
-        get() = dasharray
 
     val activeLightsArr: BooleanArray
         get() {
@@ -133,8 +113,6 @@ class Receivepacket(data: ByteArray, length: Int) {
         const val INDEX_OILWARN = 8
         const val INDEX_BATTERY = 9
         const val INDEX_ABS = 10
-
-        private const val FLAG_KMH = 16384
 
         // Bit values from the game's lua/vehicle/protocols/outgauge.lua (DL_x constants).
         private const val FLAG_SHIFTLIGHT = 1

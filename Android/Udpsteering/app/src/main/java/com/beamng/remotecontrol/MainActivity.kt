@@ -81,13 +81,6 @@ class MainActivity : AppCompatActivity() {
     private var receiverSocket: DatagramSocket? = null
     private var hostAddress: InetAddress? = null
 
-    // Packet tracking (sender writes on IO, telemetry handler reads on Main)
-    @Volatile private var lpTime = 0L
-    private var timeDiff = 0L
-    private var oldDiff = 1L
-    @Volatile private var pID = 1
-    @Volatile private var lastID = 0
-
     // Modular Input System
     private lateinit var settingsManager: SettingsManager
     @Volatile private var steeringInputHandler: SteeringInputHandler? = null
@@ -128,9 +121,6 @@ class MainActivity : AppCompatActivity() {
         initControls()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        lpTime = System.currentTimeMillis()
-        timeDiff = 0L
     }
 
     private fun initViews() {
@@ -161,17 +151,13 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initControls() {
-        throttle.setOnTouchListener { v, event ->
-            val analog = settingsManager.isAnalogPedals
+        // Pedals are on/off: the stock game thresholds throttle/brake at 0.5
+        // (remoteController.lua button0/button1), so partial values do nothing.
+        throttle.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    thrpushed = if (analog) {
-                        // Analog: Y position determines value (bottom=0, top=1)
-                        (1f - (event.y / v.height)).coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    updatePedalFill(throttleFill, thrpushed)
+                    thrpushed = 1f
+                    updatePedalFill(throttleFill, 1f)
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     thrpushed = 0f
@@ -181,16 +167,11 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        breaks.setOnTouchListener { v, event ->
-            val analog = settingsManager.isAnalogPedals
+        breaks.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    brpushed = if (analog) {
-                        (1f - (event.y / v.height)).coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    updatePedalFill(brakeFill, brpushed)
+                    brpushed = 1f
+                    updatePedalFill(brakeFill, 1f)
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     brpushed = 0f
@@ -365,12 +346,9 @@ class MainActivity : AppCompatActivity() {
                     sendpacket.setSteeringAngle(steeringValue)
                     sendpacket.setThrottle(thrpushed)
                     sendpacket.setBreaks(brpushed)
-                    sendpacket.setID(pID)
-
-                    if (lastID != pID) {
-                        lastID = pID
-                        lpTime = System.currentTimeMillis()
-                    }
+                    // Stock game never echoes the id (outgauge.lua: o.id = 0),
+                    // so there is no RTT to measure — send a constant.
+                    sendpacket.setID(0)
 
                     val buffer = sendpacket.sendingByteArray
                     socket.send(DatagramPacket(buffer, buffer.size, host, Ports.GAME))
@@ -433,19 +411,6 @@ class MainActivity : AppCompatActivity() {
             telemetryConnected = true
             textDelay.text = getString(R.string.status_connected)
             textDelay.setTextColor(ContextCompat.getColor(this, R.color.status_connected))
-        }
-
-        // Latency tracking (works only when the id echo round-trips, e.g. companion mod)
-        if (p.id == pID) {
-            timeDiff = System.currentTimeMillis() - lpTime
-            var disDiff = Math.round(((oldDiff + timeDiff) / 2).toFloat())
-            disDiff /= 2
-            if (timeDiff != 0L) {
-                textDelay.text = getString(R.string.status_delay_ms, disDiff)
-            }
-            pID++
-            if (pID == 128) pID = 0
-            oldDiff = timeDiff
         }
 
         // Speed conversion - direct calculation

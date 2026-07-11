@@ -35,7 +35,6 @@
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
     <string name="status_connected">Connected</string>
-    <string name="status_delay_ms">Delay: %1$dms</string>
     <string name="toast_no_connection">No connection — please scan the QR code first</string>
     <string name="toast_invalid_qr">Invalid QR code</string>
     <string name="toast_invalid_qr_format">Invalid QR code format</string>
@@ -60,8 +59,6 @@
     <string name="settings_dashboard_only_sub">Controls off, gauges only</string>
     <string name="settings_haptics">Haptics</string>
     <string name="settings_haptics_sub">Gear &amp; impact feedback</string>
-    <string name="settings_analog_pedals">Analog pedals</string>
-    <string name="settings_analog_pedals_sub">Pressure by touch position (PC mod)</string>
     <string name="settings_instant_save">changes save instantly</string>
 
 </resources>

@@ -49,7 +49,6 @@ fun SettingsScreen(settings: SettingsManager) {
     var metric by remember { mutableStateOf(settings.useMetricUnits()) }
     var dashboardOnly by remember { mutableStateOf(settings.isDashboardOnly) }
     var haptics by remember { mutableStateOf(settings.isHapticEnabled) }
-    var analogPedals by remember { mutableStateOf(settings.isAnalogPedals) }
 
     Column(
         modifier = Modifier
@@ -160,14 +159,6 @@ fun SettingsScreen(settings: SettingsManager) {
             ) {
                 haptics = it
                 settings.isHapticEnabled = it
-            }
-            ToggleRow(
-                title = stringResource(R.string.settings_analog_pedals),
-                subtitle = stringResource(R.string.settings_analog_pedals_sub),
-                checked = analogPedals,
-            ) {
-                analogPedals = it
-                settings.isAnalogPedals = it
             }
         }
 
