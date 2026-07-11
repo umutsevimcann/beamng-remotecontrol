@@ -34,15 +34,50 @@
     <string name="connect_step_2">Controls → Hardware → QR</string>
     <string name="connect_step_3">Scan &amp; drive</string>
 
-    <!-- Welcome: dashboard card -->
-    <string name="dashboard_card_title">LIVE DASHBOARD</string>
-    <string name="dashboard_instructions">Options → Other → OutGauge support</string>
-    <string name="dashboard_ip_port">IP %1$s · PORT 4445</string>
-    <string name="dashboard_no_wifi">Connect phone to Wi-Fi</string>
+    <!-- Welcome: extras card -->
+    <string name="extras_card_title">OPTIONAL EXTRAS — ENABLE IN GAME</string>
+    <string name="extras_dashboard_line">OutGauge → live dashboard: speed, RPM, gear, fuel, warning lights, crash haptics</string>
+    <string name="extras_drift_line">MotionSim → drift meter with session record</string>
+    <string name="extras_guide_hint">Step-by-step with YOUR values:</string>
 
     <!-- Welcome: actions -->
     <string name="scan_qr_button">SCAN QR CODE</string>
     <string name="settings_button">SETTINGS</string>
+    <string name="guide_button">SETUP GUIDE</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">HOW-TO</string>
+    <string name="guide_title">Setup Guide</string>
+    <string name="guide_intro">This page shows YOUR real values. Type them into the game exactly as written — no guessing, no copying from screenshots.</string>
+    <string name="guide_ip_label">YOUR PHONE\'S IP</string>
+    <string name="guide_ip_missing">— connect the phone to Wi-Fi and this page will fill it in —</string>
+    <string name="guide_value_address">Address</string>
+    <string name="guide_value_port">Port</string>
+    <string name="guide_value_rate">Max update rate</string>
+
+    <string name="guide_connect_title">1 · CONNECT — REQUIRED</string>
+    <string name="guide_connect_what">Steer, accelerate and brake from the phone.</string>
+    <string name="guide_connect_s1">Phone and PC must be on the same Wi-Fi network</string>
+    <string name="guide_connect_s2">In game: Options → Controls → Hardware → show the Remote Control QR</string>
+    <string name="guide_connect_s3">Tap SCAN QR CODE and point the camera at it — that\'s it</string>
+
+    <string name="guide_dash_title">2 · LIVE DASHBOARD — OPTIONAL</string>
+    <string name="guide_dash_what">Unlocks on the drive screen: live speed, RPM needle, gear, fuel, engine temperature, turbo boost, real warning lights (signals, high beam, handbrake, ABS, TC, oil, battery) and crash vibration.</string>
+    <string name="guide_dash_s1">In game: Options → Other → scroll to Protocols</string>
+    <string name="guide_dash_s2">Tick “OutGauge support” and fill in the values below</string>
+    <string name="guide_dash_s3">Reload the vehicle once (Ctrl+R) — the game reads this when the car spawns</string>
+
+    <string name="guide_drift_title">3 · DRIFT METER — OPTIONAL</string>
+    <string name="guide_drift_what">Shows a live drift angle above the speedometer while you slide, plus your session record. Great with the 0-100 timer (enable it in the app\'s Settings).</string>
+    <string name="guide_drift_s1">In game: Options → Other → Protocols (same place)</string>
+    <string name="guide_drift_s2">Tick “MotionSim enabled” and fill in the values below</string>
+    <string name="guide_drift_s3">Reload the vehicle once (Ctrl+R)</string>
+
+    <string name="guide_trouble_title">TROUBLESHOOTING</string>
+    <string name="guide_trouble_1">Nothing arrives? Allow BeamNG.drive through the Windows Firewall.</string>
+    <string name="guide_trouble_2">Guest/hotel Wi-Fi often blocks phones from talking to PCs — use your own network or the phone\'s hotspot.</string>
+    <string name="guide_trouble_3">Router gave the phone a new IP? Re-check this page and update the game, then Ctrl+R.</string>
+    <string name="guide_trouble_4">Gauges frozen after a game update? Re-tick the options — settings occasionally reset.</string>
 
     <!-- Scanner -->
     <string name="scan_eyebrow">CONNECT</string>

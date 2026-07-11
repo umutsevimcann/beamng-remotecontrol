@@ -32,6 +32,7 @@ class WelcomeActivity : ComponentActivity() {
                     phoneIp = phoneIp,
                     onScanClick = ::scanRequested,
                     onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                    onGuideClick = { startActivity(Intent(this, SetupGuideActivity::class.java)) },
                 )
             }
         }

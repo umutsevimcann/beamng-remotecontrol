@@ -49,6 +49,7 @@ fun WelcomeScreen(
     phoneIp: String?,
     onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onGuideClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -94,35 +95,23 @@ fun WelcomeScreen(
         }
         Spacer(Modifier.height(14.dp))
 
-        // ===== Live dashboard card =====
-        GarageCard(title = stringResource(R.string.dashboard_card_title)) {
+        // ===== Optional extras card (details live in the Setup Guide) =====
+        GarageCard(title = stringResource(R.string.extras_card_title)) {
+            FeatureLine(stringResource(R.string.extras_dashboard_line))
+            FeatureLine(stringResource(R.string.extras_drift_line))
+            Spacer(Modifier.height(6.dp))
             Text(
-                stringResource(R.string.dashboard_instructions),
+                stringResource(R.string.extras_guide_hint),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.Text,
+                color = NightGarage.TextFaint,
             )
-            Spacer(Modifier.height(10.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF100C08), RoundedCornerShape(9.dp))
-                    .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(9.dp))
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = phoneIp
-                        ?.let { stringResource(R.string.dashboard_ip_port, it) }
-                        ?: stringResource(R.string.dashboard_no_wifi),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFFFFD9A0),
-                )
-            }
         }
         Spacer(Modifier.height(28.dp))
 
         // ===== Actions =====
         AmberButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
+        Spacer(Modifier.height(12.dp))
+        GhostButton(stringResource(R.string.guide_button), onClick = onGuideClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.settings_button), onClick = onSettingsClick)
         Spacer(Modifier.height(20.dp))
@@ -158,6 +147,15 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
             Spacer(Modifier.height(10.dp))
         }
         content()
+    }
+}
+
+@Composable
+private fun FeatureLine(text: String) {
+    Row(modifier = Modifier.padding(vertical = 3.dp)) {
+        Text("•", color = NightGarage.Amber, style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.size(8.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = NightGarage.Text)
     }
 }
 
@@ -223,6 +221,9 @@ fun GhostButton(label: String, onClick: () -> Unit) {
 @Composable
 private fun WelcomeScreenPreview() {
     NightGarageTheme {
-        WelcomeScreen(phoneIp = "192.168.0.23", onScanClick = {}, onSettingsClick = {})
+        WelcomeScreen(
+            phoneIp = "192.168.0.23",
+            onScanClick = {}, onSettingsClick = {}, onGuideClick = {},
+        )
     }
 }
