@@ -10,4 +10,7 @@ object Ports {
 
     /** Phone listens here: discovery reply + OutGauge telemetry. */
     const val APP = GAME + 1
+
+    /** Phone listens here: optional MotionSim stream (drift meter). */
+    const val MOTION = 4446
 }

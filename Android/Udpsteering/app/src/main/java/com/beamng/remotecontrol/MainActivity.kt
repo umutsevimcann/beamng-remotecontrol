@@ -360,7 +360,7 @@ class MainActivity : ComponentActivity() {
             val sock = DatagramSocket(null)
             motionSocket = sock
             sock.reuseAddress = true
-            sock.bind(InetSocketAddress(MOTION_PORT))
+            sock.bind(InetSocketAddress(Ports.MOTION))
             sock.soTimeout = 2000
 
             val buf = ByteArray(160)
@@ -380,7 +380,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } catch (e: IOException) {
-            Log.e(TAG, "Cannot bind to port $MOTION_PORT", e)
+            Log.e(TAG, "Cannot bind to port ${Ports.MOTION}", e)
         } finally {
             motionSocket?.let { if (!it.isClosed) it.close() }
             motionSocket = null
@@ -470,6 +470,5 @@ class MainActivity : ComponentActivity() {
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
         private const val IMPACT_WINDOW_MS = 300L
-        private const val MOTION_PORT = 4446 // phone-side MotionSim listen port
     }
 }

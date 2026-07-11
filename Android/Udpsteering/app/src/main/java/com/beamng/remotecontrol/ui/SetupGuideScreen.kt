@@ -30,7 +30,6 @@ import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.ui.theme.NightGarage
 
-private const val MOTION_PORT = 4446 // keep in sync with MainActivity.MOTION_PORT
 private const val RECOMMENDED_RATE = "60"
 
 /**
@@ -104,7 +103,7 @@ fun SetupGuideScreen(phoneIp: String?) {
             WhatYouGet(stringResource(R.string.guide_drift_what))
             GuideStep(1, stringResource(R.string.guide_drift_s1))
             GuideStep(2, stringResource(R.string.guide_drift_s2))
-            ValueTable(phoneIp, port = MOTION_PORT.toString())
+            ValueTable(phoneIp, port = Ports.MOTION.toString())
             GuideStep(3, stringResource(R.string.guide_drift_s3))
         }
         Spacer(Modifier.height(14.dp))
