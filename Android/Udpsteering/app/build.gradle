@@ -2,6 +2,18 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
+// Release signing comes from the gitignored local.properties:
+//   RELEASE_STORE_FILE=../release-key.jks   (relative to app/)
+//   RELEASE_STORE_PASSWORD=...
+//   RELEASE_KEY_ALIAS=...
+//   RELEASE_KEY_PASSWORD=...
+// Without these, release builds fall back to the debug key (device testing only).
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
+}
+
 android {
     namespace 'com.beamng.remotecontrol'
     compileSdk 35
@@ -10,8 +22,19 @@ android {
         applicationId 'com.beamng.remotecontrol'
         minSdk 21
         targetSdk 35
-        versionCode 10
-        versionName '2.0.0'
+        versionCode 11
+        versionName '3.0.0'
+    }
+
+    signingConfigs {
+        release {
+            if (localProps['RELEASE_STORE_FILE']) {
+                storeFile file(localProps['RELEASE_STORE_FILE'])
+                storePassword localProps['RELEASE_STORE_PASSWORD']
+                keyAlias localProps['RELEASE_KEY_ALIAS']
+                keyPassword localProps['RELEASE_KEY_PASSWORD']
+            }
+        }
     }
 
     buildTypes {
@@ -19,6 +42,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig localProps['RELEASE_STORE_FILE'] ? signingConfigs.release : signingConfigs.debug
         }
     }
     
