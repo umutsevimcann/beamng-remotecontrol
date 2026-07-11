@@ -2,8 +2,40 @@
 <resources>
 
     <string name="app_name">BeamNG.drive Remote Control</string>
-    <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="menu">menu</string>
     <string name="unit">Unit</string>
+
+    <!-- Brand -->
+    <string name="brand_name">BeamNG</string>
+    <string name="brand_subtitle">REMOTE CONTROL</string>
+    <string name="version_label">v3.0 — Night Garage</string>
+
+    <!-- Welcome: connect card -->
+    <string name="connect_card_title">CONNECT</string>
+    <string name="connect_step_1">Open BeamNG.drive on your PC</string>
+    <string name="connect_step_2">Controls → Hardware → QR</string>
+    <string name="connect_step_3">Scan &amp; drive</string>
+
+    <!-- Welcome: dashboard card -->
+    <string name="dashboard_card_title">LIVE DASHBOARD</string>
+    <string name="dashboard_instructions">Options → Other → OutGauge support</string>
+    <string name="dashboard_ip_port">IP %1$s · PORT 4445</string>
+    <string name="dashboard_no_wifi">Connect phone to Wi-Fi</string>
+
+    <!-- Welcome: actions -->
+    <string name="scan_qr_button">SCAN QR CODE</string>
+    <string name="settings_button">SETTINGS</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_delay_ms">Delay: %1$dms</string>
+    <string name="toast_no_connection">No connection — please scan the QR code first</string>
+    <string name="toast_invalid_qr">Invalid QR code</string>
+    <string name="toast_invalid_qr_format">Invalid QR code format</string>
+    <string name="toast_wifi_required">You must be connected to the same Wi-Fi as your PC</string>
+
+    <!-- Settings -->
+    <string name="toast_settings_saved">Settings saved!</string>
 
 </resources>

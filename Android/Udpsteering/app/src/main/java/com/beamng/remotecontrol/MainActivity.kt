@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         hostAddress = (application as RemoteControlApplication).hostAddress
 
         if (hostAddress == null) {
-            Toast.makeText(this, "No connection - please scan QR code first", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_no_connection), Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -431,7 +431,7 @@ class MainActivity : AppCompatActivity() {
         // (id is always 0), so flowing telemetry itself is the connect signal.
         if (!telemetryConnected) {
             telemetryConnected = true
-            textDelay.text = "Connected"
+            textDelay.text = getString(R.string.status_connected)
             textDelay.setTextColor(ContextCompat.getColor(this, R.color.status_connected))
         }
 
@@ -441,7 +441,7 @@ class MainActivity : AppCompatActivity() {
             var disDiff = Math.round(((oldDiff + timeDiff) / 2).toFloat())
             disDiff /= 2
             if (timeDiff != 0L) {
-                textDelay.text = "Delay: ${disDiff}ms"
+                textDelay.text = getString(R.string.status_delay_ms, disDiff)
             }
             pID++
             if (pID == 128) pID = 0

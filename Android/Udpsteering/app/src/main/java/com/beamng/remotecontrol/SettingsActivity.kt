@@ -141,7 +141,7 @@ class SettingsActivity : AppCompatActivity() {
         settings.isHapticEnabled = switchHaptic.isChecked
         settings.isAnalogPedals = switchAnalogPedals.isChecked
 
-        Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
         finish()
     }
 }

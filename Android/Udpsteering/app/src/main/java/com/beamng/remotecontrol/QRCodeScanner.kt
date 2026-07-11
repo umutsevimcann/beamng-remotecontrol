@@ -80,7 +80,7 @@ class QRCodeScanner : AppCompatActivity() {
     private fun handleScanResult(rawResult: String) {
         val parts = rawResult.split("#")
         if (parts.size != 2) {
-            Toast.makeText(this, "Invalid QR code", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_invalid_qr), Toast.LENGTH_LONG).show()
             barcodeView.resume()
             return
         }
@@ -88,7 +88,7 @@ class QRCodeScanner : AppCompatActivity() {
 
         // Validate securityCode: max 64 chars, alphanumeric + underscore + hyphen only
         if (securityCode.length > 64 || !securityCode.matches(Regex("^[a-zA-Z0-9_\\-]+$"))) {
-            Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_invalid_qr_format), Toast.LENGTH_LONG).show()
             barcodeView.resume()
             return
         }
@@ -113,7 +113,7 @@ class QRCodeScanner : AppCompatActivity() {
                 }
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "You must be connected to the same WiFi as your PC", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_wifi_required), Toast.LENGTH_LONG).show()
             barcodeView.resume()
         }
     }

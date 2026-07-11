@@ -4,67 +4,55 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import com.beamng.remotecontrol.network.NetworkUtils
+import com.beamng.remotecontrol.ui.WelcomeScreen
+import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 
-class WelcomeActivity : AppCompatActivity() {
+class WelcomeActivity : ComponentActivity() {
+
+    private var phoneIp by mutableStateOf<String?>(null)
+
+    private val cameraPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) openScanner()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_welcome)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onScanClick(view: View) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.i("BeamNG", "No Camera Permission")
-
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                CAM_PERMISSION_REQUEST
-            )
-            return
+        setContent {
+            NightGarageTheme {
+                WelcomeScreen(
+                    phoneIp = phoneIp,
+                    onScanClick = ::scanRequested,
+                    onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                )
+            }
         }
-        startActivity(Intent(this, QRCodeScanner::class.java))
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onSettingsClick(view: View) {
-        startActivity(Intent(this, SettingsActivity::class.java))
     }
 
     override fun onResume() {
         super.onResume()
-        val ip = NetworkUtils.wifiIpv4String(this) ?: "(connect phone to Wi-Fi)"
-        findViewById<TextView>(R.id.textTelemetryHint)?.text =
-            "In BeamNG: Options → Other → OutGauge support\n" +
-                "Enable it and set:\n" +
-                "IP: $ip     Port: 4445"
+        phoneIp = NetworkUtils.wifiIpv4String(this)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAM_PERMISSION_REQUEST &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
+    private fun scanRequested() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED
         ) {
-            startActivity(Intent(this, QRCodeScanner::class.java))
+            openScanner()
+        } else {
+            cameraPermission.launch(Manifest.permission.CAMERA)
         }
     }
 
-    companion object {
-        const val CAM_PERMISSION_REQUEST = 100
+    private fun openScanner() {
+        startActivity(Intent(this, QRCodeScanner::class.java))
     }
 }

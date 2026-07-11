@@ -1,0 +1,226 @@
+package com.beamng.remotecontrol.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.beamng.remotecontrol.R
+import com.beamng.remotecontrol.ui.theme.NightGarage
+import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+
+/** Warm cockpit backdrop shared by the portrait screens. */
+fun cockpitBackground() = Brush.radialGradient(
+    colorStops = arrayOf(
+        0.0f to Color(0xFF2B241D),
+        0.55f to Color(0xFF16120E),
+        1.0f to NightGarage.Shell,
+    ),
+    radius = 1400f,
+)
+
+@Composable
+fun WelcomeScreen(
+    phoneIp: String?,
+    onScanClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(cockpitBackground())
+            .systemBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 28.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // ===== Brand =====
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(Color(0xFF4A3A26), Color(0xFF241A0F)),
+                    ),
+                    CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("⟲", color = NightGarage.Amber, fontSize = 26.sp)
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            stringResource(R.string.brand_name),
+            style = MaterialTheme.typography.titleLarge,
+            color = NightGarage.TextBright,
+        )
+        Text(
+            stringResource(R.string.brand_subtitle),
+            style = MaterialTheme.typography.labelSmall,
+            color = NightGarage.Amber,
+        )
+        Spacer(Modifier.height(24.dp))
+
+        // ===== Connect card =====
+        GarageCard(title = stringResource(R.string.connect_card_title)) {
+            NumberedStep(1, stringResource(R.string.connect_step_1))
+            NumberedStep(2, stringResource(R.string.connect_step_2))
+            NumberedStep(3, stringResource(R.string.connect_step_3))
+        }
+        Spacer(Modifier.height(14.dp))
+
+        // ===== Live dashboard card =====
+        GarageCard(title = stringResource(R.string.dashboard_card_title)) {
+            Text(
+                stringResource(R.string.dashboard_instructions),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.Text,
+            )
+            Spacer(Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF100C08), RoundedCornerShape(9.dp))
+                    .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(9.dp))
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = phoneIp
+                        ?.let { stringResource(R.string.dashboard_ip_port, it) }
+                        ?: stringResource(R.string.dashboard_no_wifi),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFFFFD9A0),
+                )
+            }
+        }
+        Spacer(Modifier.height(28.dp))
+
+        // ===== Actions =====
+        AmberButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
+        Spacer(Modifier.height(12.dp))
+        GhostButton(stringResource(R.string.settings_button), onClick = onSettingsClick)
+        Spacer(Modifier.height(20.dp))
+
+        Text(
+            stringResource(R.string.version_label),
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp),
+            color = NightGarage.TextFaint,
+        )
+    }
+}
+
+// ==================== Night Garage building blocks ====================
+
+@Composable
+fun GarageCard(title: String, content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(listOf(Color(0xDD241C12), Color(0xDD1A140E))),
+                RoundedCornerShape(14.dp),
+            )
+            .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(14.dp))
+            .padding(16.dp),
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.labelSmall,
+            color = NightGarage.TextFaint,
+        )
+        Spacer(Modifier.height(10.dp))
+        content()
+    }
+}
+
+@Composable
+private fun NumberedStep(number: Int, text: String) {
+    Row(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            "$number",
+            style = MaterialTheme.typography.bodyLarge,
+            color = NightGarage.Amber,
+        )
+        Spacer(Modifier.size(10.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = NightGarage.Text,
+        )
+    }
+}
+
+@Composable
+fun AmberButton(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp)
+            .background(
+                Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00))),
+                RoundedCornerShape(14.dp),
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = NightGarage.OnAmber,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+fun GhostButton(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp),
+            color = NightGarage.TextDim,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 740)
+@Composable
+private fun WelcomeScreenPreview() {
+    NightGarageTheme {
+        WelcomeScreen(phoneIp = "192.168.0.23", onScanClick = {}, onSettingsClick = {})
+    }
+}

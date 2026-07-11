@@ -14,7 +14,7 @@ class ProgressDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireActivity())
-        builder.setTitle("Connecting to BeamNG.drive")
+        builder.setTitle(getString(R.string.connecting_dialog_title))
 
         val progressBar = ProgressBar(requireContext())
         progressBar.setPadding(40, 40, 40, 40)
