@@ -1,13 +1,23 @@
 package com.beamng.remotecontrol;
 
+import android.util.Log;
+
 import org.apache.commons.io.EndianUtils;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Parses the OutGauge telemetry packet received from BeamNG.drive.
+ * Struct layout: see outgauge_t definition below.
+ */
 public class Receivepacket {
+    // Stock BeamNG OutGauge (Options > Other) sends the standard 96-byte LFS struct;
+    // the companion mod appends a 4-byte odometer (100 bytes). Accept both.
+    public static final int MIN_PACKET_LENGTH = 96;
+
     private int time;
     private int flags;
-    private final short FLAG_KMH = 16384;
+    private static final int FLAG_KMH = 16384;
     private boolean[] flagsarray = new boolean[5];
     private byte gear;
     private String gearStr;
@@ -15,115 +25,89 @@ public class Receivepacket {
     private float rpm;
     private float engTemp;
     private float fuel;
+    private float throttle;
+    private float brake;
     private int odometer;
-    private short dashLights;
+    private int dashLights;
     private int id;
     private boolean[] dasharray = new boolean[11];
-    private short showLights;
-    private final short FLAG_SHIFTLIGHT = 1;
-    private final short FLAG_FULLBEAM = 2;
-    private final short FLAG_HANDBREAK = 16;
-    private final short FLAG_SIGNAL_L = 32;
-    private final short FLAG_SIGNAL_R = 64;
-    private final short FLAG_SIGNAL_ANY = 128;
-    private final short FLAG_OILWARN = 256;
-    private final short FLAG_BATTERY = 512;
-    private final short FLAG_ABS = 1024;
+    private int showLights;
+    // Bit values from the game's lua/vehicle/protocols/outgauge.lua (DL_x constants).
+    private static final int FLAG_SHIFTLIGHT = 1;
+    private static final int FLAG_FULLBEAM = 2;
+    private static final int FLAG_HANDBREAK = 4; // DL_HANDBRAKE = 2^2; 16 is DL_TC (was wrongly lighting on traction control)
+    private static final int FLAG_SIGNAL_L = 32;
+    private static final int FLAG_SIGNAL_R = 64;
+    private static final int FLAG_OILWARN = 256;
+    private static final int FLAG_BATTERY = 512;
+    private static final int FLAG_ABS = 1024;
     private boolean[] lightsArray = new boolean[11];
+    private boolean valid = false;
 
+    /**
+     * OutGauge struct layout (Little-Endian):
+     * 0-3:   unsigned time
+     * 4-7:   char car[4]
+     * 8-9:   unsigned short flags
+     * 10:    char gear
+     * 11:    char plid
+     * 12-15: float speed (m/s)
+     * 16-19: float rpm
+     * 20-23: float turbo (BAR)
+     * 24-27: float engTemp (C)
+     * 28-31: float fuel (0-1)
+     * 32-35: float oilPressure (BAR)
+     * 36-39: float oilTemp (C)
+     * 40-43: unsigned dashLights
+     * 44-47: unsigned showLights
+     * 48-51: float throttle (0-1)
+     * 52-55: float brake (0-1)
+     * 56-59: float clutch (0-1)
+     * 60-75: char display1[16]
+     * 76-91: char display2[16]
+     * 92-95: int id
+     * 96-99: unsigned odometer
+     */
+    public Receivepacket(byte[] data, int length) {
+        if (length < MIN_PACKET_LENGTH) {
+            Log.w("Receivepacket", "Packet too short: " + length + " bytes (need " + MIN_PACKET_LENGTH + ")");
+            return;
+        }
 
-    //Constructor
-    public Receivepacket(byte[] data) {
-
-    /*ffi.cdef[[
-    typedef struct outgauge_t  {
-    unsigned       time;            // time in milliseconds (to check order)        //0-3
-    char           car[4];          // Car name                                     //4-7
-    unsigned short flags;           // Info (see OG_x below)                        //8-9
-    char           gear;            // Reverse:0, Neutral:1, First:2...             //10
-    char           plid;            // Unique ID of viewed player (0 = none)        //11
-    float          speed;           // 0-1                                          //12-15
-    float          rpm;             // 0-1                                          //16-19
-    float          turbo;           // BAR                                          //20-23
-    float          engTemp;         // C                                            //24-27
-    float          fuel;            // 0 to 1                                       //28-31
-    float          oilPressure;     // BAR                                          //32-35
-    float          oilTemp;         // C                                            //36-39
-    unsigned       dashLights;      // Dash lights available (see DL_x below)       //40-43
-    unsigned       showLights;      // Dash lights currently switched on            //44-47
-    float          throttle;        // 0 to 1                                       //48-51
-    float          brake;           // 0 to 1                                       //52-55
-    float          clutch;          // 0 to 1                                       //56-59
-    char           display1[16];    // Usually Fuel                                 //60-75
-    char           display2[16];    // Usually Settings                             //76-91
-    int            id;              // optional - only if OutGauge ID is specified  //92-95
-    unsigned	   odometer;	    // distance driven in meters or miles (0-999999)//96-99
-    } outgauge_t;
-    ,]]
-
-    --[[
-    CONSTANTS
-    // OG_x - bits for OutGaugePack Flags
-    #define OG_SHIFT      1        // key
-    #define OG_CTRL       2        // key
-    #define OG_TURBO      8192     // show turbo gauge
-    #define OG_KM         16384    // if not set - user prefers MILES //only value used
-    #define OG_BAR        32768    // if not set - user prefers PSI
-
-    // DL_x - bits for OutGaugePack DashLights and ShowLights
-    DL_SHIFT,           // bit 0    - shift light
-    DL_FULLBEAM,        // bit 1    - full beam
-    DL_HANDBRAKE,       // bit 2    - handbrake
-    DL_PITSPEED,        // bit 3    - pit speed limiter
-    DL_TC,              // bit 4    - TC active or switched off
-    DL_SIGNAL_L,        // bit 5    - left turn signal
-    DL_SIGNAL_R,        // bit 6    - right turn signal
-    DL_SIGNAL_ANY,      // bit 7    - shared turn signal
-    DL_OILWARN,         // bit 8    - oil pressure warning
-    DL_BATTERY,         // bit 9    - battery warning
-    DL_ABS,             // bit 10   - ABS active or switched off
-    DL_SPARE,           // bit 11
-    ]]--
-
-    */
-
-
-        ByteBuffer bb = ByteBuffer.wrap(data);
-
-        time = Integer.reverseBytes(bb.getInt(0));
-
-        flags = EndianUtils.readSwappedUnsignedShort(data,8);
-
-        gear = bb.get(10);
-
-        speed = EndianUtils.readSwappedFloat(data,12);
-
-        rpm = EndianUtils.readSwappedFloat(data, 16);
-
-        engTemp = EndianUtils.readSwappedFloat(data, 24);
-
-        fuel = EndianUtils.readSwappedFloat(data, 28);
-
-        dashLights = EndianUtils.readSwappedShort(data, 40);
-
-        showLights = EndianUtils.readSwappedShort(data, 44);
-
-        id = bb.get(92);
-
-
-
-        //Integer.reverseBytes(odometer);
-
-        bb.clear();
-
-        //Log.i("CONSTRUCTOR","flags= " + flags + " gear= "+ gear + " speed= "+speed+ " rpm= "+rpm+" engTemp= "+engTemp+" fuel= "+fuel+" odometer= "+odometer+" dashLights= "+dashLights+" showLights= "+showLights);
-
+        try {
+            ByteBuffer bb = ByteBuffer.wrap(data);
+            time = Integer.reverseBytes(bb.getInt(0));
+            flags = EndianUtils.readSwappedUnsignedShort(data, 8);
+            gear = bb.get(10);
+            speed = EndianUtils.readSwappedFloat(data, 12);
+            rpm = EndianUtils.readSwappedFloat(data, 16);
+            engTemp = EndianUtils.readSwappedFloat(data, 24);
+            fuel = EndianUtils.readSwappedFloat(data, 28);
+            throttle = EndianUtils.readSwappedFloat(data, 48);
+            brake = EndianUtils.readSwappedFloat(data, 52);
+            dashLights = EndianUtils.readSwappedInteger(data, 40);
+            showLights = EndianUtils.readSwappedInteger(data, 44);
+            id = EndianUtils.readSwappedInteger(data, 92);
+            odometer = length >= 100 ? EndianUtils.readSwappedInteger(data, 96) : 0;
+            bb.clear();
+            valid = true;
+        } catch (Exception e) {
+            Log.e("Receivepacket", "Failed to parse packet", e);
+        }
     }
 
-    //getters
+    public boolean isValid() {
+        return valid;
+    }
+
     public boolean[] getFlagsArray(){
-        if((flags & FLAG_KMH) == FLAG_KMH)
-        {flagsarray[3]= true;}
+        // Reset flags first to avoid sticky-true bug
+        for (int i = 0; i < flagsarray.length; i++) {
+            flagsarray[i] = false;
+        }
+        if ((flags & FLAG_KMH) == FLAG_KMH) {
+            flagsarray[3] = true;
+        }
         return flagsarray;
     }
 
@@ -132,50 +116,35 @@ public class Receivepacket {
     }
 
     public boolean[] getActiveLightsArr(){
+        // Reset all lights first (fixes bug where lights never turn off)
+        for (int i = 0; i < lightsArray.length; i++) {
+            lightsArray[i] = false;
+        }
 
         if((showLights & FLAG_SHIFTLIGHT) == FLAG_SHIFTLIGHT) {
-            lightsArray[0]= true;
-            //Log.i("ACTIVELIGHTS","Shiftlight ON");
+            lightsArray[0] = true;
         }
-
         if((showLights & FLAG_FULLBEAM) == FLAG_FULLBEAM) {
-            lightsArray[1]= true;
-            //Log.i("ACTIVELIGHTS","Fullbeam ON");
+            lightsArray[1] = true;
         }
-
         if((showLights & FLAG_HANDBREAK) == FLAG_HANDBREAK){
-            lightsArray[2]= true;
-            //Log.i("ACTIVELIGHTS","Handbreak ON");
+            lightsArray[2] = true;
         }
-
         if((showLights & FLAG_SIGNAL_L) == FLAG_SIGNAL_L) {
-            lightsArray[5]= true;
-            //Log.i("ACTIVELIGHTS","Left Signal ON");
+            lightsArray[5] = true;
         }
-
         if((showLights & FLAG_SIGNAL_R) == FLAG_SIGNAL_R) {
-            lightsArray[6]= true;
-            //Log.i("ACTIVELIGHTS","Right Signal ON");
+            lightsArray[6] = true;
         }
-
-        if((showLights & FLAG_SIGNAL_ANY) == FLAG_SIGNAL_ANY) {
-            lightsArray[7]= true;
-            //Log.i("ACTIVELIGHTS","Any Signal ON");
-        }
-
+        // FLAG_SIGNAL_ANY (128) intentionally not mapped: BeamNG never sets it (N/A in game source).
         if((showLights & FLAG_OILWARN) == FLAG_OILWARN) {
-            lightsArray[8]= true;
-            //Log.i("ACTIVELIGHTS","Oilwarn ON");
+            lightsArray[8] = true;
         }
-
         if((showLights & FLAG_BATTERY) == FLAG_BATTERY) {
-            lightsArray[9]= true;
-            //Log.i("ACTIVELIGHTS","Battery ON");
+            lightsArray[9] = true;
         }
-
         if((showLights & FLAG_ABS) == FLAG_ABS) {
-            lightsArray[10]= true;
-            //Log.i("ACTIVELIGHTS","ABS ON");
+            lightsArray[10] = true;
         }
 
         return lightsArray;
@@ -183,30 +152,19 @@ public class Receivepacket {
 
     public String getGear(){
         switch (gear){
-            case 0:
-                gearStr = "R";
-            break;
-            case 1:
-                gearStr = "N";
-                break;
-            case 2:
-                gearStr = "1";
-                break;
-            case 3:
-                gearStr = "2";
-                break;
-            case 4:
-                gearStr = "3";
-                break;
-            case 5:
-                gearStr = "4";
-                break;
-            case 6:
-                gearStr = "5";
-                break;
-            case 7:
-                gearStr = "6";
-                break;
+            case 0:  gearStr = "R"; break;
+            case 1:  gearStr = "N"; break;
+            case 2:  gearStr = "1"; break;
+            case 3:  gearStr = "2"; break;
+            case 4:  gearStr = "3"; break;
+            case 5:  gearStr = "4"; break;
+            case 6:  gearStr = "5"; break;
+            case 7:  gearStr = "6"; break;
+            case 8:  gearStr = "7"; break;
+            case 9:  gearStr = "8"; break;
+            case 10: gearStr = "9"; break;
+            case 11: gearStr = "10"; break;
+            default: gearStr = "?"; break;
         }
         return gearStr;
     }
@@ -227,7 +185,11 @@ public class Receivepacket {
         return fuel;
     }
 
-    public int getOdometer() { return 500; }
+    public float getThrottle() { return throttle; }
+
+    public float getBrake() { return brake; }
+
+    public int getOdometer() { return odometer; }
 
     public int getID() { return id; }
 }

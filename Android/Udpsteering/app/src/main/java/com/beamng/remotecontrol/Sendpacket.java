@@ -1,52 +1,43 @@
 package com.beamng.remotecontrol;
 
-import android.util.Log;
-
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
+/**
+ * Builds the 16-byte UDP control packet sent to BeamNG.drive.
+ * Format (Big-Endian):
+ *   [0-3]  float steering  (0.0=right, 0.5=center, 1.0=left)
+ *   [4-7]  float throttle  (0.0-1.0)
+ *   [8-11] float brakes    (0.0-1.0)
+ *   [12-15] float packetId (the game parses all four fields as floats)
+ *
+ * Pre-allocates a single ByteBuffer to avoid GC pressure at high send rates.
+ */
 public class Sendpacket {
-    private float steeringAngle; // 0 to 1, bytes 0-3
-    private float throttle;      // 0 or 1, bytes 4-7
-    private float brakes;        // 0 or 1, bytes 8-11
-    private float id;        // 0+, bytes 12-15
+    private final ByteBuffer buffer = ByteBuffer.allocate(16).order(ByteOrder.BIG_ENDIAN);
 
-    public void setBreaks(float brakes) {
-        this.brakes = brakes;
-    }
+    private float steeringAngle;
+    private float throttle;
+    private float brakes;
+    private int id;
 
-    public void setSteeringAngle(float steeringAngle) {
-        this.steeringAngle = steeringAngle;
-    }
+    public void setSteeringAngle(float steeringAngle) { this.steeringAngle = steeringAngle; }
+    public void setThrottle(float throttle) { this.throttle = throttle; }
+    public void setBreaks(float brakes) { this.brakes = brakes; }
+    public void setID(int id) { this.id = id; }
 
-    public void setThrottle(float throttle) {
-        this.throttle = throttle;
-    }
-
-    public void setID(float id) {
-        this.id = id;
-    }
-
-    public static byte [] float2ByteArray (float value)
-    {
-        return ByteBuffer.allocate(4).putFloat(value).array();
-    }
-
-    public byte[] getSendingByteArray(){
-
-        //Log.i("Sendpacket", "steer: "+ steeringAngle+", throttle: "+throttle+", brake: "+brakes);
-
-
-        byte s[] = ByteBuffer.allocate(4).order(java.nio.ByteOrder.BIG_ENDIAN).putFloat(steeringAngle).array();
-        byte t[] = ByteBuffer.allocate(4).order(java.nio.ByteOrder.BIG_ENDIAN).putFloat(throttle).array();
-        byte b[] = ByteBuffer.allocate(4).order(java.nio.ByteOrder.BIG_ENDIAN).putFloat(brakes).array();
-        byte i[] = ByteBuffer.allocate(4).order(java.nio.ByteOrder.BIG_ENDIAN).putFloat(id).array();
-
-        byte[] res = new byte[16];
-        System.arraycopy(s, 0, res, 0, 4);
-        System.arraycopy(t, 0, res, 4, 4);
-        System.arraycopy(b, 0, res, 8, 4);
-        System.arraycopy(i, 0, res, 12, 4);
-        //Log.i("byte array", ""+res);
-        return res;
+    public byte[] getSendingByteArray() {
+        // BeamNG reverses all 16 bytes then reads them as struct {float w,x,y,z}:
+        //   z (bytes 0-3 reversed)   = steering
+        //   y (bytes 4-7 reversed)   = throttle
+        //   x (bytes 8-11 reversed)  = brake
+        //   w (bytes 12-15 reversed) = packet id — MUST be a float; an int here
+        //     parses as a denormal ≈0 and kills the ID-echo/latency mechanism.
+        buffer.clear();
+        buffer.putFloat(steeringAngle);
+        buffer.putFloat(throttle);
+        buffer.putFloat(brakes);
+        buffer.putFloat((float) id);
+        return buffer.array();
     }
 }
