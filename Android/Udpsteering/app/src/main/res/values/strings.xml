@@ -17,6 +17,8 @@
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">READY</string>
     <string name="drive_timer_best">BEST</string>
+    <string name="drive_drift">DRIFT</string>
+    <string name="drive_drift_max">MAX</string>
     <string name="drive_thr">THR</string>
     <string name="drive_brk">BRK</string>
     <string name="drive_clt">CLT</string>

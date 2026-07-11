@@ -32,6 +32,7 @@ import com.beamng.remotecontrol.input.InputHandlerFactory
 import com.beamng.remotecontrol.input.SliderInputHandler
 import com.beamng.remotecontrol.input.SteeringInputHandler
 import com.beamng.remotecontrol.network.UdpDiscovery
+import com.beamng.remotecontrol.protocol.MotionPacket
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
@@ -81,8 +82,14 @@ class MainActivity : ComponentActivity() {
     // Haptic Feedback
     private var vibrator: Vibrator? = null
     private var oldGearString = ""
-    private var oldSpeedForImpact = 0
+    private var impactWindowSpeed = 0
+    private var impactWindowStartMs = 0L
     private var lastImpactVibrationTime = 0L
+
+    // Drift indicator (MotionSim protocol, optional second stream)
+    private var motionJob: Job? = null
+    private var motionSocket: DatagramSocket? = null
+    private var lastMotionMs = 0L
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         if (hasFocus) {
@@ -211,17 +218,25 @@ class MainActivity : ComponentActivity() {
             oldGearString = currentGear
         }
 
-        // 2. Impact Detection with cooldown
-        val speedDiff = abs(newSpeed - oldSpeedForImpact)
-        if (speedDiff > 20 && (now - lastImpactVibrationTime) > IMPACT_VIBRATION_COOLDOWN_MS) {
-            when {
-                speedDiff > 50 -> doVibrate(600, 255)  // Severe crash
-                speedDiff > 35 -> doVibrate(300, 180)  // Medium impact
-                else -> doVibrate(150, 100)            // Minor bump
+        // 2. Impact detection over a ~300ms window. Telemetry arrives at up to
+        // 60Hz, so the per-packet delta of even a violent crash is only a few
+        // km/h — the old per-packet comparison could never fire.
+        if (impactWindowStartMs == 0L) {
+            impactWindowStartMs = now
+            impactWindowSpeed = newSpeed
+        } else if (now - impactWindowStartMs >= IMPACT_WINDOW_MS) {
+            val drop = abs(impactWindowSpeed - newSpeed)
+            if (drop > 25 && (now - lastImpactVibrationTime) > IMPACT_VIBRATION_COOLDOWN_MS) {
+                when {
+                    drop > 60 -> doVibrate(600, 255)  // Severe crash
+                    drop > 40 -> doVibrate(300, 180)  // Medium impact
+                    else -> doVibrate(150, 100)       // Minor bump
+                }
+                lastImpactVibrationTime = now
             }
-            lastImpactVibrationTime = now
+            impactWindowStartMs = now
+            impactWindowSpeed = newSpeed
         }
-        oldSpeedForImpact = newSpeed
 
         // 3. ABS feel (hard braking)
         if (p.brake > 0.85f && (now - lastImpactVibrationTime) > 100) {
@@ -236,6 +251,7 @@ class MainActivity : ComponentActivity() {
         val host = hostAddress ?: return
         senderJob = lifecycleScope.launch(Dispatchers.IO) { runSender(host) }
         receiverJob = lifecycleScope.launch(Dispatchers.IO) { runReceiver() }
+        motionJob = lifecycleScope.launch(Dispatchers.IO) { runMotionReceiver() }
     }
 
     private fun stopUdpTasks() {
@@ -243,8 +259,11 @@ class MainActivity : ComponentActivity() {
         senderJob = null
         receiverJob?.cancel()
         receiverJob = null
-        // Closing the socket unblocks a receive() that is mid-wait.
+        motionJob?.cancel()
+        motionJob = null
+        // Closing the sockets unblocks a receive() that is mid-wait.
         receiverSocket?.let { if (!it.isClosed) it.close() }
+        motionSocket?.let { if (!it.isClosed) it.close() }
     }
 
     /**
@@ -331,6 +350,54 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Optional drift stream: the game's MotionSim protocol (Options > Other),
+     * pointed at this phone on port 4446. Purely additive — when the user
+     * hasn't enabled it, nothing arrives and the drift badge stays hidden.
+     */
+    private suspend fun runMotionReceiver() {
+        try {
+            val sock = DatagramSocket(null)
+            motionSocket = sock
+            sock.reuseAddress = true
+            sock.bind(InetSocketAddress(MOTION_PORT))
+            sock.soTimeout = 2000
+
+            val buf = ByteArray(160)
+            while (coroutineContext.isActive) {
+                try {
+                    val dp = DatagramPacket(buf, buf.size)
+                    sock.receive(dp)
+                    val p = MotionPacket(buf, dp.length)
+                    if (p.isValid) {
+                        withContext(Dispatchers.Main) { onMotion(p) }
+                    }
+                } catch (e: SocketTimeoutException) {
+                    // Normal, loop continues
+                } catch (e: IOException) {
+                    if (coroutineContext.isActive) Log.e(TAG, "Motion receive error: " + e.message)
+                    break
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Cannot bind to port $MOTION_PORT", e)
+        } finally {
+            motionSocket?.let { if (!it.isClosed) it.close() }
+            motionSocket = null
+        }
+    }
+
+    private fun onMotion(p: MotionPacket) {
+        if (isFinishing || isDestroyed) return
+        lastMotionMs = System.currentTimeMillis()
+        val slip = p.slipAngleDeg()
+        telemetry.driftDeg = slip
+        if (slip != null) {
+            val a = abs(slip)
+            telemetry.driftMaxDeg = telemetry.driftMaxDeg?.let { maxOf(it, a) } ?: a
+        }
+    }
+
     /** UI-thread telemetry handler (called from the receiver coroutine). */
     private fun onTelemetry(p: Receivepacket) {
         if (isFinishing || isDestroyed) return
@@ -348,6 +415,13 @@ class MainActivity : ComponentActivity() {
         telemetry.clutchEcho = p.clutch
 
         if (perfTimer) updatePerfTimer(3.6f * p.speed)
+
+        // Hide the drift badge when the MotionSim stream goes quiet.
+        if (telemetry.driftDeg != null &&
+            System.currentTimeMillis() - lastMotionMs > 2000
+        ) {
+            telemetry.driftDeg = null
+        }
 
         val lightsarray = p.activeLightsArr
         for (i in 0 until 11) {
@@ -395,5 +469,7 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "BeamNG"
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
+        private const val IMPACT_WINDOW_MS = 300L
+        private const val MOTION_PORT = 4446 // phone-side MotionSim listen port
     }
 }

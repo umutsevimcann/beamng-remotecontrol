@@ -419,6 +419,7 @@ private fun SpeedCluster(telemetry: TelemetryUiState, metricUnits: Boolean, big:
         (2.23694f * telemetry.speedMs).roundToInt()
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        DriftBadge(telemetry)
         Text(
             text = String.format("%03d", min(speed, 999)),
             style = MaterialTheme.typography.displayLarge.copy(
@@ -444,6 +445,50 @@ private fun SpeedCluster(telemetry: TelemetryUiState, metricUnits: Boolean, big:
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 9.sp, letterSpacing = 1.5.sp),
                 color = NightGarage.TextFaint,
                 modifier = Modifier.padding(bottom = 4.dp),
+            )
+        }
+    }
+}
+
+/**
+ * Drift slip-angle badge above the speedometer. Appears only while the
+ * MotionSim stream is flowing AND the car is actually sliding (>=8°).
+ */
+@Composable
+private fun DriftBadge(telemetry: TelemetryUiState) {
+    val drift = telemetry.driftDeg
+    val active = drift != null && kotlin.math.abs(drift) >= 8f
+    val pulse by rememberInfiniteTransition(label = "drift").animateFloat(
+        initialValue = 0.55f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(220), RepeatMode.Reverse),
+        label = "pulse",
+    )
+    Row(
+        modifier = Modifier
+            .graphicsLayer { alpha = if (active) 1f else 0f }
+            .background(NightGarage.Panel, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.drive_drift),
+            fontSize = 10.sp,
+            style = MaterialTheme.typography.labelSmall,
+            color = NightGarage.AmberHot.copy(alpha = if (active) pulse else 1f),
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            "${kotlin.math.abs(drift ?: 0f).roundToInt()}°",
+            style = MaterialTheme.typography.bodyLarge,
+            color = NightGarage.TextBright,
+        )
+        telemetry.driftMaxDeg?.let { max ->
+            Spacer(Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.drive_drift_max) + " ${max.roundToInt()}°",
+                fontSize = 9.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = NightGarage.TextFaint,
             )
         }
     }

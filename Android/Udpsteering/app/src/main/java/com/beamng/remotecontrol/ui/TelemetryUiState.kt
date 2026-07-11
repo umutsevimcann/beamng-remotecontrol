@@ -27,4 +27,8 @@ class TelemetryUiState {
     var timerLiveSec by mutableStateOf<Float?>(null)
     var timerLastSec by mutableStateOf<Float?>(null)
     var timerBestSec by mutableStateOf<Float?>(null)
+
+    // Drift (MotionSim stream; null = not drifting / stream not enabled)
+    var driftDeg by mutableStateOf<Float?>(null)
+    var driftMaxDeg by mutableStateOf<Float?>(null)
 }

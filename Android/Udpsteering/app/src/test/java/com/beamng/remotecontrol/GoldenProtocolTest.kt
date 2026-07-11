@@ -122,4 +122,41 @@ class GoldenProtocolTest {
         val p = Receivepacket(ByteArray(64), 64)
         assertFalse(p.isValid)
     }
+
+    // ---------------- MotionSim (drift stream) ----------------
+
+    private fun motionPacket(velX: Float, velY: Float, yawPos: Float): ByteArray {
+        val buf = ByteBuffer.allocate(88).order(ByteOrder.LITTLE_ENDIAN)
+        buf.put("BNG1".toByteArray())
+        buf.putFloat(16, velX)
+        buf.putFloat(20, velY)
+        buf.putFloat(60, yawPos)
+        return buf.array()
+    }
+
+    @Test
+    fun motion_slipAngle_30degrees() {
+        // Travelling 30° off the heading (yaw=0): velX=sin(30°)*10, velY=cos(30°)*10
+        val p = com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(5f, 8.6603f, 0f), 88)
+        assertTrue(p.isValid)
+        assertEquals(30f, p.slipAngleDeg()!!, 0.5f)
+    }
+
+    @Test
+    fun motion_slowOrReverse_noDrift() {
+        // Too slow (< ~20 km/h)
+        val slow = com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(1f, 1f, 0f), 88)
+        assertTrue(slow.isValid)
+        assertEquals(null, slow.slipAngleDeg())
+        // Reversing (travel ~180° from heading)
+        val reverse = com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(0f, -10f, 0f), 88)
+        assertEquals(null, reverse.slipAngleDeg())
+    }
+
+    @Test
+    fun motion_wrongMagic_isInvalid() {
+        val bad = motionPacket(5f, 5f, 0f)
+        bad[0] = 'X'.code.toByte()
+        assertFalse(com.beamng.remotecontrol.protocol.MotionPacket(bad, 88).isValid)
+    }
 }
