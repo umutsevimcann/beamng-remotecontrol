@@ -10,6 +10,33 @@ Modernized fork of the official Remote Control app for the PC game [BeamNG.drive
 *   **Gradle 8.7:** Updated build system and dependencies to latest stable versions.
 *   **Aesthetic & UI Fixes:** Improved UI handling and removed obsolete Google App Indexing code.
 
+## Setup Guide (for players)
+
+### 1. Connect the controls (steering / throttle / brake)
+
+1. Install the APK on your Android phone (see Releases).
+2. Make sure the phone and the PC are on the **same Wi-Fi network**.
+3. In BeamNG.drive open **Options → Controls → Hardware** and enable the Remote Control QR code.
+4. In the app tap **SCAN QR CODE** and scan it. Drive!
+
+### 2. Enable the live dashboard (speed / RPM / gear / lights)
+
+The dashboard uses BeamNG's built-in **OutGauge** stream — no mod required:
+
+1. Open the app's start screen — it shows **your phone's IP address** (e.g. `192.168.0.23`).
+2. In BeamNG.drive go to **Options → Other**, scroll to **Protocols** and tick **OutGauge support**.
+3. Fill in:
+   * **Address** = the IP shown in the app
+   * **Port** = `4445`
+   * **Max update rate** = `60`
+4. **Reload your vehicle once (Ctrl+R)** — the setting is read when the vehicle loads.
+5. The app's status turns green ("Connected") and the gauges come alive.
+
+**Troubleshooting**
+* Gauges frozen? Re-check the IP in the app (it changes when your router reassigns it), then Ctrl+R.
+* Nothing at all? Allow BeamNG.drive through the Windows Firewall, and confirm phone + PC share the same network (guest Wi-Fi networks often isolate devices).
+* Throttle/brake feel on/off rather than gradual? That's the stock game behavior (it treats them as buttons). True analog pedals need the companion PC mod — separate download, optional.
+
 ### How to Build
 1. Clone the repository.
 2. Open the project in **Android Studio (Iguana or newer)**.
@@ -22,13 +49,16 @@ Modernized fork of the official Remote Control app for the PC game [BeamNG.drive
 
 ### Communication functionality ###
 
-*   App sends out a broadcast in its local wifi on port 4444. It sends the string "beamng" + device-name.
-*   It then listens on the same Port for the string "beamng" as an answer to start the communication.
-*   Main communication takes place on port 4445
-*   App sends the floats:
+*   App broadcasts `beamng|<device-name>|<code>` on port 4444 (`<code>` comes from the QR).
+*   The game replies `beamng|<code>` to port 4445 to confirm the connection.
+*   Control packets (app → game, port 4444) are 16 bytes, four Big-Endian floats:
     * Steering-angle between 0 (right) and 1 (left)
-    * Throttle 1 for pushed otherwise 0
-    * Breaks 1 for pushed otherwise 0
+    * Throttle 0..1 (stock game thresholds at 0.5 → on/off; analog needs the companion mod)
+    * Brakes 0..1 (same threshold behavior)
+    * Packet id (float; echoed back only by the companion mod for latency measurement)
+*   Telemetry (game → app, port 4445) is the standard 96-byte OutGauge struct sent by
+    BeamNG's built-in `protocols_outgauge` when enabled in Options → Other; the
+    companion mod may append a 4-byte odometer (100 bytes total).
 *   App needs following structure for incoming packages:  
 
 type              | name          | description                                      | bytes  
@@ -51,9 +81,9 @@ float             | throttle      | 0 to 1                                      
 float             | brake         | 0 to 1                                           | 52-55  
 float             | clutch        | 0 to 1                                           | 56-59  
 char              | display1[16]  | Usually Fuel                                     | 60-75  
-char              | display2[16]  | Usually Settings                                 | 76-80  
-int               | id            | optional - only if OutGauge ID is specified      | 81-84  
-unsigned          | odometer	  | distance driven in meters or miles (0-999999)    | 85-88  
+char              | display2[16]  | Usually Settings                                 | 76-91  
+int               | id            | 0 in the stock game; echoed id with companion mod | 92-95  
+unsigned          | odometer      | optional (companion mod only), meters             | 96-99  
 
 
     // OG _x - bits for Flags  
