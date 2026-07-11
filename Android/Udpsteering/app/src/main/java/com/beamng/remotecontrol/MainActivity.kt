@@ -3,7 +3,6 @@ package com.beamng.remotecontrol
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -25,6 +24,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import com.beamng.remotecontrol.input.ButtonInputHandler
 import com.beamng.remotecontrol.input.InputHandlerFactory
@@ -41,12 +48,8 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketTimeoutException
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import kotlin.coroutines.coroutineContext
 
-@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     // UI Elements
@@ -71,23 +74,19 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var thrpushed = 0f
     @Volatile private var brpushed = 0f
 
-    // Networking
-    private var iadress: String? = null
+    // Networking (coroutine jobs on lifecycleScope, IO dispatcher)
     private val sendingTimeout = 10L // 100Hz for responsive controls
-    private var sessionsender: UdpSessionSender? = null
-    private var sessionreceiver: UdpSessionReceiver? = null
+    private var senderJob: Job? = null
+    private var receiverJob: Job? = null
+    private var receiverSocket: DatagramSocket? = null
     private var hostAddress: InetAddress? = null
 
-    // Packet tracking
-    private var lpTime = 0L
+    // Packet tracking (sender writes on IO, telemetry handler reads on Main)
+    @Volatile private var lpTime = 0L
     private var timeDiff = 0L
     private var oldDiff = 1L
-    private var pID = 1
-    private var lastID = 0
-
-    // Thread pool
-    private lateinit var executor: ThreadPoolExecutor
-    private var mDecodeWorkQueue: BlockingQueue<Runnable>? = null
+    @Volatile private var pID = 1
+    @Volatile private var lastID = 0
 
     // Modular Input System
     private lateinit var settingsManager: SettingsManager
@@ -117,7 +116,6 @@ class MainActivity : AppCompatActivity() {
 
         // Validate host address - must be set via QR scan before reaching here
         hostAddress = (application as RemoteControlApplication).hostAddress
-        iadress = (application as RemoteControlApplication).ip
 
         if (hostAddress == null) {
             Toast.makeText(this, "No connection - please scan QR code first", Toast.LENGTH_LONG).show()
@@ -126,7 +124,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         initViews()
-        initThreadPool()
         initInputSystem()
         initControls()
 
@@ -160,13 +157,6 @@ class MainActivity : AppCompatActivity() {
         btnSteerLeft = findViewById(R.id.btnSteerLeft)
         btnSteerRight = findViewById(R.id.btnSteerRight)
         steeringSlider = findViewById(R.id.steeringSlider)
-    }
-
-    private fun initThreadPool() {
-        val queue = LinkedBlockingQueue<Runnable>()
-        mDecodeWorkQueue = queue
-        val cores = maxOf(2, Runtime.getRuntime().availableProcessors())
-        executor = ThreadPoolExecutor(cores, cores, 1, TimeUnit.SECONDS, queue)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -272,9 +262,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopUdpTasks()
-        if (this::executor.isInitialized) {
-            executor.shutdownNow()
-        }
     }
 
     // ==================== PEDAL VISUALS ====================
@@ -341,190 +328,148 @@ class MainActivity : AppCompatActivity() {
 
     // ==================== NETWORKING ====================
 
-    fun connectionTimeout() {
-        sessionsender?.cancel(true)
-        sessionreceiver?.cancel(true)
-        Toast.makeText(this, "Connection timed out", Toast.LENGTH_LONG).show()
-        executor.shutdownNow()
-        initThreadPool()
-    }
-
     private fun startUdpTasks() {
         stopUdpTasks()
         val host = hostAddress ?: return
-        sessionsender = UdpSessionSender(host).also { it.executeOnExecutor(executor) }
-        sessionreceiver = UdpSessionReceiver(host).also { it.executeOnExecutor(executor) }
+        senderJob = lifecycleScope.launch(Dispatchers.IO) { runSender(host) }
+        receiverJob = lifecycleScope.launch(Dispatchers.IO) { runReceiver() }
     }
 
     private fun stopUdpTasks() {
-        sessionsender?.cancel(true)
-        sessionreceiver?.cancel() // Custom cancel that also closes socket
+        senderJob?.cancel()
+        senderJob = null
+        receiverJob?.cancel()
+        receiverJob = null
+        // Closing the socket unblocks a receive() that is mid-wait.
+        receiverSocket?.let { if (!it.isClosed) it.close() }
     }
 
-    // ==================== UDP SENDER ====================
-
     /**
-     * Sends control packets to BeamNG on port 4444.
-     * BeamNG's remoteController.lua listens on port 4444 and reverses the byte
-     * array before parsing as {w, x, y, z} floats where z=steering, y=throttle,
-     * x=brake, w=id.
+     * Sends control packets to BeamNG on port 4444 at ~100Hz.
+     * BeamNG's remoteController.lua reverses the byte array before parsing as
+     * {w, x, y, z} floats where z=steering, y=throttle, x=brake, w=id.
      */
-    inner class UdpSessionSender(private val receiverAddress: InetAddress) :
-        AsyncTask<String, String, String>() {
+    private suspend fun runSender(host: InetAddress) {
+        try {
+            DatagramSocket().use { socket ->
+                val sendpacket = Sendpacket()
+                while (true) {
+                    delay(sendingTimeout) // also our cancellation point
 
-        override fun doInBackground(vararg arg0: String?): String? {
-            try {
-                DatagramSocket().use { socket ->
-                    val sendpacket = Sendpacket()
-                    while (!isCancelled) {
-                        try {
-                            Thread.sleep(sendingTimeout)
-                        } catch (e: InterruptedException) {
-                            break
-                        }
-
-                        var steeringValue = 0.5f
-                        val handler = steeringInputHandler
-                        if (handler != null) {
-                            // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
-                            steeringValue = ((1f - handler.getSteeringValue()) / 2f).coerceIn(0f, 1f)
-                        }
-                        sendpacket.setSteeringAngle(steeringValue)
-                        sendpacket.setThrottle(thrpushed)
-                        sendpacket.setBreaks(brpushed)
-                        sendpacket.setID(pID)
-
-                        if (lastID != pID) {
-                            lastID = pID
-                            lpTime = System.currentTimeMillis()
-                        }
-
-                        val buffer = sendpacket.sendingByteArray
-                        socket.send(DatagramPacket(buffer, buffer.size, receiverAddress, Ports.GAME))
+                    var steeringValue = 0.5f
+                    val handler = steeringInputHandler
+                    if (handler != null) {
+                        // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
+                        steeringValue = ((1f - handler.getSteeringValue()) / 2f).coerceIn(0f, 1f)
                     }
+                    sendpacket.setSteeringAngle(steeringValue)
+                    sendpacket.setThrottle(thrpushed)
+                    sendpacket.setBreaks(brpushed)
+                    sendpacket.setID(pID)
+
+                    if (lastID != pID) {
+                        lastID = pID
+                        lpTime = System.currentTimeMillis()
+                    }
+
+                    val buffer = sendpacket.sendingByteArray
+                    socket.send(DatagramPacket(buffer, buffer.size, host, Ports.GAME))
                 }
-            } catch (e: IOException) {
-                if (!isCancelled) Log.e(TAG, "UDP send error", e)
             }
-            return null
+        } catch (e: IOException) {
+            if (coroutineContext.isActive) Log.e(TAG, "UDP send error", e)
         }
     }
 
-    // ==================== UDP RECEIVER ====================
-
     /**
-     * Receives OutGauge telemetry packets from BeamNG on port 4445.
-     * Sent either by the game's built-in OutGauge protocol (Options > Other)
+     * Receives OutGauge telemetry packets from BeamNG on port 4445 —
+     * sent either by the game's built-in OutGauge protocol (Options > Other)
      * or by the companion mod (which also echoes the packet id).
      */
-    inner class UdpSessionReceiver(
-        @Suppress("unused") private val expectedHost: InetAddress
-    ) : AsyncTask<String, String, String>() {
+    private suspend fun runReceiver() {
+        try {
+            val sock = DatagramSocket(null)
+            receiverSocket = sock
+            sock.reuseAddress = true
+            sock.bind(InetSocketAddress(Ports.APP))
+            sock.soTimeout = 2000
 
-        private var packet: Receivepacket? = null
-        private var socket: DatagramSocket? = null
+            val buf = ByteArray(128)
+            while (coroutineContext.isActive) {
+                try {
+                    val dp = DatagramPacket(buf, buf.size)
+                    sock.receive(dp)
 
-        fun cancel() {
-            super.cancel(true)
-            socket?.let { if (!it.isClosed) it.close() }
-        }
-
-        override fun doInBackground(vararg arg0: String?): String? {
-            try {
-                val sock = DatagramSocket(null)
-                socket = sock
-                sock.reuseAddress = true
-                sock.bind(InetSocketAddress(Ports.APP))
-                sock.soTimeout = 2000
-
-                val buf = ByteArray(128)
-                while (!isCancelled) {
-                    try {
-                        val dp = DatagramPacket(buf, buf.size)
-                        sock.receive(dp)
-
-                        if (dp.length < Receivepacket.MIN_PACKET_LENGTH) {
-                            continue
-                        }
-
-                        packet = Receivepacket(buf, dp.length)
-                        if (packet?.isValid == true) {
-                            publishProgress("")
-                        }
-                    } catch (e: SocketTimeoutException) {
-                        // Normal, loop continues
-                    } catch (e: IOException) {
-                        if (!isCancelled) Log.e(TAG, "Receive error: " + e.message)
-                        break
+                    if (dp.length < Receivepacket.MIN_PACKET_LENGTH) {
+                        continue
                     }
+
+                    val p = Receivepacket(buf, dp.length)
+                    if (p.isValid) {
+                        withContext(Dispatchers.Main) { onTelemetry(p) }
+                    }
+                } catch (e: SocketTimeoutException) {
+                    // Normal, loop continues
+                } catch (e: IOException) {
+                    if (coroutineContext.isActive) Log.e(TAG, "Receive error: " + e.message)
+                    break
                 }
-            } catch (e: IOException) {
-                Log.e(TAG, "Cannot bind to port ${Ports.APP}", e)
-            } finally {
-                socket?.let { if (!it.isClosed) it.close() }
             }
-            return null
+        } catch (e: IOException) {
+            Log.e(TAG, "Cannot bind to port ${Ports.APP}", e)
+        } finally {
+            receiverSocket?.let { if (!it.isClosed) it.close() }
+            receiverSocket = null
+        }
+    }
+
+    /** UI-thread telemetry handler (called from the receiver coroutine). */
+    private fun onTelemetry(p: Receivepacket) {
+        if (isFinishing || isDestroyed) return
+
+        // Stock-game OutGauge (Options > Other) never echoes our packet id
+        // (id is always 0), so flowing telemetry itself is the connect signal.
+        if (!telemetryConnected) {
+            telemetryConnected = true
+            textDelay.text = "Connected"
+            textDelay.setTextColor(ContextCompat.getColor(this, R.color.status_connected))
         }
 
-        override fun onProgressUpdate(vararg values: String?) {
-            if (isFinishing || isDestroyed) return
-
-            if (values.isNotEmpty() && "TIMEOUT" == values[0]) {
-                cancel(true)
-                connectionTimeout()
-                return
+        // Latency tracking (works only when the id echo round-trips, e.g. companion mod)
+        if (p.id == pID) {
+            timeDiff = System.currentTimeMillis() - lpTime
+            var disDiff = Math.round(((oldDiff + timeDiff) / 2).toFloat())
+            disDiff /= 2
+            if (timeDiff != 0L) {
+                textDelay.text = "Delay: ${disDiff}ms"
             }
+            pID++
+            if (pID == 128) pID = 0
+            oldDiff = timeDiff
+        }
 
-            val p = packet
-            if (p == null || !p.isValid) return
+        // Speed conversion - direct calculation
+        val newSpeed = if (useKMH == 1) {
+            Math.round(3.6f * p.speed)
+        } else {
+            Math.round(2.23694f * p.speed)
+        }
 
-            // Stock-game OutGauge (Options > Other) never echoes our packet id
-            // (id is always 0), so flowing telemetry itself is the connect signal.
-            if (!telemetryConnected) {
-                telemetryConnected = true
-                textDelay.text = "Connected"
-                textDelay.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.status_connected))
-            }
+        textSpeed.text = String.format("%03d", newSpeed)
+        textGear.text = p.gear
 
-            // Latency tracking (works only when the id echo round-trips, e.g. companion mod)
-            if (p.id == pID) {
-                timeDiff = System.currentTimeMillis() - lpTime
-                var disDiff = Math.round(((oldDiff + timeDiff) / 2).toFloat())
-                disDiff /= 2
-                if (timeDiff != 0L) {
-                    textDelay.text = "Delay: ${disDiff}ms"
-                }
-                pID++
-                if (pID == 128) pID = 0
-                oldDiff = timeDiff
-            }
+        // Haptic feedback with proper debouncing
+        processHapticFeedback(p, newSpeed)
 
-            // Speed conversion - direct calculation
-            val newSpeed = if (useKMH == 1) {
-                Math.round(3.6f * p.speed)
-            } else {
-                Math.round(2.23694f * p.speed)
-            }
-
-            textSpeed.text = String.format("%03d", newSpeed)
-            textGear.text = p.gear
-
-            // Haptic feedback with proper debouncing
-            processHapticFeedback(p, newSpeed)
-
-            // Update dashboard lights
-            val lightsarray = p.activeLightsArr
-            for (i in 0 until 11) {
-                lightViews[i]?.visibility = if (lightsarray[i]) View.VISIBLE else View.INVISIBLE
-            }
+        // Update dashboard lights
+        val lightsarray = p.activeLightsArr
+        for (i in 0 until 11) {
+            lightViews[i]?.visibility = if (lightsarray[i]) View.VISIBLE else View.INVISIBLE
         }
     }
 
     companion object {
         private const val TAG = "BeamNG"
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
-
-        @JvmField
-        var id: String = ""
     }
 }

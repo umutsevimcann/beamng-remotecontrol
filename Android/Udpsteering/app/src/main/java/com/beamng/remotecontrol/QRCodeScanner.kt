@@ -1,22 +1,26 @@
 package com.beamng.remotecontrol
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.beamng.remotecontrol.network.NetworkUtils
-import com.beamng.remotecontrol.network.UdpExploreSenderFragment
+import com.beamng.remotecontrol.network.UdpDiscovery
 import com.google.zxing.ResultPoint
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class QRCodeScanner : AppCompatActivity() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
-    private lateinit var exploreSenderFragment: UdpExploreSenderFragment
     private lateinit var progressDialogFragment: ProgressDialogFragment
+    private var discoveryJob: Job? = null
 
     private val callback = object : BarcodeCallback {
         override fun barcodeResult(result: BarcodeResult) {
@@ -38,17 +42,10 @@ class QRCodeScanner : AppCompatActivity() {
         barcodeView = findViewById(R.id.barcode_scanner)
         barcodeView.decodeContinuous(callback)
 
-        val fm = supportFragmentManager
-        exploreSenderFragment =
-            (fm.findFragmentByTag("exploreSender") as? UdpExploreSenderFragment)
-                ?: UdpExploreSenderFragment().also {
-                    fm.beginTransaction().add(it, "exploreSender").commit()
-                }
-
         progressDialogFragment =
-            (fm.findFragmentByTag("progressDialog") as? ProgressDialogFragment)
+            (supportFragmentManager.findFragmentByTag("progressDialog") as? ProgressDialogFragment)
                 ?: ProgressDialogFragment()
-        progressDialogFragment.setListener(exploreSenderFragment)
+        progressDialogFragment.onCancelAction = { cancelDiscovery() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -63,7 +60,7 @@ class QRCodeScanner : AppCompatActivity() {
         super.onResume()
         barcodeView.resume()
 
-        if (!exploreSenderFragment.isRunning) {
+        if (discoveryJob?.isActive != true) {
             if (progressDialogFragment.isShowing) {
                 progressDialogFragment.dismiss()
             }
@@ -75,7 +72,7 @@ class QRCodeScanner : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (!isChangingConfigurations) {
-            exploreSenderFragment.cancelTask()
+            discoveryJob?.cancel()
         }
         barcodeView.pause()
     }
@@ -105,12 +102,25 @@ class QRCodeScanner : AppCompatActivity() {
             val broadcastAddress = NetworkUtils.broadcastAddress(NetworkUtils.localInetAddress())!!
             Log.i("Broadcast Address", broadcastAddress.hostAddress ?: "?")
 
-            exploreSenderFragment.execute(broadcastAddress, this, ip, securityCode)
             progressDialogFragment.show(supportFragmentManager, "progressDialog")
+            discoveryJob = lifecycleScope.launch {
+                when (val result = UdpDiscovery.discover(broadcastAddress, ip, securityCode)) {
+                    is UdpDiscovery.Result.Connected -> {
+                        (application as RemoteControlApplication).hostAddress = result.host
+                        startActivity(Intent(this@QRCodeScanner, MainActivity::class.java))
+                    }
+                    is UdpDiscovery.Result.Failed -> onError(result.message)
+                }
+            }
         } catch (e: Exception) {
             Toast.makeText(this, "You must be connected to the same WiFi as your PC", Toast.LENGTH_LONG).show()
             barcodeView.resume()
         }
+    }
+
+    private fun cancelDiscovery() {
+        discoveryJob?.cancel()
+        onError(null)
     }
 
     fun onError(message: String?) {

@@ -9,11 +9,8 @@ import androidx.fragment.app.DialogFragment
 
 class ProgressDialogFragment : DialogFragment() {
 
-    private var listener: OnUdpConnected? = null
-
-    fun setListener(listener: OnUdpConnected?) {
-        this.listener = listener
-    }
+    /** Invoked when the user cancels the dialog (back press / outside tap). */
+    var onCancelAction: (() -> Unit)? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireActivity())
@@ -29,7 +26,7 @@ class ProgressDialogFragment : DialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        listener?.onCancel()
+        onCancelAction?.invoke()
     }
 
     val isShowing: Boolean
