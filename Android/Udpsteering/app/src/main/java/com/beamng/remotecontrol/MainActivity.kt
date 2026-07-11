@@ -1,6 +1,5 @@
 package com.beamng.remotecontrol
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -8,19 +7,14 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.SeekBar
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -41,6 +35,9 @@ import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
 import com.beamng.remotecontrol.settings.SettingsManager
+import com.beamng.remotecontrol.ui.DriveScreen
+import com.beamng.remotecontrol.ui.TelemetryUiState
+import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 
 import java.io.IOException
 import java.net.DatagramPacket
@@ -49,28 +46,18 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketTimeoutException
 import kotlin.coroutines.coroutineContext
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    // UI Elements
-    private var mainLayout: RelativeLayout? = null
-    private lateinit var throttle: View
-    private lateinit var breaks: View
-    private var throttleFill: View? = null
-    private var brakeFill: View? = null
-    private lateinit var textSpeed: TextView
-    private lateinit var textGear: TextView
-    private lateinit var textUnit: TextView
-    private lateinit var textDelay: TextView
-    private var telemetryConnected = false
-    private var lightViews = arrayOfNulls<ImageView>(11)
-    private lateinit var menu: ImageButton
-    private lateinit var buttonControlsContainer: LinearLayout
-    private lateinit var btnSteerLeft: Button
-    private lateinit var btnSteerRight: Button
-    private lateinit var steeringSlider: SeekBar
+    // Compose-observed state
+    private val telemetry = TelemetryUiState()
+    private var controlType by mutableIntStateOf(SettingsManager.CONTROL_GYROSCOPE)
+    private var dashboardOnly by mutableStateOf(false)
+    private var metricUnits by mutableStateOf(true)
 
-    // Thread-safe control values (written UI thread, read sender thread)
+    // Thread-safe control values (written UI thread, read sender coroutine)
     @Volatile private var thrpushed = 0f
     @Volatile private var brpushed = 0f
 
@@ -91,9 +78,6 @@ class MainActivity : AppCompatActivity() {
     private var oldSpeedForImpact = 0
     private var lastImpactVibrationTime = 0L
 
-    // Settings
-    private var useKMH = 0
-
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         if (hasFocus) {
             hideSystemUI()
@@ -105,129 +89,59 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         hideSystemUI()
-        setContentView(R.layout.activity_main)
 
         // Validate host address - must be set via QR scan before reaching here
         hostAddress = (application as RemoteControlApplication).hostAddress
-
         if (hostAddress == null) {
             Toast.makeText(this, getString(R.string.toast_no_connection), Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        initViews()
-        initInputSystem()
-        initControls()
-
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    private fun initViews() {
-        mainLayout = findViewById(R.id.main)
-        textSpeed = findViewById(R.id.Textspeed)
-        textGear = findViewById(R.id.Textgear)
-        textUnit = findViewById(R.id.Textunit)
-        textDelay = findViewById(R.id.Textdelay)
-
-        lightViews = arrayOfNulls(11)
-        // Stock OutGauge has no low-beam bit, so there is no headlight icon.
-        lightViews[Receivepacket.INDEX_ABS] = findViewById(R.id.light_abs)
-        lightViews[Receivepacket.INDEX_HANDBRAKE] = findViewById(R.id.light_break)
-        lightViews[Receivepacket.INDEX_FULLBEAM] = findViewById(R.id.light_fullbeam)
-        lightViews[Receivepacket.INDEX_SIGNAL_L] = findViewById(R.id.light_leftindicator)
-        lightViews[Receivepacket.INDEX_SIGNAL_R] = findViewById(R.id.light_rightindicator)
-
-        throttle = findViewById(R.id.throttlecontrol)
-        breaks = findViewById(R.id.breakcontrol)
-        throttleFill = findViewById(R.id.throttleFill)
-        brakeFill = findViewById(R.id.brakeFill)
-        menu = findViewById(R.id.menuButton)
-        buttonControlsContainer = findViewById(R.id.buttonControlsContainer)
-        btnSteerLeft = findViewById(R.id.btnSteerLeft)
-        btnSteerRight = findViewById(R.id.btnSteerRight)
-        steeringSlider = findViewById(R.id.steeringSlider)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun initControls() {
-        // Pedals are on/off: the stock game thresholds throttle/brake at 0.5
-        // (remoteController.lua button0/button1), so partial values do nothing.
-        throttle.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    thrpushed = 1f
-                    updatePedalFill(throttleFill, 1f)
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    thrpushed = 0f
-                    updatePedalFill(throttleFill, 0f)
-                }
-            }
-            true
-        }
-
-        breaks.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    brpushed = 1f
-                    updatePedalFill(brakeFill, 1f)
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    brpushed = 0f
-                    updatePedalFill(brakeFill, 0f)
-                }
-            }
-            true
-        }
-
-        menu.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-    }
-
-    private fun initInputSystem() {
         settingsManager = SettingsManager.getInstance(this)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        setupInputHandler()
-    }
 
-    /**
-     * Creates the correct input handler based on settings and configures UI.
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupInputHandler() {
-        steeringInputHandler?.stop()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        val handler = InputHandlerFactory.createHandler(this)
-        steeringInputHandler = handler
-
-        buttonControlsContainer.visibility = View.GONE
-        steeringSlider.visibility = View.GONE
-
-        when (settingsManager.controlType) {
-            SettingsManager.CONTROL_BUTTONS -> {
-                buttonControlsContainer.visibility = View.VISIBLE
-                val buttonHandler = handler as ButtonInputHandler
-                btnSteerLeft.setOnTouchListener(buttonHandler.leftButtonListener)
-                btnSteerRight.setOnTouchListener(buttonHandler.rightButtonListener)
-            }
-            SettingsManager.CONTROL_SLIDER -> {
-                steeringSlider.visibility = View.VISIBLE
-                (handler as SliderInputHandler).attachSlider(steeringSlider)
+        setContent {
+            NightGarageTheme {
+                DriveScreen(
+                    telemetry = telemetry,
+                    metricUnits = metricUnits,
+                    controlType = controlType,
+                    dashboardOnly = dashboardOnly,
+                    onThrottle = { pressed -> thrpushed = if (pressed) 1f else 0f },
+                    onBrake = { pressed -> brpushed = if (pressed) 1f else 0f },
+                    onSteerLeft = { pressed ->
+                        (steeringInputHandler as? ButtonInputHandler)?.pressLeft(pressed)
+                    },
+                    onSteerRight = { pressed ->
+                        (steeringInputHandler as? ButtonInputHandler)?.pressRight(pressed)
+                    },
+                    onSliderChange = { value ->
+                        (steeringInputHandler as? SliderInputHandler)?.setValue(value)
+                    },
+                    onSliderRelease = {
+                        (steeringInputHandler as? SliderInputHandler)?.release()
+                    },
+                    onOpenSettings = {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                    },
+                )
             }
         }
-
-        useKMH = if (settingsManager.useMetricUnits()) 1 else 0
-        textUnit.text = if (useKMH == 1) "Km/h" else "MPH"
     }
 
     // ==================== LIFECYCLE ====================
 
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
-        setupInputHandler()
 
+        metricUnits = settingsManager.useMetricUnits()
+        dashboardOnly = settingsManager.isDashboardOnly
+        controlType = settingsManager.controlType
+
+        setupInputHandler()
         steeringInputHandler?.start()
 
         startUdpTasks()
@@ -236,7 +150,6 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         stopUdpTasks()
-
         steeringInputHandler?.stop()
     }
 
@@ -245,18 +158,18 @@ class MainActivity : AppCompatActivity() {
         stopUdpTasks()
     }
 
-    // ==================== PEDAL VISUALS ====================
-
-    private fun updatePedalFill(fill: View?, value: Float) {
-        if (fill == null) return
-        val parent = fill.parent as View
-        val parentHeight = parent.height
-        if (parentHeight <= 0) return
-        fill.layoutParams.height = Math.round(parentHeight * value)
-        fill.requestLayout()
+    private fun setupInputHandler() {
+        steeringInputHandler?.stop()
+        // Dashboard-only: no steering input at all; the sender keeps sending a
+        // centered wheel so the game keeps the device registered (10s timeout).
+        steeringInputHandler = if (dashboardOnly) {
+            null
+        } else {
+            InputHandlerFactory.createHandler(this, controlType)
+        }
+        thrpushed = 0f
+        brpushed = 0f
     }
-
-    // ==================== IMMERSIVE UI ====================
 
     private fun hideSystemUI() {
         val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -273,24 +186,25 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vib.vibrate(VibrationEffect.createOneShot(ms, amplitude))
         } else {
+            @Suppress("DEPRECATION")
             vib.vibrate(ms)
         }
     }
 
-    private fun processHapticFeedback(packet: Receivepacket, newSpeed: Int) {
+    private fun processHapticFeedback(p: Receivepacket, newSpeed: Int) {
         if (!settingsManager.isHapticEnabled) return
 
         val now = System.currentTimeMillis()
 
         // 1. Gear Change
-        val currentGear = packet.gear
+        val currentGear = p.gear
         if (currentGear != oldGearString) {
             doVibrate(50, VibrationEffect.DEFAULT_AMPLITUDE)
             oldGearString = currentGear
         }
 
         // 2. Impact Detection with cooldown
-        val speedDiff = kotlin.math.abs(newSpeed - oldSpeedForImpact)
+        val speedDiff = abs(newSpeed - oldSpeedForImpact)
         if (speedDiff > 20 && (now - lastImpactVibrationTime) > IMPACT_VIBRATION_COOLDOWN_MS) {
             when {
                 speedDiff > 50 -> doVibrate(600, 255)  // Severe crash
@@ -302,7 +216,7 @@ class MainActivity : AppCompatActivity() {
         oldSpeedForImpact = newSpeed
 
         // 3. ABS feel (hard braking)
-        if (packet.brake > 0.85f && (now - lastImpactVibrationTime) > 100) {
+        if (p.brake > 0.85f && (now - lastImpactVibrationTime) > 100) {
             doVibrate(40, 60)
         }
     }
@@ -346,8 +260,7 @@ class MainActivity : AppCompatActivity() {
                     sendpacket.setSteeringAngle(steeringValue)
                     sendpacket.setThrottle(thrpushed)
                     sendpacket.setBreaks(brpushed)
-                    // Stock game never echoes the id (outgauge.lua: o.id = 0),
-                    // so there is no RTT to measure — send a constant.
+                    // Stock game never echoes the id (outgauge.lua: o.id = 0) — constant.
                     sendpacket.setID(0)
 
                     val buffer = sendpacket.sendingByteArray
@@ -361,8 +274,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Receives OutGauge telemetry packets from BeamNG on port 4445 —
-     * sent either by the game's built-in OutGauge protocol (Options > Other)
-     * or by the companion mod (which also echoes the packet id).
+     * sent by the game's built-in OutGauge protocol (Options > Other).
      */
     private suspend fun runReceiver() {
         try {
@@ -405,32 +317,28 @@ class MainActivity : AppCompatActivity() {
     private fun onTelemetry(p: Receivepacket) {
         if (isFinishing || isDestroyed) return
 
-        // Stock-game OutGauge (Options > Other) never echoes our packet id
-        // (id is always 0), so flowing telemetry itself is the connect signal.
-        if (!telemetryConnected) {
-            telemetryConnected = true
-            textDelay.text = getString(R.string.status_connected)
-            textDelay.setTextColor(ContextCompat.getColor(this, R.color.status_connected))
-        }
+        telemetry.connected = true
+        telemetry.speedMs = p.speed
+        telemetry.rpm = p.rpm
+        telemetry.gear = p.gear
+        telemetry.fuel = p.fuel
+        telemetry.engTemp = p.engineTemp
+        telemetry.turbo = p.turbo
+        telemetry.hasTurbo = p.hasTurbo
 
-        // Speed conversion - direct calculation
-        val newSpeed = if (useKMH == 1) {
-            Math.round(3.6f * p.speed)
-        } else {
-            Math.round(2.23694f * p.speed)
-        }
-
-        textSpeed.text = String.format("%03d", newSpeed)
-        textGear.text = p.gear
-
-        // Haptic feedback with proper debouncing
-        processHapticFeedback(p, newSpeed)
-
-        // Update dashboard lights
         val lightsarray = p.activeLightsArr
         for (i in 0 until 11) {
-            lightViews[i]?.visibility = if (lightsarray[i]) View.VISIBLE else View.INVISIBLE
+            if (telemetry.lights[i] != lightsarray[i]) {
+                telemetry.lights[i] = lightsarray[i]
+            }
         }
+
+        val newSpeed = if (metricUnits) {
+            (3.6f * p.speed).roundToInt()
+        } else {
+            (2.23694f * p.speed).roundToInt()
+        }
+        processHapticFeedback(p, newSpeed)
     }
 
     companion object {

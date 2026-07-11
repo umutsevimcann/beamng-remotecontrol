@@ -1,11 +1,8 @@
 package com.beamng.remotecontrol.input
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.view.MotionEvent
-import android.view.View
 
 import com.beamng.remotecontrol.settings.SettingsManager
 
@@ -61,39 +58,17 @@ class ButtonInputHandler(context: Context) : SteeringInputHandler {
 
     override fun requiresUIControls(): Boolean = true
 
-    @get:SuppressLint("ClickableViewAccessibility")
-    val leftButtonListener: View.OnTouchListener
-        get() = View.OnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    leftPressed = true
-                    updateTarget()
-                    startRamp()
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    leftPressed = false
-                    updateTarget()
-                }
-            }
-            true
-        }
+    fun pressLeft(pressed: Boolean) {
+        leftPressed = pressed
+        updateTarget()
+        if (pressed) startRamp()
+    }
 
-    @get:SuppressLint("ClickableViewAccessibility")
-    val rightButtonListener: View.OnTouchListener
-        get() = View.OnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    rightPressed = true
-                    updateTarget()
-                    startRamp()
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    rightPressed = false
-                    updateTarget()
-                }
-            }
-            true
-        }
+    fun pressRight(pressed: Boolean) {
+        rightPressed = pressed
+        updateTarget()
+        if (pressed) startRamp()
+    }
 
     private fun updateTarget() {
         if (leftPressed && !rightPressed) {

@@ -67,16 +67,28 @@ class GoldenProtocolTest {
 
     // ---------------- OutGauge (game -> app) ----------------
 
-    private fun outgaugePacket(size: Int): ByteArray {
+    private fun outgaugePacket(size: Int, turbo: Boolean = false): ByteArray {
         val buf = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN)
-        buf.putShort(8, 16384.toShort())        // flags: OG_KM
+        val flags = 16384 or if (turbo) 8192 else 0 // OG_KM (+ OG_TURBO)
+        buf.putShort(8, flags.toShort())
         buf.put(10, 5)                          // gear byte 5 -> "4"
         buf.putFloat(12, 27.5f)                 // speed m/s
         buf.putFloat(16, 3500f)                 // rpm
+        if (turbo) buf.putFloat(20, 0.8f)       // turbo BAR
         buf.putInt(44, 4 or 32)                 // showLights: HANDBRAKE(4) | SIGNAL_L(32)
         buf.putInt(92, 42)                      // id
         if (size >= 100) buf.putInt(96, 1284)   // odometer (companion mod extension)
         return buf.array()
+    }
+
+    @Test
+    fun outgauge_turboFlag_and_pressure() {
+        val withTurbo = Receivepacket(outgaugePacket(96, turbo = true), 96)
+        assertTrue(withTurbo.hasTurbo)
+        assertEquals(0.8f, withTurbo.turbo)
+
+        val withoutTurbo = Receivepacket(outgaugePacket(96, turbo = false), 96)
+        assertFalse("non-turbo car must hide the boost gauge", withoutTurbo.hasTurbo)
     }
 
     @Test

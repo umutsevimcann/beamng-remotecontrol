@@ -30,6 +30,12 @@ class Receivepacket(data: ByteArray, length: Int) {
     @get:JvmName("getRPM")
     var rpm = 0f; private set
 
+    /** Turbo pressure in BAR; meaningful only when [hasTurbo] is true. */
+    var turbo = 0f; private set
+
+    /** OG_TURBO flag — the game sets it only for turbocharged vehicles. */
+    var hasTurbo = false; private set
+
     @get:JvmName("getEngineTemp")
     var engineTemp = 0f; private set
 
@@ -57,9 +63,11 @@ class Receivepacket(data: ByteArray, length: Int) {
         } else {
             try {
                 val bb = ByteBuffer.wrap(data)
+                hasTurbo = (EndianUtils.readSwappedUnsignedShort(data, 8) and FLAG_TURBO) != 0
                 gearByte = bb.get(10)
                 speed = EndianUtils.readSwappedFloat(data, 12)
                 rpm = EndianUtils.readSwappedFloat(data, 16)
+                turbo = EndianUtils.readSwappedFloat(data, 20)
                 engineTemp = EndianUtils.readSwappedFloat(data, 24)
                 fuel = EndianUtils.readSwappedFloat(data, 28)
                 throttle = EndianUtils.readSwappedFloat(data, 48)
@@ -113,6 +121,9 @@ class Receivepacket(data: ByteArray, length: Int) {
         const val INDEX_OILWARN = 8
         const val INDEX_BATTERY = 9
         const val INDEX_ABS = 10
+
+        // OG_TURBO from the game's flags field (lua/vehicle/protocols/outgauge.lua).
+        private const val FLAG_TURBO = 8192
 
         // Bit values from the game's lua/vehicle/protocols/outgauge.lua (DL_x constants).
         private const val FLAG_SHIFTLIGHT = 1

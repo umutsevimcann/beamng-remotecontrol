@@ -2,8 +2,18 @@
 <resources>
 
     <string name="app_name">BeamNG.drive Remote Control</string>
-    <string name="menu">menu</string>
-    <string name="unit">Unit</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">BRAKE</string>
+    <string name="drive_gas">GAS</string>
+    <string name="drive_gear">GEAR</string>
+    <string name="drive_rpm_x1000">×1000 RPM</string>
+    <string name="drive_fuel">FUEL</string>
+    <string name="drive_temp">TEMP</string>
+    <string name="drive_boost">BOOST</string>
+    <string name="speed_kmh">KM/H</string>
+    <string name="speed_mph">MPH</string>
+    <string name="drive_gyro_hint">Tilt to steer — hold level to center</string>
 
     <!-- Brand -->
     <string name="brand_name">BeamNG</string>
