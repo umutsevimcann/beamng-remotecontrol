@@ -17,7 +17,9 @@ public class SettingsManager {
     public static final String KEY_USE_METRIC = "use_metric";
     public static final String KEY_HAPTIC_ENABLED = "haptic_enabled";
     public static final String KEY_LAST_IP = "last_ip";
-    
+    public static final String KEY_DEAD_ZONE = "dead_zone";
+    public static final String KEY_ANALOG_PEDALS = "analog_pedals";
+
     // Kontrol Tipleri
     public static final int CONTROL_GYROSCOPE = 0;
     public static final int CONTROL_BUTTONS = 1;
@@ -28,6 +30,8 @@ public class SettingsManager {
     private static final float DEFAULT_SENSITIVITY = 0.5f;
     private static final boolean DEFAULT_USE_METRIC = true;
     private static final boolean DEFAULT_HAPTIC_ENABLED = true;
+    private static final float DEFAULT_DEAD_ZONE = 3.0f;
+    private static final boolean DEFAULT_ANALOG_PEDALS = true;
     
     private final SharedPreferences prefs;
     private static SettingsManager instance;
@@ -95,6 +99,26 @@ public class SettingsManager {
         prefs.edit().putBoolean(KEY_HAPTIC_ENABLED, enabled).apply();
     }
     
+    // ==================== DEAD ZONE ====================
+
+    public float getDeadZone() {
+        return prefs.getFloat(KEY_DEAD_ZONE, DEFAULT_DEAD_ZONE);
+    }
+
+    public void setDeadZone(float degrees) {
+        prefs.edit().putFloat(KEY_DEAD_ZONE, Math.max(0f, Math.min(10f, degrees))).apply();
+    }
+
+    // ==================== ANALOG PEDALS ====================
+
+    public boolean isAnalogPedals() {
+        return prefs.getBoolean(KEY_ANALOG_PEDALS, DEFAULT_ANALOG_PEDALS);
+    }
+
+    public void setAnalogPedals(boolean analog) {
+        prefs.edit().putBoolean(KEY_ANALOG_PEDALS, analog).apply();
+    }
+
     // ==================== NETWORK ====================
     
     public String getLastIP() {

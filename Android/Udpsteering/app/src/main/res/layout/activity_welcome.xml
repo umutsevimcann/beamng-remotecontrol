@@ -1,78 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.beamng.udpsteering.WelcomeActivity">
+    android:background="@color/background_dark"
+    android:fillViewport="true">
 
-    <ScrollView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/scrollView"
-        android:layout_alignParentEnd="false"
-        android:layout_alignParentStart="false"
-        android:fillViewport="false"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true">
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="32dp">
 
-        <RelativeLayout
+        <!-- ===== LOGO & TITLE ===== -->
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/ic_launcher"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="BeamNG Logo"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BeamNG"
+            android:textColor="@color/text_primary"
+            android:textSize="32sp"
+            android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.08"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REMOTE CONTROL"
+            android:textColor="@color/beamng_orange"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.3"
+            android:layout_marginBottom="36dp"/>
+
+        <!-- ===== CONNECTION GUIDE CARD ===== -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_welcome_card"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp">
 
-            <RelativeLayout
+            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:layout_centerHorizontal="true">
+                android:layout_height="wrap_content"
+                android:text="HOW TO CONNECT"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="16dp"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Open BeamNG.drive and select &quot;Controls&quot; from the main menu and then click on &quot;HARDWARE&quot;. Scan the QR Code to use this device as a remote controller."
-                    android:id="@+id/textView"
-                    android:layout_below="@+id/imageView"
-                    android:layout_alignRight="@+id/imageView"
-                    android:layout_alignEnd="@+id/imageView" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1.  Open BeamNG.drive on your PC"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="8dp"/>
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Scan QRCode"
-                    android:id="@+id/button2"
-                    android:onClick="onScanClick"
-                    android:layout_alignRight="@+id/textView"
-                    android:layout_alignEnd="@+id/textView"
-                    android:layout_marginTop="15dp"
-                    android:layout_below="@+id/textView" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2.  Go to Controls → Hardware"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="8dp"/>
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Settings"
-                    android:id="@+id/buttonSettings"
-                    android:onClick="onSettingsClick"
-                    android:layout_alignRight="@+id/button2"
-                    android:layout_alignEnd="@+id/button2"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/button2" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3.  Scan the QR code shown on screen"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingExtra="4dp"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/imageView"
-                    android:src="@drawable/screenshot"
-                    android:adjustViewBounds="false"
-                    android:cropToPadding="false"
-                    android:baselineAlignBottom="false"
-                    android:scaleType="fitEnd"
-                    android:paddingBottom="17dp" />
-            </RelativeLayout>
-        </RelativeLayout>
-    </ScrollView>
+        </LinearLayout>
 
-</RelativeLayout>
+        <!-- ===== ENHANCED MODE INFO ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_welcome_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ANALOG MODE"
+                android:textColor="@color/beamng_orange"
+                android:textSize="11sp"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="For analog throttle/brake (variable pressure),\ninstall the companion mod on your PC.\nSee GitHub for instructions."
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingExtra="3dp"/>
+
+        </LinearLayout>
+
+        <!-- ===== TELEMETRY SETUP ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_welcome_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LIVE DASHBOARD (SPEED / RPM / GEAR)"
+                android:textColor="@color/beamng_orange"
+                android:textSize="11sp"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/textTelemetryHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="In BeamNG: Options → Other → OutGauge support"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingExtra="3dp"/>
+
+        </LinearLayout>
+
+        <!-- ===== SCAN BUTTON ===== -->
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_scan_qr"
+            android:text="SCAN QR CODE"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:onClick="onScanClick"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ===== SETTINGS BUTTON ===== -->
+        <Button
+            android:id="@+id/buttonSettings"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/btn_settings_outline"
+            android:text="SETTINGS"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:onClick="onSettingsClick"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ===== VERSION ===== -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v2.0 — Modernized Fork"
+            android:textColor="@color/text_dim"
+            android:textSize="11sp"/>
+
+    </LinearLayout>
+</ScrollView>

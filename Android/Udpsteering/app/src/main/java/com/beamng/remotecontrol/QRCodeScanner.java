@@ -109,6 +109,13 @@ public class QRCodeScanner extends AppCompatActivity {
         }
         final String securityCode = parts[1];
 
+        // Validate securityCode: max 64 chars, alphanumeric + underscore + hyphen only
+        if (securityCode.length() > 64 || !securityCode.matches("^[a-zA-Z0-9_\\-]+$")) {
+            Toast.makeText(this, "Invalid QR code format", Toast.LENGTH_LONG).show();
+            barcodeView.resume();
+            return;
+        }
+
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
         try {

@@ -54,8 +54,11 @@ public class UdpExploreSender extends AsyncTask<String, String, String> {
     protected String doInBackground(String... args) {
         String securityCode = args[0];
 
-        sendString = "beamng|" + getDeviceName() + "|" + securityCode;
-        Log.i("SendString", sendString);
+        String deviceName = getDeviceName().replaceAll("[|#\\n\\r]", "_");
+        sendString = "beamng|" + deviceName + "|" + securityCode;
+        if (Log.isLoggable("BeamNG", Log.DEBUG)) {
+            Log.i("SendString", sendString);
+        }
         byte[] buffer = (sendString).getBytes();
 
         DatagramSocket socketS = null;
@@ -77,7 +80,9 @@ public class UdpExploreSender extends AsyncTask<String, String, String> {
             while (!isCancelled()) {
                 try {
                     socketS.send(packetS);
-                    Log.i("packet", packetS.toString());
+                    if (Log.isLoggable("BeamNG", Log.DEBUG)) {
+                        Log.i("packet", packetS.toString());
+                    }
                     socketR.receive(packetR);
                 } catch (IOException e) {
                     if (++tries > 10) {
@@ -93,9 +98,11 @@ public class UdpExploreSender extends AsyncTask<String, String, String> {
                 }
                 String message = new String(receive_buf, 0, packetR.getLength());
                 hostadress = packetR.getAddress();
-                Log.i("UDP SERVER", "Received: " + message + " IP " +
-                      packetR.getAddress().getHostAddress() + ":" + packetR.getPort() +
-                      " / waiting for: " + waitingFor);
+                if (Log.isLoggable("BeamNG", Log.DEBUG)) {
+                    Log.i("UDP SERVER", "Received: " + message + " IP " +
+                          packetR.getAddress().getHostAddress() + ":" + packetR.getPort() +
+                          " / waiting for: " + waitingFor);
+                }
                 if (message.equals(waitingFor)) {
                     publishProgress(message);
                     break;

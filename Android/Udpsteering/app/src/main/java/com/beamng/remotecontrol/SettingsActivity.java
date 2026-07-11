@@ -30,7 +30,11 @@ public class SettingsActivity extends AppCompatActivity {
     
     private SwitchCompat switchMetric;
     private SwitchCompat switchHaptic;
-    
+    private SwitchCompat switchAnalogPedals;
+
+    private SeekBar seekBarDeadZone;
+    private TextView textDeadZoneValue;
+
     private Button btnSaveSettings;
 
     @Override
@@ -39,7 +43,14 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         
         settings = SettingsManager.getInstance(this);
-        
+
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                saveSettings();
+            }
+        });
+
         initViews();
         loadCurrentSettings();
         setupListeners();
@@ -56,7 +67,11 @@ public class SettingsActivity extends AppCompatActivity {
         
         switchMetric = findViewById(R.id.switchMetric);
         switchHaptic = findViewById(R.id.switchHaptic);
-        
+        switchAnalogPedals = findViewById(R.id.switchAnalogPedals);
+
+        seekBarDeadZone = findViewById(R.id.seekBarDeadZone);
+        textDeadZoneValue = findViewById(R.id.textDeadZoneValue);
+
         btnSaveSettings = findViewById(R.id.btnSaveSettings);
     }
     
@@ -81,9 +96,15 @@ public class SettingsActivity extends AppCompatActivity {
         seekBarSensitivity.setProgress(sensitivityPercent);
         textSensitivityValue.setText(sensitivityPercent + "%");
         
-        // Diğer ayarlar
+        // Dead zone
+        int deadZoneDegrees = Math.round(settings.getDeadZone());
+        seekBarDeadZone.setProgress(deadZoneDegrees);
+        textDeadZoneValue.setText(deadZoneDegrees + "°");
+
+        // Toggles
         switchMetric.setChecked(settings.useMetricUnits());
         switchHaptic.setChecked(settings.isHapticEnabled());
+        switchAnalogPedals.setChecked(settings.isAnalogPedals());
     }
     
     private void setupListeners() {
@@ -103,6 +124,18 @@ public class SettingsActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         
+        // Dead zone değişimi
+        seekBarDeadZone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                textDeadZoneValue.setText(progress + "°");
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
         // Kaydet butonu
         btnSaveSettings.setOnClickListener(v -> saveSettings());
     }
@@ -122,17 +155,16 @@ public class SettingsActivity extends AppCompatActivity {
         float sensitivity = Math.max(10, seekBarSensitivity.getProgress()) / 100f;
         settings.setSensitivity(sensitivity);
         
-        // Diğer ayarlar
+        // Dead zone
+        settings.setDeadZone((float) seekBarDeadZone.getProgress());
+
+        // Toggles
         settings.setUseMetricUnits(switchMetric.isChecked());
         settings.setHapticEnabled(switchHaptic.isChecked());
+        settings.setAnalogPedals(switchAnalogPedals.isChecked());
         
         Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show();
         finish(); // Ayarlar ekranını kapat
     }
     
-    @Override
-    public void onBackPressed() {
-        // Geri tuşuna basınca da kaydet
-        saveSettings();
-    }
 }

@@ -7,14 +7,15 @@ android {
     defaultConfig {
         applicationId 'com.beamng.remotecontrol'
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode 10
         versionName '2.0.0'
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -1,10 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- BeamNG Brand -->
+    <color name="beamng_orange">#FF6600</color>
+    <color name="beamng_orange_dark">#CC5200</color>
+    <color name="beamng_orange_light">#FF8833</color>
+
+    <!-- Backgrounds -->
+    <color name="background_dark">#0D0D0D</color>
+    <color name="surface_dark">#161616</color>
+    <color name="surface_elevated">#1E1E1E</color>
+    <color name="surface_card">#222222</color>
+
+    <!-- Controls -->
+    <color name="brake_normal">#1A0808</color>
+    <color name="brake_pressed">#E53935</color>
+    <color name="brake_fill">#66E53935</color>
+    <color name="gas_normal">#081A08</color>
+    <color name="gas_pressed">#43A047</color>
+    <color name="gas_fill">#6643A047</color>
+    <color name="steer_normal">#2A2A2A</color>
+    <color name="steer_pressed">#FF6600</color>
+
+    <!-- Text -->
+    <color name="text_primary">#F0F0F0</color>
+    <color name="text_secondary">#777777</color>
+    <color name="text_accent">#FF6600</color>
+    <color name="text_dim">#444444</color>
+
+    <!-- Status -->
+    <color name="status_connected">#43A047</color>
+    <color name="status_connecting">#FFAA00</color>
+    <color name="status_disconnected">#CC3333</color>
+    <color name="text_tertiary">#555555</color>
+    <color name="beamng_orange_tint">#1AFF6600</color>
+
+    <!-- Legacy compat -->
     <color name="black">#000000</color>
-    <color name="white">#ffffff</color>
+    <color name="white">#FFFFFF</color>
     <color name="pushedwhite">#10ffffff</color>
     <color name="green">#149434</color>
     <color name="lightblue">#2b71ff</color>
     <color name="darkblue">#31326e</color>
     <color name="darkred">#6a2727</color>
+
+    <!-- Theme -->
+    <color name="colorPrimary">#0D0D0D</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FF6600</color>
 </resources>

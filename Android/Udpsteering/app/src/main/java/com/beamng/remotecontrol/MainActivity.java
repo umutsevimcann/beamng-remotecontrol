@@ -1,44 +1,37 @@
 package com.beamng.remotecontrol;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
 import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.content.SharedPreferences;
+import android.os.Looper;
+import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import androidx.appcompat.widget.SwitchCompat;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.CompoundButton;
-import android.widget.SeekBar;
 
 import com.beamng.remotecontrol.input.ButtonInputHandler;
 import com.beamng.remotecontrol.input.InputHandlerFactory;
 import com.beamng.remotecontrol.input.SliderInputHandler;
 import com.beamng.remotecontrol.input.SteeringInputHandler;
 import com.beamng.remotecontrol.settings.SettingsManager;
-
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -47,95 +40,70 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.channels.DatagramChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    private SensorManager mSensorManager;
-    public Handler mHandler;
-    private AppCompatActivity aContext;
+public class MainActivity extends AppCompatActivity {
 
-    private String Iadress;
-    private float angle;
-    private float oldangle = 0.0f;
-    private int sendingTimeout = 50;
-    private ObjectAnimator oban;
-    private UdpSessionSender sessionsender;
-    private UdpSessionReceiver sessionreceiver;
+    private static final String TAG = "BeamNG";
 
-    //Sensordata damping elements
-    private List<Float> rollingAverage = new ArrayList<Float>();
-    private static final int MAX_SAMPLE_SIZE = 5;
-    private float gravity;
-
-    //UI Elements
-    private Button throttle;
-    private Button breaks;
-    private float thrpushed;
-    private float brpushed;
-
-    //menu items
-    private SwitchCompat unitToggle;
-
-    private int useKMH = 0;
-    private SeekBar sensitivity;
-    private float sensitivitySetting = 0.5f;
-    private ImageButton menu;
-    private LinearLayout menuItems;
-
-    //Views depending on communication
+    // UI Elements
     private RelativeLayout mainLayout;
-    private ProgressBar pbSpeed;
-    private ProgressBar pbRspeed;
-    private ProgressBar pbFuel;
-    private ProgressBar pbHeat;
+    private View throttle;
+    private View breaks;
+    private View throttleFill;
+    private View brakeFill;
     private TextView textSpeed;
     private TextView textGear;
-    private TextView textOdo;
-    private TextView textDelay;
     private TextView textUnit;
+    private TextView textDelay;
+    private boolean telemetryConnected = false;
     private ImageView[] lightViews;
-
-    //Orientationhandling
-    private Display display;
-    int orientation;
-    private int orientationhandler = 1;
-
-    //UI update interval
-    public static final int TIME_CONSTANT = 50;
-
-    private Timer fuseTimer = new Timer();
-
-    public static String id = "";
-
-    private Long lpTime, timeDiff, oldDiff = 1l;
-    private int pID = 1, lastID = 0;
-
-    //Multithreading
-    private ThreadPoolExecutor executor;
-    private BlockingQueue<Runnable> mDecodeWorkQueue;
-    private int KEEP_ALIVE_TIME = 1;
-    private TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-    private int NUMBER_OF_CORES;
-    private InetAddress hostAddress;
-
-    // Modüler Input Sistemi
-    private SettingsManager settingsManager;
-    private SteeringInputHandler steeringInputHandler;
+    private ImageButton menu;
     private LinearLayout buttonControlsContainer;
     private Button btnSteerLeft;
     private Button btnSteerRight;
     private SeekBar steeringSlider;
 
-    public static final String prefsName = "UserSettings";
+    // Thread-safe control values (written UI thread, read sender thread)
+    private volatile float thrpushed;
+    private volatile float brpushed;
 
+    // Networking
+    private String Iadress;
+    private int sendingTimeout = 10; // 100Hz for responsive controls
+    private UdpSessionSender sessionsender;
+    private UdpSessionReceiver sessionreceiver;
+    private InetAddress hostAddress;
+
+    // Packet tracking
+    private long lpTime;
+    private long timeDiff;
+    private long oldDiff = 1L;
+    private int pID = 1;
+    private int lastID = 0;
+
+    // Thread pool
+    private ThreadPoolExecutor executor;
+    private BlockingQueue<Runnable> mDecodeWorkQueue;
+
+    // Modular Input System
+    private SettingsManager settingsManager;
+    private volatile SteeringInputHandler steeringInputHandler;
+
+    // Haptic Feedback
+    private Vibrator vibrator;
+    private String oldGearString = "";
+    private int oldSpeedForImpact = 0;
+    private long lastImpactVibrationTime = 0;
+    private static final long IMPACT_VIBRATION_COOLDOWN_MS = 500;
+
+    // Settings
+    private int useKMH = 0;
+
+    public static String id = "";
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -145,645 +113,450 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onWindowFocusChanged(hasFocus);
     }
 
-    protected void SaveSettings () {
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
-        SharedPreferences settings = getSharedPreferences(prefsName, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("unit", useKMH);
-        editor.putFloat("sens", sensitivitySetting);
-        // Commit the edits!
-        editor.commit();
-
-    }
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.v("BeamNG", id);
-
         hideSystemUI();
         setContentView(R.layout.activity_main);
 
-        mainLayout = (RelativeLayout) findViewById(R.id.main);
-        pbSpeed = (ProgressBar) findViewById(R.id.progressBar);
-        pbRspeed = (ProgressBar) findViewById(R.id.progressBar2);
-        pbFuel = (ProgressBar) findViewById(R.id.progressBar3);
-        pbHeat = (ProgressBar) findViewById(R.id.progressBar4);
-        textSpeed = (TextView) findViewById(R.id.Textspeed);
-        textGear = (TextView) findViewById(R.id.Textgear);
-        textOdo = (TextView) findViewById(R.id.Textodo);
-        textDelay = (TextView) findViewById(R.id.Textdelay);
-        textUnit = (TextView) findViewById(R.id.Textunit);
+        // Validate host address - must be set via QR scan before reaching here
+        hostAddress = ((RemoteControlApplication) getApplication()).getHostAddress();
+        Iadress = ((RemoteControlApplication) getApplication()).getIp();
 
-        //HUD-Lights in the order of given structure in Receivepacket.java
-        lightViews = new ImageView[11];
-        lightViews[10] = (ImageView) findViewById(R.id.light_abs);
-        lightViews[2] = (ImageView) findViewById(R.id.light_break);
-        lightViews[0] = (ImageView) findViewById(R.id.light_headlight);
-        lightViews[1] = (ImageView) findViewById(R.id.light_fullbeam);
-        lightViews[5] = (ImageView) findViewById(R.id.light_leftindicator);
-        lightViews[6] = (ImageView) findViewById(R.id.light_rightindicator);
-
-        throttle = (Button) findViewById(R.id.throttlecontrol);
-        breaks = (Button) findViewById(R.id.breakcontrol);
-
-        aContext = this;
-        hostAddress = ((RemoteControlApplication)getApplication()).getHostAddress();
-        Iadress = ((RemoteControlApplication)getApplication()).getIp();
-
-        display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        orientation = display.getRotation();
-        lpTime = System.currentTimeMillis();
-        timeDiff = 0l;
-        //Multi-Thread-executor:
-        // A queue of Runnables
-        // instantiate the queue of Runnables as a LinkedBlockingQueue
-        mDecodeWorkQueue = new LinkedBlockingQueue<Runnable>();
-        // Sets the amount of time an idle thread waits before terminating
-        KEEP_ALIVE_TIME = 1;
-        // Sets the Time Unit to seconds
-        KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-
-        NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
-
-        // Creates a thread pool manager
-        executor = new ThreadPoolExecutor(
-                NUMBER_OF_CORES,       // Initial pool size
-                NUMBER_OF_CORES,       // Max pool size
-                KEEP_ALIVE_TIME,
-                KEEP_ALIVE_TIME_UNIT,
-                mDecodeWorkQueue);
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        mainLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        fuseTimer.scheduleAtFixedRate(new calculateFusedOrientationTask(),
-                1000, TIME_CONSTANT);
-
-        throttle.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    thrpushed = 1f;
-
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    thrpushed = 0f;
-                }
-                return false;
-            }
-        });
-
-        breaks.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    brpushed = 1f;
-
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    brpushed = 0f;
-                }
-                return false;
-            }
-        });
-
-        unitToggle = (SwitchCompat) findViewById(R.id.unitSwitch);
-
-        sensitivity = (SeekBar) findViewById(R.id.sensitivity);
-        // Restore options preferences
-        SharedPreferences settings = getSharedPreferences(prefsName, 0);
-        useKMH = settings.getInt("unit", 0);
-        sensitivitySetting = settings.getFloat("sens", 0.5f);
-        sensitivity.setProgress(Math.round(sensitivitySetting*100));
-        if (useKMH == 1) {
-            unitToggle.setChecked(true);
-            textUnit.setText("Km/h");
+        if (hostAddress == null) {
+            Toast.makeText(this, "No connection - please scan QR code first", Toast.LENGTH_LONG).show();
+            finish();
+            return;
         }
 
-        unitToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    useKMH = 1;
-                    textUnit.setText("Km/h");
-                } else {
-                   useKMH = 0;
-                    textUnit.setText("MPH");
-                }
-                SaveSettings();
-            }
-        });
+        initViews();
+        initThreadPool();
+        initInputSystem();
+        initControls();
 
-        sensitivity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
-                sensitivitySetting = 0.2f+(progressValue/100f*0.8f);
-                SaveSettings();
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+        lpTime = System.currentTimeMillis();
+        timeDiff = 0L;
+    }
 
-            }
-        });
-        menuItems = (LinearLayout)  findViewById(R.id.menuItems);
-        menu = (ImageButton) findViewById(R.id.menuButton);
-        menu.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (menuItems.getVisibility() == View.INVISIBLE)
-                        menuItems.setVisibility(View.VISIBLE);
-                    else
-                        menuItems.setVisibility(View.INVISIBLE);
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+    private void initViews() {
+        mainLayout = findViewById(R.id.main);
+        textSpeed = findViewById(R.id.Textspeed);
+        textGear = findViewById(R.id.Textgear);
+        textUnit = findViewById(R.id.Textunit);
+        textDelay = findViewById(R.id.Textdelay);
 
-                }
-                return false;
-            }
-        });
+        lightViews = new ImageView[11];
+        // Index = bit position in the game's showLights field. Stock OutGauge has no
+        // low-beam bit (index 0 is the shift light), so there is no headlight icon.
+        lightViews[10] = findViewById(R.id.light_abs);
+        lightViews[2] = findViewById(R.id.light_break);
+        lightViews[1] = findViewById(R.id.light_fullbeam);
+        lightViews[5] = findViewById(R.id.light_leftindicator);
+        lightViews[6] = findViewById(R.id.light_rightindicator);
 
-        //faster handling of the rotating views
-        mainLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        //Sensor
-        mSensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
-        //initListeners();
-
-        mHandler = new Handler();
-        
-        // === MODÜLER INPUT SİSTEMİ BAŞLATMA ===
-        settingsManager = SettingsManager.getInstance(this);
-        
-        // UI elemanlarını bul
+        throttle = findViewById(R.id.throttlecontrol);
+        breaks = findViewById(R.id.breakcontrol);
+        throttleFill = findViewById(R.id.throttleFill);
+        brakeFill = findViewById(R.id.brakeFill);
+        menu = findViewById(R.id.menuButton);
         buttonControlsContainer = findViewById(R.id.buttonControlsContainer);
         btnSteerLeft = findViewById(R.id.btnSteerLeft);
         btnSteerRight = findViewById(R.id.btnSteerRight);
         steeringSlider = findViewById(R.id.steeringSlider);
-        
-        // Input handler'ı oluştur ve UI'ı ayarla
+    }
+
+    private void initThreadPool() {
+        mDecodeWorkQueue = new LinkedBlockingQueue<>();
+        int cores = Math.max(2, Runtime.getRuntime().availableProcessors());
+        executor = new ThreadPoolExecutor(cores, cores, 1, TimeUnit.SECONDS, mDecodeWorkQueue);
+    }
+
+    private void initControls() {
+        throttle.setOnTouchListener((v, event) -> {
+            boolean analog = settingsManager != null && settingsManager.isAnalogPedals();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    if (analog) {
+                        // Analog: Y position determines value (bottom=0, top=1)
+                        float ratio = 1f - (event.getY() / v.getHeight());
+                        thrpushed = Math.max(0f, Math.min(1f, ratio));
+                    } else {
+                        thrpushed = 1f;
+                    }
+                    updatePedalFill(throttleFill, thrpushed);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    thrpushed = 0f;
+                    updatePedalFill(throttleFill, 0f);
+                    break;
+            }
+            return true;
+        });
+
+        breaks.setOnTouchListener((v, event) -> {
+            boolean analog = settingsManager != null && settingsManager.isAnalogPedals();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    if (analog) {
+                        float ratio = 1f - (event.getY() / v.getHeight());
+                        brpushed = Math.max(0f, Math.min(1f, ratio));
+                    } else {
+                        brpushed = 1f;
+                    }
+                    updatePedalFill(brakeFill, brpushed);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    brpushed = 0f;
+                    updatePedalFill(brakeFill, 0f);
+                    break;
+            }
+            return true;
+        });
+
+        menu.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void initInputSystem() {
+        settingsManager = SettingsManager.getInstance(this);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setupInputHandler();
     }
-    
+
     /**
-     * Ayarlara göre doğru input handler'ı oluşturur ve UI'ı günceller.
+     * Creates the correct input handler based on settings and configures UI.
      */
     private void setupInputHandler() {
-        // Önce mevcut handler'ı durdur
         if (steeringInputHandler != null) {
             steeringInputHandler.stop();
         }
-        
-        // Yeni handler oluştur
+
         steeringInputHandler = InputHandlerFactory.createHandler(this);
-        
-        // Tüm alternatif kontrolleri gizle
+
         buttonControlsContainer.setVisibility(View.GONE);
         steeringSlider.setVisibility(View.GONE);
-        
-        // Seçilen kontrol tipine göre UI'ı göster
+
         int controlType = settingsManager.getControlType();
-        
+
         if (controlType == SettingsManager.CONTROL_BUTTONS) {
             buttonControlsContainer.setVisibility(View.VISIBLE);
-            // Buton listener'ları bağla
             ButtonInputHandler buttonHandler = (ButtonInputHandler) steeringInputHandler;
             btnSteerLeft.setOnTouchListener(buttonHandler.getLeftButtonListener());
             btnSteerRight.setOnTouchListener(buttonHandler.getRightButtonListener());
-            
+
         } else if (controlType == SettingsManager.CONTROL_SLIDER) {
             steeringSlider.setVisibility(View.VISIBLE);
-            // Slider'ı bağla
             SliderInputHandler sliderHandler = (SliderInputHandler) steeringInputHandler;
             sliderHandler.attachSlider(steeringSlider);
         }
-        // GYROSCOPE için ekstra UI gerekmez, sensörler onResume'da başlatılacak
-        
-        // Ayarlardan hassasiyet ve birim ayarlarını da oku
-        sensitivitySetting = settingsManager.getSensitivity();
+
         useKMH = settingsManager.useMetricUnits() ? 1 : 0;
-        if (useKMH == 1) {
-            textUnit.setText("Km/h");
-            unitToggle.setChecked(true);
-        } else {
-            textUnit.setText("MPH");
-            unitToggle.setChecked(false);
-        }
+        textUnit.setText(useKMH == 1 ? "Km/h" : "MPH");
     }
 
-
+    // ==================== LIFECYCLE ====================
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-        switch (event.sensor.getType()) {
-            case Sensor.TYPE_ACCELEROMETER:
+    public void onResume() {
+        super.onResume();
+        setupInputHandler();
 
-                angle = (float) (Math.asin(
-                    -event.values[1] / Math.sqrt(
-                        event.values[0] * event.values[0] +
-                        event.values[1] * event.values[1] +
-                        event.values[2] * event.values[2]
-                    )
-                ) * 180 / Math.PI);
-
-                rollingAverage = roll(rollingAverage, event.values[1]);
-                gravity = averageList(rollingAverage);
-
-                break;
-
-            // Check for orientation-change sensor event
-            case Sensor.TYPE_ROTATION_VECTOR:
-                orientation = display.getRotation();
-                switch (orientation) {
-                    case Surface.ROTATION_90:
-                        if (orientationhandler != 1) {
-                            orientationhandler = 1;
-                        }
-                        break;
-                    case Surface.ROTATION_270:
-                        if (orientationhandler != -1) {
-                            orientationhandler = -1;
-                        }
-                        break;
-                }
-                break;
+        if (steeringInputHandler != null) {
+            steeringInputHandler.start();
         }
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        // unregister sensor listeners to prevent the activity from draining the device's battery.
-        mSensorManager.unregisterListener(this);
+        startUdpTasks();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // unregister sensor listeners to prevent the activity from draining the device's battery.
-        mSensorManager.unregisterListener(this);
         stopUdpTasks();
-        
-        // Input handler'ı durdur
+
         if (steeringInputHandler != null) {
             steeringInputHandler.stop();
         }
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Ayarlar değişmiş olabilir, handler'ı yeniden oluştur
-        setupInputHandler();
-        
-        // Input handler'ı başlat
-        if (steeringInputHandler != null) {
-            steeringInputHandler.start();
-        }
-        
-        initListeners();
-        startUdpTasks();
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
-
-    // This function registers sensor listeners for the accelerometer
-    public void initListeners() {
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_GAME);
-
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-                SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    public void updateOrientationDisplay() {
-        //angle damped via the average of the last 5 sensordata entries
-        //with Boundaries -60 to +60°:
-        //float uiAngle =Math.min(Math.max((float) (gravity * -7.9 * orientationhandler), -60f),60f);
-        float uiAngle = (float) (gravity * -7.9 * orientationhandler);
-        //animation of the whole mainLayout when UI is updated every 50ms
-        oban = ObjectAnimator.ofFloat(mainLayout, "rotation", oldangle, uiAngle);
-        oban.setDuration(50);
-        oban.setInterpolator(new LinearInterpolator());
-        oban.start();
-
-        oldangle = uiAngle;
-    }
-
-    private Runnable updateOrientationDisplayTask = new Runnable() {
-        public void run() {
-            updateOrientationDisplay();
-        }
-    };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    class calculateFusedOrientationTask extends TimerTask {
-        public void run() {
-            // update sensor output in GUI
-            mHandler.post(updateOrientationDisplayTask);
+    protected void onDestroy() {
+        super.onDestroy();
+        stopUdpTasks();
+        if (executor != null) {
+            executor.shutdownNow();
         }
     }
 
-    //rolling list of the last 5 Sensorevents
-    public List<Float> roll(List<Float> list, float newMember) {
-        if (list.size() == MAX_SAMPLE_SIZE) {
-            list.remove(0);
-        }
-        list.add(newMember);
-        return list;
+    // ==================== PEDAL VISUALS ====================
+
+    private void updatePedalFill(View fill, float value) {
+        if (fill == null) return;
+        View parent = (View) fill.getParent();
+        int parentHeight = parent.getHeight();
+        if (parentHeight <= 0) return;
+        int fillHeight = Math.round(parentHeight * value);
+        fill.getLayoutParams().height = fillHeight;
+        fill.requestLayout();
     }
 
-    //average of the rolling list
-    public float averageList(List<Float> tallyUp) {
-
-        float total = 0;
-        for (float item : tallyUp) {
-            total += item;
-        }
-        total = total / tallyUp.size();
-
-        return total;
-    }
+    // ==================== IMMERSIVE UI ====================
 
     private void hideSystemUI() {
-        // If the Android version is lower than Jellybean, use this call to hide
-        // the status bar.
-        if (Build.VERSION.SDK_INT < 16) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        controller.hide(WindowInsetsCompat.Type.systemBars());
+        controller.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    }
+
+    // ==================== HAPTIC FEEDBACK ====================
+
+    @SuppressWarnings("deprecation")
+    private void doVibrate(long ms, int amplitude) {
+        if (vibrator == null || !vibrator.hasVibrator()) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(ms, amplitude));
         } else {
-            View decorView = getWindow().getDecorView();
-            // Hide both the navigation bar and the status bar.
-            // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher
-            int uiOptions;
-            if (Build.VERSION.SDK_INT >= 19) {
-                uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-                decorView.setSystemUiVisibility(uiOptions);
-            } else {
-                uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-                decorView.setSystemUiVisibility(uiOptions);
-            }
+            vibrator.vibrate(ms);
         }
     }
 
+    private void processHapticFeedback(Receivepacket packet, int newSpeed) {
+        if (settingsManager == null || !settingsManager.isHapticEnabled()) return;
+
+        long now = System.currentTimeMillis();
+
+        // 1. Gear Change
+        String currentGear = packet.getGear();
+        if (currentGear != null && !currentGear.equals(oldGearString)) {
+            doVibrate(50, VibrationEffect.DEFAULT_AMPLITUDE);
+            oldGearString = currentGear;
+        }
+
+        // 2. Impact Detection with cooldown
+        int speedDiff = Math.abs(newSpeed - oldSpeedForImpact);
+        if (speedDiff > 20 && (now - lastImpactVibrationTime) > IMPACT_VIBRATION_COOLDOWN_MS) {
+            if (speedDiff > 50) {
+                doVibrate(600, 255);       // Severe crash
+            } else if (speedDiff > 35) {
+                doVibrate(300, 180);       // Medium impact
+            } else {
+                doVibrate(150, 100);       // Minor bump
+            }
+            lastImpactVibrationTime = now;
+        }
+        oldSpeedForImpact = newSpeed;
+
+        // 3. ABS feel (hard braking)
+        float brakeValue = packet.getBrake();
+        if (brakeValue > 0.85f && (now - lastImpactVibrationTime) > 100) {
+            doVibrate(40, 60);
+        }
+    }
+
+    // ==================== NETWORKING ====================
+
     public void connectionTimeout() {
-        //udptest.setVisibility(View.VISIBLE);
-        sessionsender.cancel(true);
-        sessionreceiver.cancel(true);
-        Toast.makeText(aContext, "Your connection timed out", Toast.LENGTH_LONG).show();
+        if (sessionsender != null) sessionsender.cancel(true);
+        if (sessionreceiver != null) sessionreceiver.cancel(true);
+        Toast.makeText(this, "Connection timed out", Toast.LENGTH_LONG).show();
         executor.shutdownNow();
         mDecodeWorkQueue = new LinkedBlockingQueue<>();
-        // Creates a thread pool manager
-        executor = new ThreadPoolExecutor(
-                NUMBER_OF_CORES,       // Initial pool size
-                NUMBER_OF_CORES,       // Max pool size
-                KEEP_ALIVE_TIME,
-                KEEP_ALIVE_TIME_UNIT,
-                mDecodeWorkQueue);
+        int cores = Math.max(2, Runtime.getRuntime().availableProcessors());
+        executor = new ThreadPoolExecutor(cores, cores, 1, TimeUnit.SECONDS, mDecodeWorkQueue);
     }
 
     private void startUdpTasks() {
         stopUdpTasks();
-        sessionsender = new UdpSessionSender(hostAddress, aContext, Iadress);
+        if (hostAddress == null) return;
+        sessionsender = new UdpSessionSender(hostAddress);
         sessionsender.executeOnExecutor(executor);
-        sessionreceiver = new UdpSessionReceiver(hostAddress, aContext, Iadress);
+        sessionreceiver = new UdpSessionReceiver(hostAddress);
         sessionreceiver.executeOnExecutor(executor);
     }
 
     private void stopUdpTasks() {
         if (sessionsender != null) {
-            sessionsender.cancel(false);
+            sessionsender.cancel(true);
         }
         if (sessionreceiver != null) {
-            // Notice that we are calling our own cancel method for the receiver:
-            sessionreceiver.cancel();
+            sessionreceiver.cancel(); // Custom cancel that also closes socket
         }
     }
 
+    // ==================== UDP SENDER ====================
+
+    /**
+     * Sends control packets to BeamNG on port 4444.
+     * BeamNG's remoteController.lua listens on port 4444 and reverses the byte array
+     * before parsing as {w, x, y, z} floats where z=steering, x=throttle, y=brake, w=id.
+     */
     public class UdpSessionSender extends AsyncTask<String, String, String> {
-        final int PORT = 4444;
-        InetAddress receiverAddress;
-        AppCompatActivity aContext;
-        String myIadr;
+        static final int SEND_PORT = 4444;
+        final InetAddress receiverAddress;
 
-        public UdpSessionSender(InetAddress iadrSend, AppCompatActivity activityContext, String myiadrr) {
+        public UdpSessionSender(InetAddress iadrSend) {
             this.receiverAddress = iadrSend;
-            this.aContext = activityContext;
-            this.myIadr = myiadrr;
         }
 
         @Override
         protected String doInBackground(String... arg0) {
-            Log.i("UdpClient", "started");
-            try {
-                DatagramSocket socket = new DatagramSocket();
-                try {
-                    Sendpacket sendpacket = new Sendpacket();
-                    while (!isCancelled()) {
-                        try {
-                            Thread.sleep(sendingTimeout);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        //Log.i("Sensitivity", ": " + sensitivitySetting);
-                        // Modüler input sisteminden direksiyon değerini al
-                        float steeringValue = 0.5f; // Varsayılan: orta
-                        if (steeringInputHandler != null) {
-                            // getSteeringValue() -1 ile 1 arasında döner, bunu 0-1 arasına çevir
-                            steeringValue = (steeringInputHandler.getSteeringValue() + 1f) / 2f;
-                        }
-                        sendpacket.setSteeringAngle(steeringValue);
-                        sendpacket.setThrottle(thrpushed);
-                        sendpacket.setBreaks(brpushed);
-                        sendpacket.setID(pID);
-
-                        //set packet sent time
-                        if (lastID != pID) {
-                            lastID = pID;
-                            lpTime = System.currentTimeMillis();
-                        }
-
-                        byte[] buffer = sendpacket.getSendingByteArray();
-                        socket.send(
-                                new DatagramPacket(buffer, buffer.length, receiverAddress, PORT)
-                        );
-                        // Log.i("UDP", "Package sent to " + receiverAddress + ":" + PORT);
+            try (DatagramSocket socket = new DatagramSocket()) {
+                Sendpacket sendpacket = new Sendpacket();
+                while (!isCancelled()) {
+                    try {
+                        Thread.sleep(sendingTimeout);
+                    } catch (InterruptedException e) {
+                        break;
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    socket.disconnect();
-                    socket.close();
-                }
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
 
-    public class UdpSessionReceiver extends AsyncTask<String, String, String> {
-        final int PORT = 4445;
-        InetAddress receiveradress;
-        AppCompatActivity aContext;
-        String myIadr;
-        InetAddress hostAddress;
-        String message;
-        int oldSpeed = 0;
-        int oldRPM = 0;
-        int oldEngTemp = 0;
-        int oldFuel = 0;
-        Receivepacket packet;
-        private ObjectAnimator animation1;
-        private ObjectAnimator animation2;
-        private ObjectAnimator animation3;
-        private ObjectAnimator animation4;
-        private AnimatorSet animSet;
-        DatagramSocket socket;
-
-        public UdpSessionReceiver(InetAddress iadrSend, AppCompatActivity activityContext, String myiadrr) {
-            this.receiveradress = iadrSend;
-            this.aContext = activityContext;
-            this.myIadr = myiadrr;
-        }
-
-        // We need or own cancel method because socket.receive is blocking and we therefore need
-        // to close the socket to quit doInBackground
-        public void cancel() {
-            super.cancel(false);
-            socket.close();
-        }
-
-        @Override
-        protected String doInBackground(String... arg0) {
-            Log.i("UdpServer", "started");
-            Log.i("ReceiveSocketBinder", Iadress + ":" + PORT);
-            try {
-                DatagramChannel channel = DatagramChannel.open();
-                socket = channel.socket();
-                socket.bind(new InetSocketAddress(Iadress, PORT));
-                socket.setSoTimeout(0); // infinite timeout
-                try {
-                    byte[] buf = new byte[100];
-                    while (!isCancelled()) {
-                        try {
-                            socket.receive(new DatagramPacket(buf, buf.length));
-                        } catch (SocketTimeoutException e) {
-                            publishProgress("TIMEOUT");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        packet = new Receivepacket(buf);
-                        //Log.i("UDP SERVER","Received a packet");
-                        publishProgress("");
+                    float steeringValue = 0.5f;
+                    SteeringInputHandler handler = steeringInputHandler;
+                    if (handler != null) {
+                        // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
+                        steeringValue = Math.max(0f, Math.min(1f, (1f - handler.getSteeringValue()) / 2f));
                     }
-                } finally {
-                    socket.disconnect();
-                    socket.close();
+                    sendpacket.setSteeringAngle(steeringValue);
+                    sendpacket.setThrottle(thrpushed);
+                    sendpacket.setBreaks(brpushed);
+                    sendpacket.setID(pID);
+
+                    if (lastID != pID) {
+                        lastID = pID;
+                        lpTime = System.currentTimeMillis();
+                    }
+
+                    byte[] buffer = sendpacket.getSendingByteArray();
+                    socket.send(new DatagramPacket(buffer, buffer.length, receiverAddress, SEND_PORT));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                if (!isCancelled()) Log.e(TAG, "UDP send error", e);
             }
-
             return null;
         }
+    }
 
+    // ==================== UDP RECEIVER ====================
+
+    /**
+     * Receives OutGauge telemetry packets from BeamNG on port 4445.
+     * BeamNG's remoteController.lua sends outgauge data to appPort (listenPort+1 = 4445).
+     */
+    public class UdpSessionReceiver extends AsyncTask<String, String, String> {
+        static final int RECEIVE_PORT = 4445; // BeamNG sends outgauge here (listenPort + 1)
+        final InetAddress expectedHost;
+        Receivepacket packet;
+        DatagramSocket socket;
+
+        public UdpSessionReceiver(InetAddress iadrSend) {
+            this.expectedHost = iadrSend;
+        }
+
+        public void cancel() {
+            super.cancel(true);
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        }
+
+        @Override
+        protected String doInBackground(String... arg0) {
+            try {
+                socket = new DatagramSocket(null);
+                socket.setReuseAddress(true);
+                socket.bind(new InetSocketAddress(RECEIVE_PORT));
+                socket.setSoTimeout(2000);
+
+                byte[] buf = new byte[128];
+                while (!isCancelled()) {
+                    try {
+                        DatagramPacket dp = new DatagramPacket(buf, buf.length);
+                        socket.receive(dp);
+
+                        if (dp.getLength() < Receivepacket.MIN_PACKET_LENGTH) {
+                            continue;
+                        }
+
+                        packet = new Receivepacket(buf, dp.getLength());
+                        if (packet.isValid()) {
+                            publishProgress("");
+                        }
+                    } catch (SocketTimeoutException e) {
+                        // Normal, loop continues
+                    } catch (IOException e) {
+                        if (!isCancelled()) Log.e(TAG, "Receive error: " + e.getMessage());
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Cannot bind to port " + RECEIVE_PORT, e);
+            } finally {
+                if (socket != null && !socket.isClosed()) socket.close();
+            }
+            return null;
+        }
 
         @Override
         protected void onProgressUpdate(String... values) {
+            if (isFinishing() || isDestroyed()) return;
 
-            if (values != null && values[0].equals("TIMEOUT")) {
+            if (values != null && values.length > 0 && "TIMEOUT".equals(values[0])) {
                 cancel(true);
                 connectionTimeout();
                 return;
             }
-            //Log.i("packet ID ", "returned: " + packet.getID());
 
+            if (packet == null || !packet.isValid()) return;
+
+            // Stock-game OutGauge (Options > Other) never echoes our packet id
+            // (id is always 0), so flowing telemetry itself is the connect signal.
+            if (!telemetryConnected) {
+                telemetryConnected = true;
+                textDelay.setText("Connected");
+                textDelay.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.status_connected));
+            }
+
+            // Latency tracking (works only when the id echo round-trips, e.g. companion mod)
             if (packet.getID() == pID) {
-                timeDiff = System.currentTimeMillis()-lpTime;
-                //smooth the display a bit so the numbers dont jump so erratically
-                int disDiff = Math.round((oldDiff+timeDiff)/2);
+                timeDiff = System.currentTimeMillis() - lpTime;
+                int disDiff = Math.round((oldDiff + timeDiff) / 2);
                 disDiff /= 2;
                 if (timeDiff != 0)
-                    textDelay.setText("Delay: "+disDiff+"ms");
+                    textDelay.setText("Delay: " + disDiff + "ms");
                 pID++;
-                if(pID == 128)
-                    pID = 0;
-
+                if (pID == 128) pID = 0;
                 oldDiff = timeDiff;
             }
-            //convert m/s to mp/h
-            int newSpeed = Math.round(2.23694f * packet.getSpeed());
-            if (useKMH == 1)
-                newSpeed =  Math.round(1.60934f*newSpeed);
-            //Log.i("Speed ", "set to: " + packet.getSpeed());
-            int barSpeed = Math.round(newSpeed*0.56f);
-            animation1 = ObjectAnimator.ofInt(pbSpeed, "progress", oldSpeed, barSpeed);
-            oldSpeed = barSpeed;
 
-            int newRPM = Math.round(0.0155f * packet.getRPM());
-            //Log.i("RPM ", "set to: " + packet.getRPM());
-            animation2 = ObjectAnimator.ofInt(pbRspeed, "progress", oldRPM, newRPM);
-            oldRPM = newRPM;
-
-            int newEngTemp = Math.round(42 * packet.getEngineTemp());
-            //Log.i("Engtemp ", "set to: " + packet.getEngineTemp());
-            animation3 = ObjectAnimator.ofInt(pbHeat, "progress", oldEngTemp, newEngTemp);
-            oldEngTemp = newEngTemp;
-
-            int newFuel = Math.round(42 * packet.getFuel());
-            //Log.i("Fuel", "set to: " + packet.getFuel());
-            animation4 = ObjectAnimator.ofInt(pbFuel, "progress", oldFuel, newFuel);
-            oldFuel = newFuel;
-
-            animSet = new AnimatorSet();
-            animSet.playTogether(animation1, animation2, animation3, animation4);
-            animSet.setInterpolator(new LinearInterpolator());
-            animSet.setDuration(500);
-            animSet.start();
-
-            textSpeed.setText(String.format("%03d", newSpeed));
-
-            textGear.setText(packet.getGear());
-            textOdo.setText(String.format("%06d", packet.getOdometer()));
-
-            boolean[] lightsarray = packet.getActiveLightsArr();
-
-            for (int i = 0; i < 11; i++) {
-                //Check if we have a View for that Flag
-
-                if (lightViews[i] != null) {
-                    if (lightsarray[i]) {
-                        if (lightViews[i].getVisibility() == View.INVISIBLE) {
-                            lightViews[i].setVisibility(View.VISIBLE);
-                        }
-
-                    } else {
-                        if (lightViews[i].getVisibility() == View.VISIBLE) {
-                            lightViews[i].setVisibility(View.INVISIBLE);
-                        }
-                    }
-                }
+            // Speed conversion - direct calculation
+            int newSpeed;
+            if (useKMH == 1) {
+                newSpeed = Math.round(3.6f * packet.getSpeed());
+            } else {
+                newSpeed = Math.round(2.23694f * packet.getSpeed());
             }
 
-            if (packet.getFlagsArray()[3]) {
-                //KMH
-                //Log.i("User wants ","KMH");
+            textSpeed.setText(String.format("%03d", newSpeed));
+            textGear.setText(packet.getGear());
+
+            // Haptic feedback with proper debouncing
+            processHapticFeedback(packet, newSpeed);
+
+            // Update dashboard lights
+            boolean[] lightsarray = packet.getActiveLightsArr();
+            for (int i = 0; i < 11; i++) {
+                if (lightViews[i] != null) {
+                    lightViews[i].setVisibility(lightsarray[i] ? View.VISIBLE : View.INVISIBLE);
+                }
             }
         }
     }
