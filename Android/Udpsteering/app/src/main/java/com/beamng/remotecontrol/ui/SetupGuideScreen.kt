@@ -85,6 +85,35 @@ fun SetupGuideScreen(phoneIp: String?) {
             GuideStep(1, stringResource(R.string.guide_connect_s1))
             GuideStep(2, stringResource(R.string.guide_connect_s2))
             GuideStep(3, stringResource(R.string.guide_connect_s3))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.guide_connect_s_note),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.TextFaint,
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+
+        // Other ways to connect (+ how to obtain the code)
+        GarageCard(title = stringResource(R.string.guide_ways_title)) {
+            Text(
+                stringResource(R.string.guide_ways_intro),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.TextDim,
+                modifier = Modifier.padding(bottom = 6.dp),
+            )
+            GuideWay(
+                stringResource(R.string.guide_way_scan_t),
+                stringResource(R.string.guide_way_scan_b),
+            )
+            GuideWay(
+                stringResource(R.string.guide_way_photo_t),
+                stringResource(R.string.guide_way_photo_b),
+            )
+            GuideWay(
+                stringResource(R.string.guide_way_code_t),
+                stringResource(R.string.guide_way_code_b),
+            )
         }
         Spacer(Modifier.height(14.dp))
 
@@ -142,6 +171,24 @@ private fun GuideStep(number: Int, text: String) {
             text,
             style = MaterialTheme.typography.bodyLarge,
             color = NightGarage.Text,
+        )
+    }
+}
+
+/** A named alternative method: amber heading + a plain-language explanation. */
+@Composable
+private fun GuideWay(title: String, body: String) {
+    Column(modifier = Modifier.padding(vertical = 5.dp)) {
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = NightGarage.Amber,
+        )
+        Text(
+            body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = NightGarage.TextDim,
+            modifier = Modifier.padding(top = 2.dp),
         )
     }
 }

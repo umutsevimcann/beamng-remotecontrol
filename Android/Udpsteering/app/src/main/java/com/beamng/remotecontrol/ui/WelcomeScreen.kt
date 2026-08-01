@@ -49,6 +49,7 @@ fun cockpitBackground() = Brush.radialGradient(
 @Composable
 fun WelcomeScreen(
     phoneIp: String?,
+    onAutoConnectClick: () -> Unit,
     onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onGuideClick: () -> Unit,
@@ -99,13 +100,73 @@ fun WelcomeScreen(
         Spacer(Modifier.height(28.dp))
 
         // ===== Actions =====
-        AmberButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
+        // Auto-connect is the hero path: the game's QR is too dense for most phone
+        // cameras, so we discover its code over Wi-Fi instead. QR scan stays as an
+        // option for good cameras; manual code entry is the last resort.
+        AmberButton(stringResource(R.string.auto_connect_button), onClick = onAutoConnectClick)
+        Spacer(Modifier.height(12.dp))
+        GhostButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.manual_button), onClick = onManualClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.guide_button), onClick = onGuideClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.settings_button), onClick = onSettingsClick)
+    }
+}
+
+/**
+ * Modal shown while the auto-connect sweep runs. [progress] is 0f..1f; the dialog
+ * is non-dismissable except via Cancel so the sweep can't be orphaned by a stray tap.
+ */
+@Composable
+fun AutoConnectDialog(progress: Float, onCancel: () -> Unit) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = { /* only Cancel ends the sweep */ },
+        properties = androidx.compose.ui.window.DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(NightGarage.Panel, RoundedCornerShape(16.dp))
+                .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(16.dp))
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                stringResource(R.string.auto_connect_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = NightGarage.TextBright,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(R.string.auto_connect_sub),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.TextDim,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(18.dp))
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { progress },
+                color = NightGarage.Amber,
+                trackColor = NightGarage.PanelEdge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(R.string.auto_connect_progress, (progress * 100).toInt()),
+                style = MaterialTheme.typography.labelLarge,
+                color = NightGarage.Amber,
+            )
+            Spacer(Modifier.height(18.dp))
+            GhostButton(stringResource(R.string.manual_cancel), onClick = onCancel)
+        }
     }
 }
 
@@ -183,9 +244,9 @@ fun AmberButton(label: String, onClick: () -> Unit) {
     }
 }
 
-/** Camera-free connect: paste the game QR's link (or type the code). */
+/** Camera-free connect: photo of the QR, or paste its link / type the code. */
 @Composable
-fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit) {
+fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit, onPickPhoto: () -> Unit) {
     val text = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -207,6 +268,15 @@ fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit) {
                 color = NightGarage.TextDim,
             )
             Spacer(Modifier.height(14.dp))
+            AmberButton(stringResource(R.string.photo_button), onClick = onPickPhoto)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.manual_or),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.TextFaint,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+            Spacer(Modifier.height(6.dp))
             androidx.compose.material3.OutlinedTextField(
                 value = text.value,
                 onValueChange = { text.value = it },
@@ -263,7 +333,15 @@ private fun WelcomeScreenPreview() {
     NightGarageTheme {
         WelcomeScreen(
             phoneIp = "192.168.0.23",
+            onAutoConnectClick = {},
             onScanClick = {}, onSettingsClick = {}, onGuideClick = {}, onManualClick = {},
         )
+    }
+}
+
+@Composable
+private fun manualDialogPreviewHost() {
+    NightGarageTheme {
+        ManualCodeDialog(onDismiss = {}, onConnect = {}, onPickPhoto = {})
     }
 }

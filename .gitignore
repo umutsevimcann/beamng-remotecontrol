@@ -40,3 +40,6 @@ local.properties
 .idea/
 *.iml
 
+
+# Java heap dumps
+*.hprof

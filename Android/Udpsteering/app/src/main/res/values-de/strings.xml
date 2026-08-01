@@ -29,8 +29,8 @@
     <!-- Welcome: connect card -->
     <string name="connect_card_title">VERBINDEN</string>
     <string name="connect_step_1">BeamNG.drive am PC starten</string>
-    <string name="connect_step_2">Controls → Hardware → QR</string>
-    <string name="connect_step_3">Scannen &amp; losfahren</string>
+    <string name="connect_step_2">Optionen → Steuerung → Hardware → Handy aktivieren</string>
+    <string name="connect_step_3">Auf Auto-Verbinden tippen — kein QR nötig</string>
 
     <!-- Welcome: extras card -->
     <string name="extras_card_title">OPTIONALE EXTRAS — IM SPIEL AKTIVIEREN</string>
@@ -39,17 +39,27 @@
     <string name="extras_guide_hint">Schritt für Schritt mit DEINEN Werten:</string>
 
     <!-- Welcome: actions -->
+    <string name="auto_connect_button">AUTO-VERBINDEN — KEIN QR</string>
     <string name="scan_qr_button">QR-CODE SCANNEN</string>
     <string name="settings_button">EINSTELLUNGEN</string>
     <string name="guide_button">EINRICHTUNGSANLEITUNG</string>
     <string name="manual_button">SCAN KLAPPT NICHT? CODE EINGEBEN</string>
 
+    <!-- Auto-connect (kameralos, durchsucht den Code-Raum des Spiels per WLAN) -->
+    <string name="auto_connect_title">Suche BeamNG.drive…</string>
+    <string name="auto_connect_sub">Kein QR, keine Kamera. Stelle nur sicher, dass die Fernsteuerung im Spiel aktiviert ist.</string>
+    <string name="auto_connect_progress">%1$d%%</string>
+    <string name="toast_auto_connect_failed">BeamNG.drive nicht gefunden. Aktiviere im Spiel Optionen → Steuerung → Hardware → „Handy oder Tablet verwenden“ und bleibe im selben WLAN.</string>
+
     <!-- Manual connect (camera-free fallback) -->
-    <string name="manual_title">Mit Code verbinden</string>
-    <string name="manual_hint">Scanne den QR des Spiels mit der normalen Handykamera und füge den Link hier ein — oder tippe einfach den Code.</string>
+    <string name="manual_title">Ohne Scan verbinden</string>
+    <string name="manual_hint">Am einfachsten ist Auto-Verbinden — kein Code nötig. Sonst mach ein scharfes Foto des Spiel-QR und lies es hier aus, oder füge den Link ein / tippe den 5-stelligen Code, falls du ihn schon hast.</string>
     <string name="manual_field">Link oder Code</string>
     <string name="manual_connect">VERBINDEN</string>
     <string name="manual_cancel">ABBRECHEN</string>
+    <string name="manual_or">— oder —</string>
+    <string name="photo_button">QR VOM FOTO LESEN</string>
+    <string name="toast_no_qr_in_photo">Kein QR im Foto gefunden — mach eine nähere, schärfere Aufnahme nur vom QR.</string>
 
     <!-- Setup guide screen -->
     <string name="guide_eyebrow">ANLEITUNG</string>
@@ -62,10 +72,21 @@
     <string name="guide_value_rate">Aktualisierungsrate</string>
 
     <string name="guide_connect_title">1 · VERBINDEN — ERFORDERLICH</string>
-    <string name="guide_connect_what">Lenken, Gas geben und bremsen direkt vom Handy.</string>
-    <string name="guide_connect_s1">Handy und PC müssen im selben WLAN sein</string>
-    <string name="guide_connect_s2">Im Spiel: Options → Controls → Hardware → Remote-Control-QR anzeigen</string>
-    <string name="guide_connect_s3">QR-CODE SCANNEN antippen und die Kamera auf den Code richten — fertig</string>
+    <string name="guide_connect_what">Mach dein Handy zum Lenkrad, Gas und Bremse für das Auto im Spiel.</string>
+    <string name="guide_connect_s1">Verbinde dein Handy mit dem GLEICHEN WLAN wie dein PC — dasselbe Heimnetz / derselbe Router. Das ist das Einzige, das stimmen muss.</string>
+    <string name="guide_connect_s2">Am PC in BeamNG.drive: Optionen → Steuerung → Hardware öffnen, „Handy oder Tablet verwenden“ finden und auf Ja stellen. Ein QR-Code erscheint — den kannst du ignorieren.</string>
+    <string name="guide_connect_s3">Zurück in dieser App auf den großen AUTO-VERBINDEN-Knopf tippen. Ein paar Sekunden warten — es findet das Spiel von selbst und verbindet. Kein QR, kein Tippen.</string>
+    <string name="guide_connect_s_note">Warum Auto-Verbinden statt QR: Seit v0.39 ist der QR des Spiels zu dicht, als dass ihn die meisten Handykameras lesen könnten. Auto-Verbinden überspringt die Kamera komplett und findet das Spiel per WLAN — funktioniert auf jedem Handy.</string>
+
+    <!-- Setup-Guide: alternative Verbindungswege + woher der Code kommt -->
+    <string name="guide_ways_title">ANDERE WEGE ZUM VERBINDEN</string>
+    <string name="guide_ways_intro">Auto-Verbinden funktioniert bei fast jedem. Wenn es das Spiel nicht findet (manche WLANs blockieren es), probiere eines davon:</string>
+    <string name="guide_way_scan_t">A · Den QR live scannen</string>
+    <string name="guide_way_scan_b">Auf QR-CODE SCANNEN tippen und die Handykamera auf den QR am PC-Bildschirm richten. Halte das Handy ruhig und ziemlich nah — es verbindet von selbst.</string>
+    <string name="guide_way_photo_t">B · Den QR vom Foto lesen</string>
+    <string name="guide_way_photo_b">Mach ein scharfes, nahes Foto vom QR am PC-Bildschirm. Dann auf CODE EINGEBEN → QR VOM FOTO LESEN tippen und das Foto wählen. Die App liest ihn und verbindet.</string>
+    <string name="guide_way_code_t">C · Den 5-stelligen Code eingeben</string>
+    <string name="guide_way_code_b">Nur wenn du den Code schon hast. Wo du ihn findest: Richte IRGENDEINE QR-App — deine normale Handykamera oder Google Lens — auf den QR des Spiels. Es öffnet einen Google-Play-Link, der mit „#12345“ endet. Diese letzten 5 Ziffern SIND dein Code. Gib sie unter CODE EINGEBEN ein.</string>
 
     <string name="guide_dash_title">2 · LIVE-COCKPIT — OPTIONAL</string>
     <string name="guide_dash_what">Schaltet auf dem Fahrbildschirm frei: Tempo, Drehzahlnadel, Gang, Tank, Motortemperatur, Ladedruck, echte Warnleuchten (Blinker, Fernlicht, Handbremse, ABS, TC, Öl, Batterie) und Crash-Vibration.</string>
