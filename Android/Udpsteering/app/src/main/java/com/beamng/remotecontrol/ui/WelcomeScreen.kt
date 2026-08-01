@@ -52,6 +52,7 @@ fun WelcomeScreen(
     onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onGuideClick: () -> Unit,
+    onManualClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -99,6 +100,8 @@ fun WelcomeScreen(
 
         // ===== Actions =====
         AmberButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
+        Spacer(Modifier.height(12.dp))
+        GhostButton(stringResource(R.string.manual_button), onClick = onManualClick)
         Spacer(Modifier.height(12.dp))
         GhostButton(stringResource(R.string.guide_button), onClick = onGuideClick)
         Spacer(Modifier.height(12.dp))
@@ -180,6 +183,61 @@ fun AmberButton(label: String, onClick: () -> Unit) {
     }
 }
 
+/** Camera-free connect: paste the game QR's link (or type the code). */
+@Composable
+fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit) {
+    val text = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(NightGarage.Panel, RoundedCornerShape(16.dp))
+                .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(16.dp))
+                .padding(20.dp),
+        ) {
+            Text(
+                stringResource(R.string.manual_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = NightGarage.TextBright,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.manual_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NightGarage.TextDim,
+            )
+            Spacer(Modifier.height(14.dp))
+            androidx.compose.material3.OutlinedTextField(
+                value = text.value,
+                onValueChange = { text.value = it },
+                singleLine = true,
+                label = { Text(stringResource(R.string.manual_field)) },
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = NightGarage.Amber,
+                    unfocusedBorderColor = NightGarage.PanelEdge,
+                    focusedLabelColor = NightGarage.Amber,
+                    unfocusedLabelColor = NightGarage.TextFaint,
+                    focusedTextColor = NightGarage.TextBright,
+                    unfocusedTextColor = NightGarage.Text,
+                    cursorColor = NightGarage.Amber,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(Modifier.weight(1f)) {
+                    GhostButton(stringResource(R.string.manual_cancel), onClick = onDismiss)
+                }
+                Box(Modifier.weight(1f)) {
+                    AmberButton(stringResource(R.string.manual_connect)) {
+                        if (text.value.isNotBlank()) onConnect(text.value.trim())
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun GhostButton(label: String, onClick: () -> Unit) {
     Box(
@@ -205,7 +263,7 @@ private fun WelcomeScreenPreview() {
     NightGarageTheme {
         WelcomeScreen(
             phoneIp = "192.168.0.23",
-            onScanClick = {}, onSettingsClick = {}, onGuideClick = {},
+            onScanClick = {}, onSettingsClick = {}, onGuideClick = {}, onManualClick = {},
         )
     }
 }

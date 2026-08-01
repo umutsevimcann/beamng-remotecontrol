@@ -28,14 +28,32 @@ class WelcomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NightGarageTheme {
+                var showManual by androidx.compose.runtime.remember { mutableStateOf(false) }
                 WelcomeScreen(
                     phoneIp = phoneIp,
                     onScanClick = ::scanRequested,
                     onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
                     onGuideClick = { startActivity(Intent(this, SetupGuideActivity::class.java)) },
+                    onManualClick = { showManual = true },
                 )
+                if (showManual) {
+                    com.beamng.remotecontrol.ui.ManualCodeDialog(
+                        onDismiss = { showManual = false },
+                        onConnect = { input ->
+                            showManual = false
+                            connectManually(input)
+                        },
+                    )
+                }
             }
         }
+    }
+
+    private fun connectManually(input: String) {
+        startActivity(
+            Intent(this, QRCodeScanner::class.java)
+                .putExtra(QRCodeScanner.EXTRA_CODE, input),
+        )
     }
 
     override fun onResume() {

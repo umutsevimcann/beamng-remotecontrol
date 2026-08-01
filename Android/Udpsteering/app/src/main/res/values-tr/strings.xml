@@ -42,6 +42,14 @@
     <string name="scan_qr_button">QR KODU TARA</string>
     <string name="settings_button">AYARLAR</string>
     <string name="guide_button">KURULUM REHBERİ</string>
+    <string name="manual_button">TARAYAMIYOR MUSUN? KODU GİR</string>
+
+    <!-- Manual connect (camera-free fallback) -->
+    <string name="manual_title">Kod ile bağlan</string>
+    <string name="manual_hint">Oyundaki QR\'ı telefonunun normal kamerasıyla okut, çıkan linki buraya yapıştır — ya da sadece kodu yaz.</string>
+    <string name="manual_field">Link veya kod</string>
+    <string name="manual_connect">BAĞLAN</string>
+    <string name="manual_cancel">İPTAL</string>
 
     <!-- Setup guide screen -->
     <string name="guide_eyebrow">NASIL YAPILIR</string>

@@ -42,6 +42,14 @@
     <string name="scan_qr_button">SCAN QR CODE</string>
     <string name="settings_button">SETTINGS</string>
     <string name="guide_button">SETUP GUIDE</string>
+    <string name="manual_button">CAN\'T SCAN? ENTER CODE</string>
+
+    <!-- Manual connect (camera-free fallback) -->
+    <string name="manual_title">Connect with code</string>
+    <string name="manual_hint">Scan the game\'s QR with your phone\'s normal camera, then paste the link here — or just type the code.</string>
+    <string name="manual_field">Link or code</string>
+    <string name="manual_connect">CONNECT</string>
+    <string name="manual_cancel">CANCEL</string>
 
     <!-- Setup guide screen -->
     <string name="guide_eyebrow">HOW-TO</string>
