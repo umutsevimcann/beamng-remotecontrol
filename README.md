@@ -5,8 +5,11 @@ Turn your Android phone into a steering wheel, controller and live dashboard for
 the PC game [BeamNG.drive](http://beamng.com/), over your local Wi-Fi.
 
 A modernized, actively maintained fork of the (archived) official Remote Control
-app. **v3.0.0** is a complete rewrite — 100% Kotlin, a new Jetpack Compose UI,
-and a live dashboard that works again on current game versions with no mods.
+app. **v3.0** is a complete rewrite — 100% Kotlin, a new Jetpack Compose UI, and a
+live dashboard that works again on current game versions with no mods. The latest
+release adds **Auto-Connect**: since BeamNG v0.39 the in-game QR is too dense for
+most phone cameras to read, so the app now finds the game over Wi-Fi and pairs
+with no QR and no camera.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
@@ -14,6 +17,8 @@ and a live dashboard that works again on current game versions with no mods.
 
 ## Features
 
+* **Auto-Connect** — camera-free pairing over Wi-Fi; no QR needed, works on any
+  phone (scanning the QR or entering the code by hand are still available).
 * **Steering, throttle & brake** from the phone — button, slider or gyroscope (tilt) modes.
 * **Live dashboard** using the game's built-in OutGauge stream (no mod required):
   speedometer, animated RPM gauge with redline, gear, fuel, engine temperature,
@@ -25,7 +30,7 @@ and a live dashboard that works again on current game versions with no mods.
 * **Dashboard-only mode** — hide the controls and use the phone as a pure gauge
   cluster (great with a wheel/keyboard).
 * **Crash & gear haptics** — vibration on impacts, gear changes and hard braking.
-* **Auto-reconnect** — scan the QR once; the app re-registers with the game after
+* **Auto-reconnect** — connect once; the app re-registers with the game after
   being backgrounded.
 * **In-app Setup Guide** — a personalized how-to that shows *your* phone's IP and
   the exact ports, so nothing gets mistyped into the game.
@@ -40,15 +45,20 @@ and a live dashboard that works again on current game versions with no mods.
 
 1. Install the APK on your Android phone (see [Releases](https://github.com/umutsevimcann/beamng-remotecontrol/releases)).
 2. Make sure the phone and the PC are on the **same Wi-Fi network**.
-3. In BeamNG.drive open **Options → Controls → Hardware** and show the Remote Control QR code.
-4. In the app tap **SCAN QR CODE** and scan it. Drive!
+3. In BeamNG.drive open **Options → Controls → Hardware** and set **"Use your
+   phone or tablet"** to **Yes**.
+4. In the app tap **AUTO-CONNECT** — no QR needed. Drive!
+
+> Prefer scanning? **SCAN QR CODE** and **READ QR FROM A PHOTO** are still there,
+> and you can type the 5-digit code by hand. The in-app Setup Guide explains each
+> method, including where to find that code.
 
 ### 2. Live dashboard (optional — speed / RPM / gear / lights)
 
 Uses BeamNG's built-in **OutGauge** stream, no mod required:
 
 1. Open the app — the start screen (and Setup Guide) shows **your phone's IP**.
-2. In BeamNG.drive: **Options → Other**, scroll to **Protocols**, tick **OutGauge support** and set:
+2. In BeamNG.drive (v0.39+): **Options → Advanced → Protocols**, tick **OutGauge support** and set:
    * **Address** = the IP shown in the app
    * **Port** = `4445`
    * **Max update rate** = `60`
@@ -57,7 +67,7 @@ Uses BeamNG's built-in **OutGauge** stream, no mod required:
 
 ### 3. Drift meter (optional)
 
-Same place as OutGauge — in **Options → Other → Protocols**, tick **MotionSim
+Same place as OutGauge — in **Options → Advanced → Protocols**, tick **MotionSim
 enabled** and set the same IP with **Port `4446`**, then Ctrl+R.
 
 ### Troubleshooting
@@ -68,8 +78,11 @@ enabled** and set the same IP with **Port `4446`**, then Ctrl+R.
 * **Throttle/brake feel on/off rather than gradual?** That's stock game behavior —
   it treats them as buttons. True analog pedals need a companion PC mod (planned,
   separate download).
-* **Updating from an older version?** v3.0.0 is signed with a new key — uninstall
-  the old app first, then install the new APK.
+* **Auto-Connect stuck on "Searching"?** Update to the latest version — older
+  builds could route over mobile data instead of Wi-Fi. Also confirm the phone
+  and PC share the same network (guest/hotel Wi-Fi often isolates devices).
+* **Updating from an older version?** v3.0.x installs over the top. Coming from a
+  2.x build (a different signing key)? Uninstall the old app first, then install.
 
 ## Building from source
 
@@ -102,16 +115,18 @@ key (for local testing only).
 
 All communication is UDP on the local network.
 
-* **Discovery:** app broadcasts `beamng|<device-name>|<code>` on port **4444**
-  (`<code>` comes from the QR); the game replies `beamng|<code>` on port **4445**.
-  The drive screen re-sends this periodically to survive the game's 10s idle timeout.
+* **Discovery:** app broadcasts `beamng|<device-name>|<code>` on port **4444**;
+  the game replies `beamng|<code>` on port **4445**. The `<code>` comes from the
+  QR, or Auto-Connect finds it by sweeping the game's 5-digit code space until the
+  game answers. The drive screen re-sends this periodically to survive the game's
+  10s idle timeout.
 * **Control (app → game, port 4444):** 16 bytes, four Big-Endian floats —
   steering (0 = right … 1 = left), throttle 0..1, brake 0..1, packet id.
   The stock game thresholds throttle/brake at 0.5 (on/off); true analog needs the
   companion mod.
 * **Telemetry (game → app, port 4445):** the standard 96-byte OutGauge struct,
-  sent by BeamNG's built-in `protocols_outgauge` (Options → Other). A companion
-  mod may append a 4-byte odometer (100 bytes).
+  sent by BeamNG's built-in `protocols_outgauge` (Options → Advanced → Protocols).
+  A companion mod may append a 4-byte odometer (100 bytes).
 * **Motion (game → app, port 4446):** the MotionSim struct (`BNG1` magic), used
   for the drift meter.
 
