@@ -90,13 +90,13 @@
 
     <string name="guide_dash_title">2 · LIVE-COCKPIT — OPTIONAL</string>
     <string name="guide_dash_what">Schaltet auf dem Fahrbildschirm frei: Tempo, Drehzahlnadel, Gang, Tank, Motortemperatur, Ladedruck, echte Warnleuchten (Blinker, Fernlicht, Handbremse, ABS, TC, Öl, Batterie) und Crash-Vibration.</string>
-    <string name="guide_dash_s1">Im Spiel: Options → Other → zum Abschnitt Protocols scrollen</string>
+    <string name="guide_dash_s1">Im Spiel (v0.39+): Optionen → Erweitert → Protocols</string>
     <string name="guide_dash_s2">„OutGauge support“ anhaken und die Werte unten eintragen</string>
     <string name="guide_dash_s3">Fahrzeug einmal neu laden (Strg+R) — das Spiel liest die Einstellung beim Spawnen</string>
 
     <string name="guide_drift_title">3 · DRIFT-ANZEIGE — OPTIONAL</string>
     <string name="guide_drift_what">Zeigt beim Driften den Live-Winkel über dem Tacho plus deinen Sitzungsrekord. Passt perfekt zum 0-100-Timer (in den App-Einstellungen aktivieren).</string>
-    <string name="guide_drift_s1">Im Spiel: Options → Other → Protocols (gleiche Stelle)</string>
+    <string name="guide_drift_s1">Im Spiel: Optionen → Erweitert → Protocols (gleiche Stelle)</string>
     <string name="guide_drift_s2">„MotionSim enabled“ anhaken und die Werte unten eintragen</string>
     <string name="guide_drift_s3">Fahrzeug einmal neu laden (Strg+R)</string>
 

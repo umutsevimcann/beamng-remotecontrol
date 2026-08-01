@@ -90,13 +90,13 @@
 
     <string name="guide_dash_title">2 · CANLI GÖSTERGE — İSTEĞE BAĞLI</string>
     <string name="guide_dash_what">Sürüş ekranında açılır: canlı hız, devir ibresi, vites, yakıt, motor sıcaklığı, turbo basıncı, gerçek uyarı ışıkları (sinyaller, uzun far, el freni, ABS, TC, yağ, akü) ve kaza titreşimi.</string>
-    <string name="guide_dash_s1">Oyunda: Seçenekler → Diğer → Protocols bölümüne in</string>
+    <string name="guide_dash_s1">Oyunda (v0.39+): Seçenekler → Gelişmiş → Protocols</string>
     <string name="guide_dash_s2">“Dış Gösterge desteği” kutusunu işaretle ve aşağıdaki değerleri gir</string>
     <string name="guide_dash_s3">Aracı bir kez yenile (Ctrl+R) — oyun bu ayarı araç yüklenirken okur</string>
 
     <string name="guide_drift_title">3 · DRIFT METRE — İSTEĞE BAĞLI</string>
     <string name="guide_drift_what">Savrulurken hız göstergesinin üstünde canlı drift açısı ve seans rekorunu gösterir. 0-100 kronometresiyle (uygulama Ayarları\'ndan aç) çok yakışır.</string>
-    <string name="guide_drift_s1">Oyunda: Seçenekler → Diğer → Protocols (aynı yer)</string>
+    <string name="guide_drift_s1">Oyunda: Seçenekler → Gelişmiş → Protocols (aynı yer)</string>
     <string name="guide_drift_s2">“MotionSim etkinleştirildi” kutusunu işaretle ve aşağıdaki değerleri gir</string>
     <string name="guide_drift_s3">Aracı bir kez yenile (Ctrl+R)</string>
 

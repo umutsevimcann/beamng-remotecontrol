@@ -90,13 +90,13 @@
 
     <string name="guide_dash_title">2 · LIVE DASHBOARD — OPTIONAL</string>
     <string name="guide_dash_what">Unlocks on the drive screen: live speed, RPM needle, gear, fuel, engine temperature, turbo boost, real warning lights (signals, high beam, handbrake, ABS, TC, oil, battery) and crash vibration.</string>
-    <string name="guide_dash_s1">In game: Options → Other → scroll to Protocols</string>
+    <string name="guide_dash_s1">In game (v0.39+): Options → Advanced → Protocols</string>
     <string name="guide_dash_s2">Tick “OutGauge support” and fill in the values below</string>
     <string name="guide_dash_s3">Reload the vehicle once (Ctrl+R) — the game reads this when the car spawns</string>
 
     <string name="guide_drift_title">3 · DRIFT METER — OPTIONAL</string>
     <string name="guide_drift_what">Shows a live drift angle above the speedometer while you slide, plus your session record. Great with the 0-100 timer (enable it in the app\'s Settings).</string>
-    <string name="guide_drift_s1">In game: Options → Other → Protocols (same place)</string>
+    <string name="guide_drift_s1">In game: Options → Advanced → Protocols (same place)</string>
     <string name="guide_drift_s2">Tick “MotionSim enabled” and fill in the values below</string>
     <string name="guide_drift_s3">Reload the vehicle once (Ctrl+R)</string>
 

@@ -1,6 +1,9 @@
 package com.beamng.remotecontrol.network
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -9,6 +12,29 @@ import java.util.Locale
 
 /** Small helpers shared by the welcome screen and the QR/connect flow. */
 object NetworkUtils {
+
+    /**
+     * The device's active Wi-Fi [Network], or null if none.
+     *
+     * Discovery sockets are pinned to this so they use Wi-Fi even when mobile
+     * data is on. Without it, Android routes app traffic over cellular whenever
+     * the Wi-Fi has no internet (a LAN-only game network is exactly that): the
+     * broadcast still leaks out and the game registers the device, but the reply
+     * never reaches us — the app just sits on "searching".
+     */
+    fun wifiNetwork(context: Context): Network? {
+        return try {
+            val cm = context.applicationContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            @Suppress("DEPRECATION")
+            cm.allNetworks.firstOrNull {
+                cm.getNetworkCapabilities(it)
+                    ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     /** Phone's Wi-Fi IPv4 as "a.b.c.d", or null when Wi-Fi is down. */
     @Suppress("DEPRECATION")

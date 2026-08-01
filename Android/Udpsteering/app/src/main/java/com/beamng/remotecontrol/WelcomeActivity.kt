@@ -125,11 +125,12 @@ class WelcomeActivity : AppCompatActivity() {
             return
         }
         (application as RemoteControlApplication).ip = ip
+        val network = NetworkUtils.wifiNetwork(this)
 
         sweepProgress = 0f
         sweeping = true
         sweepJob = lifecycleScope.launch {
-            val result = UdpDiscovery.sweep(broadcast, ip) { tried, total ->
+            val result = UdpDiscovery.sweep(broadcast, ip, network) { tried, total ->
                 runOnUiThread { sweepProgress = tried.toFloat() / total }
             }
             sweeping = false

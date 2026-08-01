@@ -1,5 +1,6 @@
 package com.beamng.remotecontrol.network
 
+import android.net.Network
 import android.os.Build
 import android.util.Log
 import com.beamng.remotecontrol.protocol.Ports
@@ -38,6 +39,19 @@ object UdpDiscovery {
     private val REPLY_CODE = Regex("^beamng\\|(\\d{5})$")
 
     /**
+     * Pins [socket] to [network] (Wi-Fi) so it can't fall back to cellular. This
+     * is what makes discovery work with mobile data on — see [NetworkUtils.wifiNetwork].
+     */
+    private fun bindToNetwork(network: Network?, socket: DatagramSocket) {
+        if (network == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) return
+        try {
+            network.bindSocket(socket)
+        } catch (e: IOException) {
+            Log.w("UdpDiscovery", "Could not pin socket to Wi-Fi", e)
+        }
+    }
+
+    /**
      * Discovery/heartbeat payload: "beamng|<deviceName>|<code>". Also sent
      * periodically by the drive screen so the game re-registers the virtual
      * device after its 10s idle timeout (mod-free auto-reconnect).
@@ -51,7 +65,8 @@ object UdpDiscovery {
     suspend fun discover(
         broadcastAddress: InetAddress,
         localIp: String,
-        securityCode: String
+        securityCode: String,
+        network: Network? = null,
     ): Result = withContext(Dispatchers.IO) {
         val buffer = buildHello(securityCode)
 
@@ -59,10 +74,14 @@ object UdpDiscovery {
         var channel: DatagramChannel? = null
         try {
             socketS = DatagramSocket()
+            bindToNetwork(network, socketS)
             channel = DatagramChannel.open()
             val socketR = channel.socket()
             socketR.reuseAddress = true
-            socketR.bind(InetSocketAddress(localIp, Ports.APP))
+            // Wildcard bind (see sweep): the game's unicast reply must be caught
+            // regardless of which local IP our detection reported.
+            socketR.bind(InetSocketAddress(Ports.APP))
+            bindToNetwork(network, socketR)
             socketR.soTimeout = RECEIVE_TIMEOUT_MS
             val waitingFor = "beamng|$securityCode"
             val receiveBuf = ByteArray(32)
@@ -118,6 +137,7 @@ object UdpDiscovery {
     suspend fun sweep(
         broadcastAddress: InetAddress,
         localIp: String,
+        network: Network?,
         onProgress: (tried: Int, total: Int) -> Unit,
     ): Result = withContext(Dispatchers.IO) {
         val name = deviceName().replace(Regex("[|#\\n\\r]"), "_")
@@ -128,10 +148,18 @@ object UdpDiscovery {
         var recvChannel: DatagramChannel? = null
         try {
             sendSocket = DatagramSocket().apply { broadcast = true }
+            bindToNetwork(network, sendSocket)
             recvChannel = DatagramChannel.open()
             val recv = recvChannel.socket()
             recv.reuseAddress = true
-            recv.bind(InetSocketAddress(localIp, Ports.APP))
+            // Bind the wildcard address, NOT a specific local IP: WifiManager-based
+            // IP detection is unreliable on some phones/bands, and the game's reply
+            // is unicast to whatever IP it actually saw. Listening on every
+            // interface guarantees we catch it. (Field report: a device the game
+            // registered fine still showed "searching" because the reply landed on
+            // an IP we weren't bound to.)
+            recv.bind(InetSocketAddress(Ports.APP))
+            bindToNetwork(network, recv)
             recv.soTimeout = 20
 
             val replyBuf = ByteArray(32)

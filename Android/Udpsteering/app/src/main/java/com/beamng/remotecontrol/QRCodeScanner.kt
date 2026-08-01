@@ -198,8 +198,9 @@ class QRCodeScanner : AppCompatActivity() {
             connectingText.text = getString(R.string.connecting_dialog_title)
             connectingOverlay.visibility = View.VISIBLE
 
+            val network = NetworkUtils.wifiNetwork(this)
             discoveryJob = lifecycleScope.launch {
-                when (val result = UdpDiscovery.discover(broadcastAddress, ip, code)) {
+                when (val result = UdpDiscovery.discover(broadcastAddress, ip, code, network)) {
                     is UdpDiscovery.Result.Connected -> {
                         val app = application as RemoteControlApplication
                         app.hostAddress = result.host
