@@ -22,8 +22,8 @@ android {
         applicationId 'com.beamng.remotecontrol'
         minSdk 21
         targetSdk 35
-        versionCode 11
-        versionName '3.0.0'
+        versionCode 12
+        versionName '3.0.1'
     }
 
     signingConfigs {
@@ -39,8 +39,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            // Minification is intentionally OFF: this repo is open source, so R8
+            // obfuscation protects nothing, and on a ~3 MB app the size saving is
+            // negligible. Resource shrinking previously stripped zxing's internally
+            // inflated camera layout, breaking QR scanning in release only (worked
+            // in debug). Keeping release == debug behaviour is the safe trade here.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig localProps['RELEASE_STORE_FILE'] ? signingConfigs.release : signingConfigs.debug
         }
