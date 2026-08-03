@@ -1,0 +1,61 @@
+name: Build iOS IPA (unsigned)
+
+on:
+  workflow_dispatch:      # manual "Run workflow" button in the Actions tab
+  push:
+    paths:
+      - 'iOS/**'
+      - '.github/workflows/build-ios-ipa.yml'
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repo (with submodules, since this repo uses .gitmodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Show available Xcode versions
+        run: ls /Applications | grep Xcode
+
+      - name: List schemes/targets (diagnostic — check this output if build fails)
+        run: |
+          cd iOS/BeamNG.SteeringDevice
+          xcodebuild -list -project BeamNG.SteeringDevice.xcodeproj || true
+
+      - name: Build unsigned .app (archive)
+        run: |
+          cd iOS/BeamNG.SteeringDevice
+          xcodebuild archive \
+            -project BeamNG.SteeringDevice.xcodeproj \
+            -scheme BeamNG.SteeringDevice \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            SWIFT_VERSION=5.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=13.0
+
+      - name: Package into unsigned IPA
+        run: |
+          set -e
+          APP_DIR="$RUNNER_TEMP/App.xcarchive/Products/Applications"
+          echo "Contents of Applications dir:"
+          ls -la "$APP_DIR"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -r "$APP_DIR"/*.app "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -r BeamNG.SteeringDevice.ipa Payload
+          mkdir -p "${{ github.workspace }}/out"
+          cp BeamNG.SteeringDevice.ipa "${{ github.workspace }}/out/"
+
+      - name: Upload IPA as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BeamNG.SteeringDevice-unsigned-ipa
+          path: out/BeamNG.SteeringDevice.ipa

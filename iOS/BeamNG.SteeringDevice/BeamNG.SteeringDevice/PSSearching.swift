@@ -18,6 +18,8 @@ class PSSearching : NSObject, AsyncUdpSocketDelegate
     
     var code : String = "232664";
     var initCon : Bool = false;
+    private var sweepWorkItem : DispatchWorkItem? = nil;
+    private(set) var isSweeping : Bool = false;
     
     override init()
     {
@@ -46,11 +48,54 @@ class PSSearching : NSObject, AsyncUdpSocketDelegate
     
     func broadcast(_ timeout : CFTimeInterval)
     {
-        let message : NSString = "beamng|\(UIDevice.current.name)|\(code)" as NSString;
+        let message : NSString = "beamng|\(safeDeviceName())|\(code)" as NSString;
         let data = message.data(using: String.Encoding.utf8.rawValue);
         
         print("Broadcasting from: \(PSNetUtil.localIPAddress())")
         socket.send(data, toHost: PSNetUtil.broadcastAddress(), port: 4444, withTimeout: timeout, tag: 0);
+    }
+    
+    func startAutoConnectSweep()
+    {
+        if(isSweeping || initCon)
+        {
+            return;
+        }
+        isSweeping = true;
+        var workItem : DispatchWorkItem! = nil;
+        workItem = DispatchWorkItem { [weak self] in
+            guard let strongSelf = self else {
+                return;
+            }
+            
+            for candidate in 10000...99999 {
+                if(workItem.isCancelled || strongSelf.initCon)
+                {
+                    break;
+                }
+                strongSelf.code = String(candidate);
+                strongSelf.broadcast(0);
+                
+                if(candidate % 300 == 0)
+                {
+                    Thread.sleep(forTimeInterval: 0.04);
+                }
+            }
+            
+            DispatchQueue.main.async {
+                strongSelf.isSweeping = false;
+                strongSelf.sweepWorkItem = nil;
+            }
+        };
+        sweepWorkItem = workItem;
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async(execute: workItem);
+    }
+    
+    func stopAutoConnectSweep()
+    {
+        sweepWorkItem?.cancel();
+        sweepWorkItem = nil;
+        isSweeping = false;
     }
     
     func onUdpSocket(_ sock: AsyncUdpSocket!, didNotReceiveDataWithTag tag: Int, dueToError error: NSError!)
@@ -74,19 +119,23 @@ class PSSearching : NSObject, AsyncUdpSocketDelegate
         if(temp.contains(PSNetUtil.localIPAddress()))
         {
             print("Received own data!");
-            return false;
+            listenSocket.receive(withTimeout: -1, tag: 0);
+            return true;
         }
         
-        if(msg as String == "beamng|\(code)")
-        {
-            //print("Recieved Message...");
-            if(onConnectToHost != nil)
+        let message = msg as String;
+        if let replyCode = parseReplyCode(message) {
+            if(message == "beamng|\(code)" || isSweeping)
             {
-                //print(host);
-                initCon = true;
-                onConnectToHost(host, 4445);
+                if(onConnectToHost != nil)
+                {
+                    initCon = true;
+                    code = replyCode;
+                    stopAutoConnectSweep();
+                    onConnectToHost(host, 4445);
+                }
+                print("Connecting people...");
             }
-            print("Connecting people...");
         }
         listenSocket.receive(withTimeout: -1, tag: 0);
         return true;
@@ -100,5 +149,25 @@ class PSSearching : NSObject, AsyncUdpSocketDelegate
     
     func onUdpSocketDidClose(_ sock: AsyncUdpSocket!)
     {
+    }
+    
+    private func safeDeviceName() -> String
+    {
+        return UIDevice.current.name.replacingOccurrences(of: "[|#\\n\\r]", with: "_", options: NSString.CompareOptions.regularExpression, range: nil);
+    }
+    
+    private func parseReplyCode(_ message : String) -> String?
+    {
+        let parts = message.components(separatedBy: "|");
+        if(parts.count != 2 || parts[0] != "beamng")
+        {
+            return nil;
+        }
+        let candidate = parts[1];
+        if(candidate.range(of: "^[0-9]{5}$", options: NSString.CompareOptions.regularExpression) == nil)
+        {
+            return nil;
+        }
+        return candidate;
     }
 }
