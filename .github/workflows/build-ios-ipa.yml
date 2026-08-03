@@ -37,7 +37,9 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            SWIFT_VERSION=5.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=13.0
 
       - name: Package into unsigned IPA
         run: |
