@@ -186,7 +186,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         temperature.draw(endAngle, endAngle: -CGFloat(M_PI_2) * 0.6, lineWidth: percentTemperatureWidth * imgWidth, strokeColor: UIColor(red: 0x6a / 255.0, green: 0x27 / 255.0, blue: 0x27 / 255.0, alpha: 1.0).cgColor, clockwise: false);
         hudView.addSubview(temperature);
         
-        hudView.bringSubview(toFront: hudImageView);
+        hudView.bringSubviewToFront(hudImageView);
         
         let percentageLabelWidth : CGFloat = 0.3;
         let labelWidth : CGFloat = percentageLabelWidth * imgWidth;
@@ -235,28 +235,28 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         labelLag.textAlignment = NSTextAlignment.center;
         hudView.addSubview(labelLag);
         
-        buttonAccelerate = UIButton(type: UIButtonType.system) as UIButton;
+        buttonAccelerate = UIButton(type: .system);
         buttonAccelerate.frame = CGRect(x: 0, y: 0, width: self.view.frame.width * 0.5, height: self.view.frame.height);
-        buttonAccelerate.setTitle("", for: UIControlState());
-        buttonAccelerate.addTarget(self, action: #selector(PSSessionViewController.onButtonAccelerate0), for: UIControlEvents.touchDown);
-        buttonAccelerate.addTarget(self, action: #selector(PSSessionViewController.onButtonAccelerate1), for: UIControlEvents.touchUpInside);
+        buttonAccelerate.setTitle("", for: .normal);
+        buttonAccelerate.addTarget(self, action: #selector(PSSessionViewController.onButtonAccelerate0), for: .touchDown);
+        buttonAccelerate.addTarget(self, action: #selector(PSSessionViewController.onButtonAccelerate1), for: .touchUpInside);
         buttonAccelerate.backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0);
         self.view.addSubview(buttonAccelerate);
         
-        buttonBrake = UIButton(type: UIButtonType.system) as UIButton;
+        buttonBrake = UIButton(type: .system);
         buttonBrake.frame = CGRect(x: self.view.frame.width * 0.5, y: 0, width: self.view.frame.width * 0.5, height: self.view.frame.height);
-        buttonBrake.setTitle("", for: UIControlState());
-        buttonBrake.addTarget(self, action: #selector(PSSessionViewController.onButtonBrake0), for: UIControlEvents.touchDown);
-        buttonBrake.addTarget(self, action: #selector(PSSessionViewController.onButtonBrake1), for: UIControlEvents.touchUpInside);
+        buttonBrake.setTitle("", for: .normal);
+        buttonBrake.addTarget(self, action: #selector(PSSessionViewController.onButtonBrake0), for: .touchDown);
+        buttonBrake.addTarget(self, action: #selector(PSSessionViewController.onButtonBrake1), for: .touchUpInside);
         buttonBrake.backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0);
         self.view.addSubview(buttonBrake);
         
         self.searching = PSSearching(connectionHandler: self.onConnected);
         
-        buttonDisconnect = UIButton(type: UIButtonType.system) as UIButton;
+        buttonDisconnect = UIButton(type: .system);
         buttonDisconnect.frame = CGRect(x: self.view.frame.width-(self.view.frame.width * 0.1)-10, y: 20, width: self.view.frame.width * 0.1, height: self.view.frame.height * 0.08);
-        buttonDisconnect.setTitle("Back", for: UIControlState());
-        buttonDisconnect.addTarget(self, action: #selector(PSSessionViewController.onButtonDisconnect), for: UIControlEvents.touchUpInside);
+        buttonDisconnect.setTitle("Back", for: .normal);
+        buttonDisconnect.addTarget(self, action: #selector(PSSessionViewController.onButtonDisconnect), for: .touchUpInside);
         buttonDisconnect.backgroundColor = UIColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 1.0);
         self.view.addSubview(buttonDisconnect);
         
@@ -265,17 +265,17 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         menuBG.backgroundColor = UIColor.black;
         self.view.addSubview(menuBG);
         
-        buttonMenu = UIButton(type: UIButtonType.system) as UIButton;
+        buttonMenu = UIButton(type: .system);
         buttonMenu.frame = CGRect(x: 10, y: 20, width: self.view.frame.width * 0.06, height: self.view.frame.height * 0.08);
-        buttonMenu.setTitle("", for: UIControlState());
-        buttonMenu.addTarget(self, action: #selector(PSSessionViewController.onButtonMenu), for: UIControlEvents.touchUpInside);
+        buttonMenu.setTitle("", for: .normal);
+        buttonMenu.addTarget(self, action: #selector(PSSessionViewController.onButtonMenu), for: .touchUpInside);
         buttonMenu.backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0);
-        buttonMenu.setBackgroundImage(UIImage(named: "menubutton")!, for: UIControlState());
+        buttonMenu.setBackgroundImage(UIImage(named: "menubutton")!, for: .normal);
         self.view.addSubview(buttonMenu);
         
-        /*self.connectionButton = UIButton(type: UIButtonType.system) as UIButton;
+        /*self.connectionButton = UIButton(type: .system);
         self.connectionButton.setTitle("Connect", for: UIControlState());
-        self.connectionButton.addTarget(self, action: #selector(PSSessionViewController.onButtonConnect), for: UIControlEvents.touchUpInside);
+        self.connectionButton.addTarget(self, action: #selector(PSSessionViewController.onButtonConnect), for: .touchUpInside);
         self.connectionButton.frame = CGRect(x: 10.0, y: 130.0, width: 100, height: 100);
         self.view.addSubview(self.connectionButton);*/
         
@@ -286,7 +286,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.senSlider.maximumValue = 1;
         self.senSlider.value = 0.5;
         self.senSlider.frame = CGRect(x: 20.0, y: 155.0, width: 150, height: 20);
-        self.senSlider.addTarget(self, action: #selector(PSSessionViewController.onSliderChange), for: UIControlEvents.valueChanged);
+        self.senSlider.addTarget(self, action: #selector(PSSessionViewController.onSliderChange), for: .valueChanged);
         self.view.addSubview(senSlider);
         
         if (defaults.float(forKey: "Sensitivity") != 0) {
@@ -302,7 +302,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.unitSel = UISwitch();
         self.unitSel.frame = CGRect(x: 20.0, y: 85.0, width: 150, height: 20);
         self.unitSel.onTintColor = UIColor.white;
-        self.unitSel.addTarget(self, action: #selector(PSSessionViewController.UnitSwitch), for: UIControlEvents.valueChanged);
+        self.unitSel.addTarget(self, action: #selector(PSSessionViewController.UnitSwitch), for: .valueChanged);
         self.view.addSubview(unitSel);
         
         unitSel.isOn = defaults.bool(forKey: "UnitSetting");
@@ -326,27 +326,21 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         
         // Get an instance of the AVCaptureDevice class to initialize a device object and provide the video
         // as the media type parameter.
-        let captureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        guard let captureDevice = AVCaptureDevice.default(for: .video) else { return }
         
         // Get an instance of the AVCaptureDeviceInput class using the previous device object.
-        var error:NSError?
-        var input : AnyObject! = nil;
+        let input: AVCaptureInput
         do {
             input = try AVCaptureDeviceInput(device: captureDevice)
         } catch {
-            print(error);
-        }
-            
-        if (error != nil) {
-            // If any error occurs, simply log the description of it and don't continue any more.
-            print("\(error?.localizedDescription)")
+            print(error.localizedDescription)
             return
         }
         
         // Initialize the captureSession object.
         captureSession = AVCaptureSession();
         // Set the input device on the capture session.
-        self.captureSession?.addInput(input as! AVCaptureInput);
+        self.captureSession?.addInput(input);
         
         // Initialize a AVCaptureMetadataOutput object and set it as the output device to the capture session.
         let captureMetadataOutput = AVCaptureMetadataOutput();
@@ -354,18 +348,18 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         
         // Set delegate and use the default dispatch queue to execute the call back
         captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main);
-        captureMetadataOutput.metadataObjectTypes = [AVMetadataObjectTypeQRCode];
+        captureMetadataOutput.metadataObjectTypes = [.qr];
         
         // Initialize the video preview layer and add it as a sublayer to the viewPreview view's layer.
-        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession);
-        self.videoPreviewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill;
+        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession!);
+        self.videoPreviewLayer?.videoGravity = .resizeAspectFill;
         self.videoPreviewLayer?.frame = self.view.bounds;
         if(self.interfaceOrientation == UIInterfaceOrientation.landscapeLeft)
         {
-            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeLeft;
+            self.videoPreviewLayer?.connection?.videoOrientation = AVCaptureVideoOrientation.landscapeLeft;
         }
         else {
-            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight;
+            self.videoPreviewLayer?.connection?.videoOrientation = AVCaptureVideoOrientation.landscapeRight;
         }
         self.view.layer.addSublayer(videoPreviewLayer!);
         
@@ -378,20 +372,20 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.qrCodeFrameView?.layer.borderColor = UIColor.green.cgColor;
         self.qrCodeFrameView?.layer.borderWidth = 2;
         self.view.addSubview(qrCodeFrameView!);
-        self.view.bringSubview(toFront: qrCodeFrameView!);
+        self.view.bringSubviewToFront(qrCodeFrameView!);
         
         //start up screen and instructions
         camBlocker = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height));
         camBlocker.backgroundColor = UIColor.black;
         self.view.addSubview(camBlocker);
-        self.view.bringSubview(toFront: camBlocker!);
+        self.view.bringSubviewToFront(camBlocker!);
 
         
         startScreen = UIImage(named: "startscreen")!;
         startScreenView = UIImageView(frame: CGRect(x: self.view.frame.width/2-(self.view.frame.width * 0.55/2), y: 20, width: self.view.frame.width * 0.55, height: self.view.frame.height * 0.35));
         startScreenView.image = startScreen;
         self.view.addSubview(startScreenView);
-        self.view.bringSubview(toFront: startScreenView!);
+        self.view.bringSubviewToFront(startScreenView!);
         
         startMessage = UILabel();
         startMessage.frame = CGRect(x: self.view.frame.width/2-(self.view.frame.width * 0.8/2), y: self.view.frame.height * 0.35, width: self.view.frame.width * 0.8, height: self.view.frame.height * 0.35);
@@ -400,16 +394,16 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         startMessage.text = "Open BeamNG.drive and select \"Controls\" from the main menu and then click on \"HARDWARE\". Scan the QR Code to use this device as a remote controller.";
         startMessage.textColor = UIColor.white;
         self.view.addSubview(startMessage);
-        self.view.bringSubview(toFront: startMessage!);
+        self.view.bringSubviewToFront(startMessage!);
         
-        startButton = UIButton(type: UIButtonType.system) as UIButton;
-        startButton.setTitle("Scan QR Code", for: UIControlState());
-        startButton.addTarget(self, action: #selector(PSSessionViewController.onButtonScan), for: UIControlEvents.touchUpInside);
+        startButton = UIButton(type: .system);
+        startButton.setTitle("Scan QR Code", for: .normal);
+        startButton.addTarget(self, action: #selector(PSSessionViewController.onButtonScan), for: .touchUpInside);
         startButton.frame = CGRect(x: self.view.frame.height * 0.8, y: self.view.frame.height * 0.65, width: self.view.frame.width * 0.25, height: self.view.frame.height * 0.15);
-        startButton.setTitleColor(UIColor.white, for: UIControlState());
+        startButton.setTitleColor(UIColor.white, for: .normal);
         startButton.backgroundColor = UIColor.gray;
         self.view.addSubview(self.startButton);
-        self.view.bringSubview(toFront: self.startButton!);
+        self.view.bringSubviewToFront(self.startButton!);
         
         cm = CMMotionManager();
         cm.startDeviceMotionUpdates();
@@ -417,7 +411,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         
     }
     
-    func Update () {
+    @objc func Update () {
         if let deviceMotion = cm.deviceMotion {
         
             let gravity : PSVector = PSVector();
@@ -690,7 +684,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             CloseStartScreen();
             //StartCM();
             //start timer
-            timer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: Selector("Update"), userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(Update), userInfo: nil, repeats: true)
         }
         else
         {
@@ -703,11 +697,11 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.session = nil;
         //self.connectionButton.isHidden = false;
     }
-    func onButtonConnect()
+    @objc func onButtonConnect()
     {
         self.searching.broadcast(1);
     }
-    func onButtonAccelerate0()
+    @objc func onButtonAccelerate0()
     {
         buttonAccelerate.backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.1);
         if(self.session != nil)
@@ -715,7 +709,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             self.session.currentData.acceleration = 1.0;
         }
     }
-    func onButtonAccelerate1()
+    @objc func onButtonAccelerate1()
     {
         buttonAccelerate.backgroundColor = UIColor.clear;
         if(self.session != nil)
@@ -723,7 +717,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             self.session.currentData.acceleration = 0.0;
         }
     }
-    func onButtonBrake0()
+    @objc func onButtonBrake0()
     {
         buttonBrake.backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.1);
         if(self.session != nil)
@@ -731,7 +725,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             self.session.currentData.brake = 1.0;
         }
     }
-    func onButtonBrake1()
+    @objc func onButtonBrake1()
     {
         buttonBrake.backgroundColor = UIColor.clear;
         if(self.session != nil)
@@ -739,11 +733,11 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             self.session.currentData.brake = 0.0;
         }
     }
-    func onSliderChange () {
+    @objc func onSliderChange () {
         let defaults = UserDefaults.standard;
         defaults.set(senSlider.value, forKey: "Sensitivity");
     }
-    func UnitSwitch () {
+    @objc func UnitSwitch () {
         if(self.unitSel.isOn) {
             unitText.text = "KM/H";
             labelUnit.text = "KM/H"
@@ -756,7 +750,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         defaults.set(unitSel.isOn, forKey: "UnitSetting");
 
     }
-    func onButtonMenu () {
+    @objc func onButtonMenu () {
         if (!unitText.isHidden) {
             //connectionButton.isHidden = true;
             unitText.isHidden = true;
@@ -776,7 +770,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
             menuBG.isHidden = false;
         }
     }
-    func onButtonScan () {
+    @objc func onButtonScan () {
         CloseStartScreen();
     }
     func CloseStartScreen () {
@@ -785,7 +779,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.startScreenView?.removeFromSuperview();
         self.camBlocker?.removeFromSuperview();
     }
-    func onButtonDisconnect () {
+    @objc func onButtonDisconnect () {
         self.view.subviews.forEach({ $0.removeFromSuperview()});
         //self.view.subviews.map({ $0.removeFromSuperview()});
         
@@ -799,10 +793,10 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.viewDidLoad();
         //self.searching = PSSearching(connectionHandler: self.onConnected);
     }
-    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [Any]!, from connection: AVCaptureConnection!) {
+    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         
         // Check if the metadataObjects array is not nil and it contains at least one object.
-        if metadataObjects == nil || metadataObjects.count == 0 {
+        if metadataObjects.isEmpty {
             qrCodeFrameView?.frame = CGRect.zero
             //messageLabel.text = "No QR code is detected"
             return
@@ -811,7 +805,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         // Get the metadata object.
         let metadataObj = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
         
-        if metadataObj.type == AVMetadataObjectTypeQRCode {
+        if metadataObj.type == .qr {
             // If the found metadata is equal to the QR code metadata then update the status label's text and set the bounds
             let barCodeObject = videoPreviewLayer?.transformedMetadataObject(for: metadataObj as AVMetadataMachineReadableCodeObject) as! AVMetadataMachineReadableCodeObject
             qrCodeFrameView?.frame = barCodeObject.bounds;
