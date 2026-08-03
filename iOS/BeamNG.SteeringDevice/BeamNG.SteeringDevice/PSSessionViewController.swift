@@ -675,6 +675,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         if(self.session == nil)
         {
             //self.connectionButton.isHidden = true;
+            self.searching.stopAutoConnectSweep();
             self.session = PSSession(host: toHost, port: onPort, sessionBrokenHandler: self.onDisconnected);
             onButtonMenu();
             self.captureSession?.stopRunning();
@@ -772,6 +773,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
     }
     @objc func onButtonScan () {
         CloseStartScreen();
+        self.searching.startAutoConnectSweep();
     }
     func CloseStartScreen () {
         self.startButton?.removeFromSuperview();
@@ -783,6 +785,7 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         self.view.subviews.forEach({ $0.removeFromSuperview()});
         //self.view.subviews.map({ $0.removeFromSuperview()});
         
+        self.searching.stopAutoConnectSweep();
         self.searching.listenSocket.close();
         self.searching.socket.close();
         self.session.listenSocket.close();
@@ -807,21 +810,34 @@ class PSSessionViewController : UIViewController, AVCaptureMetadataOutputObjects
         
         if metadataObj.type == .qr {
             // If the found metadata is equal to the QR code metadata then update the status label's text and set the bounds
-            let barCodeObject = videoPreviewLayer?.transformedMetadataObject(for: metadataObj as AVMetadataMachineReadableCodeObject) as! AVMetadataMachineReadableCodeObject
-            qrCodeFrameView?.frame = barCodeObject.bounds;
+            if let barCodeObject = videoPreviewLayer?.transformedMetadataObject(for: metadataObj as AVMetadataMachineReadableCodeObject) as? AVMetadataMachineReadableCodeObject {
+                qrCodeFrameView?.frame = barCodeObject.bounds;
+            } else {
+                qrCodeFrameView?.frame = CGRect.zero;
+            }
             
-            if metadataObj.stringValue != nil {
-                //messageLabel.text = metadataObj.stringValue
-                //print(metadataObj.stringValue);
-                var qrString = metadataObj.stringValue;
-                var splitString = qrString?.components(separatedBy: "#");
-                if (splitString?[1] != "") {
-                    //print(splitString[1]);
-                    self.searching.code = (splitString?[1])!;
-                    self.searching.broadcast(1);
-                }
+            if let qrString = metadataObj.stringValue,
+                let extractedCode = extractSecurityCode(from: qrString) {
+                self.searching.code = extractedCode;
+                self.searching.broadcast(1);
             }
         }
+    }
+    
+    private func extractSecurityCode(from raw: String) -> String? {
+        let candidateFromHash = raw.components(separatedBy: "#").last;
+        let candidate = (candidateFromHash ?? raw).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines);
+        
+        if candidate.isEmpty || candidate.count > 64 {
+            return nil;
+        }
+        
+        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_-"));
+        if candidate.rangeOfCharacter(from: allowedCharacters.inverted) != nil {
+            return nil;
+        }
+        
+        return candidate;
     }
     override var shouldAutorotate : Bool {
         return true;
