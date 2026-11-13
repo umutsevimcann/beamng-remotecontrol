@@ -137,6 +137,13 @@
     <string name="settings_eyebrow">AYARLAR</string>
     <string name="settings_language">DİL</string>
     <string name="settings_title">Kontroller ve Gösterge</string>
+    <string name="settings_dash_layout">GÖSTERGE DÜZENİ</string>
+    <string name="dash_modern">Modern</string>
+    <string name="dash_classic">Klasik</string>
+    <string name="dash_race">Yarış</string>
+    <string name="dash_minimal">Sade</string>
+    <string name="settings_mirrored">Aynalı yerleşim</string>
+    <string name="settings_mirrored_sub">Direksiyon sağda, pedallar solda</string>
     <string name="settings_control_type">KONTROL TİPİ</string>
     <string name="control_buttons">Ok tuşları</string>
     <string name="control_slider">Direksiyon</string>

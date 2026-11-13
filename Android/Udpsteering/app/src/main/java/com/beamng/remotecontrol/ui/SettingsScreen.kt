@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.settings.SettingsManager
+import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.theme.Graphite
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
@@ -51,6 +52,8 @@ fun SettingsScreen(settings: SettingsManager) {
     var haptics by remember { mutableStateOf(settings.isHapticEnabled) }
     var perfTimer by remember { mutableStateOf(settings.isPerfTimerEnabled) }
     var analogPedals by remember { mutableStateOf(settings.isAnalogPedals) }
+    var dashLayout by remember { mutableStateOf(settings.dashLayout) }
+    var mirrored by remember { mutableStateOf(settings.isMirrored) }
 
     Column(
         modifier = Modifier
@@ -83,6 +86,23 @@ fun SettingsScreen(settings: SettingsManager) {
                     AppLanguage.apply(language)
                 }
             }
+        }
+        Spacer(Modifier.height(14.dp))
+
+        GarageCard(title = stringResource(R.string.settings_dash_layout)) {
+            SegmentedRow(
+                options = listOf(
+                    stringResource(R.string.dash_modern),
+                    stringResource(R.string.dash_classic),
+                    stringResource(R.string.dash_race),
+                    stringResource(R.string.dash_minimal),
+                ),
+                selectedIndex = DashLayout.entries.indexOf(dashLayout),
+                onSelect = { index ->
+                    dashLayout = DashLayout.entries[index]
+                    settings.dashLayout = dashLayout
+                },
+            )
         }
         Spacer(Modifier.height(14.dp))
 
@@ -191,6 +211,14 @@ fun SettingsScreen(settings: SettingsManager) {
             ) {
                 analogPedals = it
                 settings.isAnalogPedals = it
+            }
+            ToggleRow(
+                title = stringResource(R.string.settings_mirrored),
+                subtitle = stringResource(R.string.settings_mirrored_sub),
+                checked = mirrored,
+            ) {
+                mirrored = it
+                settings.isMirrored = it
             }
         }
 

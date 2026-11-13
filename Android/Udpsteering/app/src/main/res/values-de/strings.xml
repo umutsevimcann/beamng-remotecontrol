@@ -137,6 +137,13 @@
     <string name="settings_eyebrow">EINSTELLUNGEN</string>
     <string name="settings_language">SPRACHE</string>
     <string name="settings_title">Steuerung &amp; Cockpit</string>
+    <string name="settings_dash_layout">ANZEIGE-LAYOUT</string>
+    <string name="dash_modern">Modern</string>
+    <string name="dash_classic">Klassisch</string>
+    <string name="dash_race">Rennen</string>
+    <string name="dash_minimal">Minimal</string>
+    <string name="settings_mirrored">Gespiegeltes Layout</string>
+    <string name="settings_mirrored_sub">Lenkrad rechts, Pedale links</string>
     <string name="settings_control_type">STEUERUNGSART</string>
     <string name="control_buttons">Pfeiltasten</string>
     <string name="control_slider">Lenkrad</string>

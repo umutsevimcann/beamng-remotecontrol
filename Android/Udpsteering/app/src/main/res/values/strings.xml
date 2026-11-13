@@ -137,6 +137,13 @@
     <string name="settings_eyebrow">SETTINGS</string>
     <string name="settings_language">LANGUAGE</string>
     <string name="settings_title">Controls &amp; Dashboard</string>
+    <string name="settings_dash_layout">DASH LAYOUT</string>
+    <string name="dash_modern">Modern</string>
+    <string name="dash_classic">Classic</string>
+    <string name="dash_race">Race</string>
+    <string name="dash_minimal">Minimal</string>
+    <string name="settings_mirrored">Mirrored layout</string>
+    <string name="settings_mirrored_sub">Wheel on the right, pedals on the left</string>
     <string name="settings_control_type">CONTROL TYPE</string>
     <string name="control_buttons">Arrow buttons</string>
     <string name="control_slider">Steering wheel</string>
