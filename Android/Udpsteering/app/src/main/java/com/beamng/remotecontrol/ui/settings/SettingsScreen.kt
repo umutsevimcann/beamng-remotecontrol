@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -113,7 +114,9 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
     var mirrored by remember { mutableStateOf(settings.isMirrored) }
 
     Heading(stringResource(R.string.settings_control_type), u)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+    // IntrinsicSize.Max: all three cards take the height of the tallest one,
+    // whatever length the subtitles have in each language.
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
         val options = listOf(
             Triple(SettingsManager.CONTROL_GYROSCOPE, R.string.control_gyro, R.string.control_gyro_sub),
             Triple(SettingsManager.CONTROL_SLIDER, R.string.control_slider, R.string.control_slider_sub),
@@ -122,7 +125,7 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
         for ((type, title, sub) in options) {
             ChoiceCard(
                 title = stringResource(title), subtitle = stringResource(sub), selected = controlType == type, u = u,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
                 controlType = type
                 settings.controlType = type
