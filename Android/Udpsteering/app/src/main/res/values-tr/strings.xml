@@ -136,6 +136,8 @@
     <string name="theme_dark">Koyu</string>
     <string name="theme_light">Açık</string>
     <string name="theme_system">Sistem</string>
+    <string name="settings_guide_sub">Senin değerlerinle, adım adım</string>
+    <string name="settings_about_sub">BeamNG\'nin Remote Control uygulamasının topluluk sürümü. BeamNG GmbH ile bağlantılı değildir.</string>
     <string name="settings_heading">Ayarlar</string>
     <string name="settings_sec_driving">Sürüş</string>
     <string name="settings_sec_dashboard">Gösterge</string>
@@ -144,7 +146,6 @@
     <string name="control_gyro_sub">Telefonu direksiyon gibi eğ</string>
     <string name="control_slider_sub">Ekrandaki direksiyonu parmağınla çevir</string>
     <string name="control_buttons_sub">Ekrandaki ◀ ve ▶ tuşlarına bas</string>
-    <string name="settings_version">Sürüm</string>
     <string name="settings_dash_layout">GÖSTERGE DÜZENİ</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Klasik</string>

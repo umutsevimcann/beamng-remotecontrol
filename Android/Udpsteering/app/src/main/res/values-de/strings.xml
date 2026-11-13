@@ -136,6 +136,8 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_light">Hell</string>
     <string name="theme_system">System</string>
+    <string name="settings_guide_sub">Schritt für Schritt, mit deinen Werten</string>
+    <string name="settings_about_sub">Community-Fork der Remote-Control-App von BeamNG. Nicht mit der BeamNG GmbH verbunden.</string>
     <string name="settings_heading">Einstellungen</string>
     <string name="settings_sec_driving">Fahren</string>
     <string name="settings_sec_dashboard">Anzeige</string>
@@ -144,7 +146,6 @@
     <string name="control_gyro_sub">Handy wie ein Lenkrad neigen</string>
     <string name="control_slider_sub">Lenkrad auf dem Bildschirm mit dem Finger drehen</string>
     <string name="control_buttons_sub">◀ und ▶ auf dem Bildschirm halten</string>
-    <string name="settings_version">Version</string>
     <string name="settings_dash_layout">ANZEIGE-LAYOUT</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Klassisch</string>

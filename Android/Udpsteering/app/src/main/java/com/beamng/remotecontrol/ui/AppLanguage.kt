@@ -32,7 +32,12 @@ enum class AppLanguage(val tag: String, val nativeName: String) {
             return entries.firstOrNull { it.tag == tag } ?: ENGLISH
         }
 
-        /** Applies and persists the choice; running activities recreate themselves. */
+        /**
+         * Applies and persists the choice. Every activity declares
+         * configChanges="locale|layoutDirection", so nothing is recreated: the
+         * configuration changes in place and Compose re-reads its strings (a
+         * recreate showed as the screen blinking off and on).
+         */
         fun apply(language: AppLanguage) {
             AppCompatDelegate.setApplicationLocales(
                 LocaleListCompat.forLanguageTags(language.tag),

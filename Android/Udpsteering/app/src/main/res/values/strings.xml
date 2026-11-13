@@ -136,6 +136,8 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
     <string name="theme_system">System</string>
+    <string name="settings_guide_sub">Step by step, with your own values</string>
+    <string name="settings_about_sub">Community fork of BeamNG\'s Remote Control app. Not affiliated with BeamNG GmbH.</string>
     <string name="settings_heading">Settings</string>
     <string name="settings_sec_driving">Driving</string>
     <string name="settings_sec_dashboard">Dashboard</string>
@@ -144,7 +146,6 @@
     <string name="control_gyro_sub">Tilt the phone like a steering wheel</string>
     <string name="control_slider_sub">Turn the wheel on the screen with your finger</string>
     <string name="control_buttons_sub">Hold ◀ and ▶ on the screen</string>
-    <string name="settings_version">Version</string>
     <string name="settings_dash_layout">DASH LAYOUT</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Classic</string>

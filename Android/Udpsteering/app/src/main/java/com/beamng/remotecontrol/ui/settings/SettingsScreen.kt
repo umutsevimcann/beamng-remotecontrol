@@ -60,6 +60,10 @@ import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.dash.sampleDashState
 import com.beamng.remotecontrol.ui.theme.Graphite
 import com.beamng.remotecontrol.ui.theme.Panel
+import com.beamng.remotecontrol.ui.theme.Palette
+import com.beamng.remotecontrol.ui.theme.LightPalette
+import com.beamng.remotecontrol.ui.theme.DarkPalette
+import androidx.compose.ui.graphics.drawscope.clipPath
 import com.beamng.remotecontrol.ui.theme.ThemeMode
 import com.beamng.remotecontrol.ui.theme.ThemeState
 import com.beamng.remotecontrol.ui.theme.asSp
@@ -249,36 +253,144 @@ private fun FeedbackSection(settings: SettingsManager, u: Dp) {
 @Composable
 private fun GeneralSection(u: Dp, onSetupGuide: () -> Unit) {
     val context = LocalContext.current
+
+    // ---- appearance: three swatches that look like what they select ----
     Heading(stringResource(R.string.settings_theme), u)
-    Row(horizontalArrangement = Arrangement.spacedBy(u * 1.5f)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
         val options = listOf(
             ThemeMode.DARK to R.string.theme_dark, ThemeMode.LIGHT to R.string.theme_light, ThemeMode.SYSTEM to R.string.theme_system,
         )
         for ((mode, label) in options) {
-            Pill(stringResource(label), ThemeState.mode == mode, u) {
+            ThemeSwatch(mode, stringResource(label), ThemeState.mode == mode, u, Modifier.weight(1f)) {
                 ThemeState.mode = mode // repaints every screen at once
                 SettingsManager.getInstance(context).themeMode = mode
             }
         }
     }
+
+    // ---- language ----
     var current by remember { mutableStateOf(AppLanguage.current()) }
     Heading(stringResource(R.string.settings_language), u)
-    Row(horizontalArrangement = Arrangement.spacedBy(u * 1.5f)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
         for (language in AppLanguage.entries) {
-            Pill(language.nativeName, language == current, u) {
-                current = language
-                AppLanguage.apply(language)
+            val selected = language == current
+            val shape = RoundedCornerShape(u * 2.5f)
+            Row(
+                Modifier
+                    .weight(1f)
+                    .clip(shape)
+                    .background(if (selected) Graphite.Selected else Graphite.Inset)
+                    .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
+                    .clickable {
+                        current = language
+                        AppLanguage.apply(language)
+                    }
+                    .padding(horizontal = u * 2.6f, vertical = u * 2.6f),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    language.tag.uppercase(), color = if (selected) Graphite.OnOrange else Graphite.Muted,
+                    fontSize = (u * 2.5f).asSp(), fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .background(if (selected) Graphite.Orange else Graphite.Track, RoundedCornerShape(u * 1.2f))
+                        .padding(horizontal = u * 1.5f, vertical = u * 0.7f),
+                )
+                Spacer(Modifier.width(u * 2))
+                Text(
+                    language.nativeName, color = Graphite.Text, fontSize = (u * 3.3f).asSp(),
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = 1,
+                )
             }
         }
     }
-    RowLabel(stringResource(R.string.guide_title), "", u, Modifier.clip(RoundedCornerShape(u * 2)).clickable(onClick = onSetupGuide)) {
-        Text("›", color = Graphite.Muted, fontSize = (u * 5).asSp())
-    }
+
+    // ---- help + about, side by side ----
     val version = remember {
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
     }
-    RowLabel(stringResource(R.string.settings_version), "", u) {
-        Text(version, color = Graphite.Muted, fontSize = (u * 3.2f).asSp())
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        val shape = RoundedCornerShape(u * 2.5f)
+        Row(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(shape)
+                .background(Graphite.Inset)
+                .border(1.dp, Graphite.Edge, shape)
+                .clickable(onClick = onSetupGuide)
+                .padding(u * 3),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.guide_title), color = Graphite.Text, fontSize = (u * 3.5f).asSp(), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(u * 0.8f))
+                Text(stringResource(R.string.settings_guide_sub), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+            }
+            Text("›", color = Graphite.Orange, fontSize = (u * 6).asSp(), fontWeight = FontWeight.Bold)
+        }
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(Graphite.Inset, shape)
+                .border(1.dp, Graphite.Edge, shape)
+                .padding(u * 3),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("BeamNG ", color = Graphite.Text, fontSize = (u * 3.5f).asSp(), fontWeight = FontWeight.Bold)
+                Text("Remote", color = Graphite.Orange, fontSize = (u * 3.5f).asSp(), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(u * 1.6f))
+                Text(
+                    version, color = Graphite.Muted, fontSize = (u * 2.5f).asSp(), fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.background(Graphite.Track, RoundedCornerShape(u * 1.2f)).padding(horizontal = u * 1.4f, vertical = u * 0.5f),
+                )
+            }
+            Spacer(Modifier.height(u * 0.8f))
+            Text(stringResource(R.string.settings_about_sub), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+        }
+    }
+}
+
+/** A miniature screen in the palette it selects; System shows both, split diagonally. */
+@Composable
+private fun ThemeSwatch(mode: ThemeMode, label: String, selected: Boolean, u: Dp, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(u * 2.5f)
+    Column(
+        modifier
+            .clip(shape)
+            .background(if (selected) Graphite.Selected else Graphite.Inset)
+            .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
+            .clickable(onClick = onClick)
+            .padding(u * 2.2f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Canvas(Modifier.fillMaxWidth().height(u * 11)) {
+            val r = CornerRadius(size.height * 0.16f)
+            fun screen(p: Palette) {
+                drawRoundRect(p.bg1, Offset.Zero, size, r)
+                // a panel, a line of text and the accent — enough to read as a screen
+                drawRoundRect(p.panelTop, Offset(size.width * 0.08f, size.height * 0.18f), Size(size.width * 0.50f, size.height * 0.64f), CornerRadius(size.height * 0.10f))
+                drawRoundRect(p.text, Offset(size.width * 0.14f, size.height * 0.32f), Size(size.width * 0.26f, size.height * 0.11f), CornerRadius(size.height * 0.05f))
+                drawRoundRect(p.muted, Offset(size.width * 0.14f, size.height * 0.54f), Size(size.width * 0.36f, size.height * 0.07f), CornerRadius(size.height * 0.04f))
+                drawRoundRect(p.orange, Offset(size.width * 0.66f, size.height * 0.36f), Size(size.width * 0.26f, size.height * 0.28f), CornerRadius(size.height * 0.10f))
+            }
+            when (mode) {
+                ThemeMode.DARK -> screen(DarkPalette)
+                ThemeMode.LIGHT -> screen(LightPalette)
+                ThemeMode.SYSTEM -> {
+                    screen(DarkPalette)
+                    val half = Path().apply { moveTo(size.width, 0f); lineTo(size.width, size.height); lineTo(0f, size.height); close() }
+                    clipPath(half) { screen(LightPalette) }
+                }
+            }
+            drawRoundRect(Graphite.Edge, Offset.Zero, size, r, style = Stroke(1.5f))
+        }
+        Spacer(Modifier.height(u * 1.6f))
+        Text(
+            label, color = if (selected) Graphite.Text else Graphite.Muted, fontSize = (u * 3.1f).asSp(),
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+        )
     }
 }
 

@@ -30,7 +30,7 @@
         </service>
         <activity
             android:name=".WelcomeActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale|layoutDirection"
             android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
@@ -42,23 +42,23 @@
         <activity 
             android:name=".QRCodeScanner"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:configChanges="orientation|keyboardHidden|screenSize|locale|layoutDirection" />
 
         <activity 
             android:name=".MainActivity"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:configChanges="orientation|keyboardHidden|screenSize|locale|layoutDirection" />
             
         <activity
             android:name=".SettingsActivity"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale|layoutDirection"
             android:theme="@style/AppTheme" />
 
         <activity
             android:name=".SetupGuideActivity"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale|layoutDirection"
             android:theme="@style/AppTheme" />
     </application>
 
