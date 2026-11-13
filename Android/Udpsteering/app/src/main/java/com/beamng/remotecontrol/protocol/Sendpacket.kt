@@ -43,4 +43,14 @@ class Sendpacket {
             buffer.putFloat(id.toFloat())
             return buffer.array()
         }
+
+    companion object {
+        /**
+         * Steering centred, both pedals released. The game acts on value changes
+         * only, so this must be the last thing it hears from a pausing drive
+         * screen — otherwise the previous packet (say, full throttle) stays in
+         * force until the device times out 10 s later.
+         */
+        fun neutral(): ByteArray = Sendpacket().apply { setSteeringAngle(0.5f) }.sendingByteArray.copyOf()
+    }
 }

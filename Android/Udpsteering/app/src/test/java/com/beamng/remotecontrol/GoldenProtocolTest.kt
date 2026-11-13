@@ -219,4 +219,17 @@ class GoldenProtocolTest {
             if (slip != null) assertTrue(slip in -180f..180f)
         }
     }
+
+    @Test
+    fun neutralPacket_centresSteeringAndReleasesBothPedals() {
+        // Sent when the drive screen pauses. The game only reacts to value changes,
+        // so without this the last packet (e.g. full throttle) stays in force.
+        val neutral = Sendpacket.neutral()
+        assertEquals(16, neutral.size)
+        val buf = ByteBuffer.wrap(neutral).order(ByteOrder.BIG_ENDIAN)
+        assertEquals(0.5f, buf.float) // steering centred
+        assertEquals(0f, buf.float)   // throttle released
+        assertEquals(0f, buf.float)   // brake released
+        assertEquals(0f, buf.float)   // id
+    }
 }

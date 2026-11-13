@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -181,6 +182,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        // Release the controls before the sender goes away: a pedal held while
+        // the screen pauses must not stay pressed in the game. The sender's
+        // finally block then transmits the neutral state.
+        thrpushed = 0f
+        brpushed = 0f
         stopUdpTasks()
         steeringInputHandler?.stop()
     }
@@ -307,6 +313,7 @@ class MainActivity : AppCompatActivity() {
                     ?.let { UdpDiscovery.buildHello(it) }
                 var tick = 0
                 var failing = false
+                try {
                 while (true) {
                     delay(sendingTimeout) // also our cancellation point
 
@@ -345,6 +352,22 @@ class MainActivity : AppCompatActivity() {
                         // dropped us (10s idle timeout) while the link was down.
                         tick = 0
                         delay(SEND_RETRY_DELAY_MS)
+                    }
+                }
+                } finally {
+                    // Leaving (pause, settings, screen off, incoming call): let go
+                    // of everything on the game's side. Sent a few times because
+                    // UDP is lossy, and non-cancellably because we are here
+                    // precisely because the coroutine was cancelled.
+                    withContext(NonCancellable) {
+                        val neutral = Sendpacket.neutral()
+                        repeat(NEUTRAL_PACKETS) {
+                            try {
+                                socket.send(DatagramPacket(neutral, neutral.size, host, Ports.GAME))
+                            } catch (e: IOException) {
+                                // Link is down; the game's 10 s timeout is the fallback.
+                            }
+                        }
                     }
                 }
             }
@@ -532,6 +555,7 @@ class MainActivity : AppCompatActivity() {
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
         private const val SEND_RETRY_DELAY_MS = 250L
+        private const val NEUTRAL_PACKETS = 3
         private const val ABS_VIBRATION_COOLDOWN_MS = 150L
         private const val TELEMETRY_STALE_MS = 2000L
         private const val IMPACT_WINDOW_MS = 300L
