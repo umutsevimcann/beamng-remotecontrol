@@ -38,6 +38,10 @@ class MotionPacket(data: ByteArray, length: Int) {
      * below ~20 km/h, or pointing backwards (reverse gear reads ~180°).
      */
     fun slipAngleDeg(): Float? {
+        // Non-finite input: no drift. Infinity here would also never leave the
+        // normalising loops below.
+        if (!velX.isFinite() || !velY.isFinite() || !yawPos.isFinite()) return null
+
         val speedH = hypot(velX, velY)
         if (speedH < 5.5f) return null // ~20 km/h
 

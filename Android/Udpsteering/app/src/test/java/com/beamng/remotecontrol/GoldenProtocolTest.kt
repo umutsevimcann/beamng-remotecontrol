@@ -4,6 +4,7 @@ import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -142,6 +143,26 @@ class GoldenProtocolTest {
         assertFalse(p.isValid)
     }
 
+    @Test
+    fun outgauge_nonFiniteFloats_areZeroed() {
+        // Anyone on the LAN can send a datagram to 4445; NaN/Infinity must never
+        // reach the UI, where Float.roundToInt() throws on NaN.
+        val buf = ByteBuffer.wrap(outgaugePacket(96, turbo = true)).order(ByteOrder.LITTLE_ENDIAN)
+        buf.putFloat(12, Float.NaN)               // speed
+        buf.putFloat(16, Float.NaN)               // rpm
+        buf.putFloat(20, Float.POSITIVE_INFINITY) // turbo
+        buf.putFloat(24, Float.NEGATIVE_INFINITY) // engine temp
+        buf.putFloat(28, Float.NaN)               // fuel
+        buf.putFloat(48, Float.NaN)               // throttle
+        buf.putFloat(52, Float.NaN)               // brake
+        buf.putFloat(56, Float.NaN)               // clutch
+        val p = Receivepacket(buf.array(), 96)
+        assertTrue(p.isValid)
+        for (v in listOf(p.speed, p.rpm, p.turbo, p.engineTemp, p.fuel, p.throttle, p.brake, p.clutch)) {
+            assertEquals(0f, v)
+        }
+    }
+
     // ---------------- MotionSim (drift stream) ----------------
 
     private fun motionPacket(velX: Float, velY: Float, yawPos: Float): ByteArray {
@@ -177,5 +198,15 @@ class GoldenProtocolTest {
         val bad = motionPacket(5f, 5f, 0f)
         bad[0] = 'X'.code.toByte()
         assertFalse(com.beamng.remotecontrol.protocol.MotionPacket(bad, 88).isValid)
+    }
+
+    @Test(timeout = 2000)
+    fun motion_nonFiniteValues_noDriftAndNoHang() {
+        // Infinity in the angle used to spin the normalising while-loop forever.
+        for (bad in listOf(Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY)) {
+            assertNull(com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(bad, 8f, 0f), 88).slipAngleDeg())
+            assertNull(com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(5f, bad, 0f), 88).slipAngleDeg())
+            assertNull(com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(5f, 8.6603f, bad), 88).slipAngleDeg())
+        }
     }
 }

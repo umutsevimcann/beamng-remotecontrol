@@ -67,14 +67,14 @@ class Receivepacket(data: ByteArray, length: Int) {
                 val bb = ByteBuffer.wrap(data)
                 hasTurbo = (EndianUtils.readSwappedUnsignedShort(data, 8) and FLAG_TURBO) != 0
                 gearByte = bb.get(10)
-                speed = EndianUtils.readSwappedFloat(data, 12)
-                rpm = EndianUtils.readSwappedFloat(data, 16)
-                turbo = EndianUtils.readSwappedFloat(data, 20)
-                engineTemp = EndianUtils.readSwappedFloat(data, 24)
-                fuel = EndianUtils.readSwappedFloat(data, 28)
-                throttle = EndianUtils.readSwappedFloat(data, 48)
-                brake = EndianUtils.readSwappedFloat(data, 52)
-                clutch = EndianUtils.readSwappedFloat(data, 56)
+                speed = finiteFloat(data, 12)
+                rpm = finiteFloat(data, 16)
+                turbo = finiteFloat(data, 20)
+                engineTemp = finiteFloat(data, 24)
+                fuel = finiteFloat(data, 28)
+                throttle = finiteFloat(data, 48)
+                brake = finiteFloat(data, 52)
+                clutch = finiteFloat(data, 56)
                 showLights = EndianUtils.readSwappedInteger(data, 44)
                 id = EndianUtils.readSwappedInteger(data, 92)
                 odometer = if (length >= 100) EndianUtils.readSwappedInteger(data, 96) else 0
@@ -83,6 +83,16 @@ class Receivepacket(data: ByteArray, length: Int) {
                 Log.e("Receivepacket", "Failed to parse packet", e)
             }
         }
+    }
+
+    /**
+     * Reads a float and replaces NaN/Infinity with 0. Port 4445 accepts datagrams
+     * from anyone on the LAN, and a non-finite value would crash the UI
+     * (Float.roundToInt() throws on NaN).
+     */
+    private fun finiteFloat(data: ByteArray, offset: Int): Float {
+        val v = EndianUtils.readSwappedFloat(data, offset)
+        return if (v.isFinite()) v else 0f
     }
 
     val activeLightsArr: BooleanArray
