@@ -1,5 +1,6 @@
 package com.beamng.remotecontrol.settings
 
+import com.beamng.remotecontrol.ui.dash.DashLayout
 import android.content.Context
 import android.content.SharedPreferences
 
@@ -75,6 +76,18 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_ANALOG_PEDALS, DEFAULT_ANALOG_PEDALS)
         set(enabled) = prefs.edit().putBoolean(KEY_ANALOG_PEDALS, enabled).apply()
 
+    // ==================== DRIVE SCREEN LAYOUT ====================
+
+    /** Which gauge layout the drive screen shows. */
+    var dashLayout: DashLayout
+        get() = DashLayout.fromKey(prefs.getString(KEY_DASH_LAYOUT, null))
+        set(layout) = prefs.edit().putString(KEY_DASH_LAYOUT, layout.key).apply()
+
+    /** Wheel on the right, pedals on the left — for left-handed players. */
+    var isMirrored: Boolean
+        get() = prefs.getBoolean(KEY_MIRRORED, DEFAULT_MIRRORED)
+        set(enabled) = prefs.edit().putBoolean(KEY_MIRRORED, enabled).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -94,6 +107,8 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_DASHBOARD_ONLY = "dashboard_only"
         const val KEY_PERF_TIMER = "perf_timer"
         const val KEY_ANALOG_PEDALS = "analog_pedals"
+        const val KEY_DASH_LAYOUT = "dash_layout"
+        const val KEY_MIRRORED = "mirrored_layout"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0
@@ -106,6 +121,7 @@ class SettingsManager private constructor(context: Context) {
         private const val DEFAULT_USE_METRIC = true
         private const val DEFAULT_HAPTIC_ENABLED = true
         private const val DEFAULT_ANALOG_PEDALS = false
+        private const val DEFAULT_MIRRORED = false
         private const val DEFAULT_DEAD_ZONE = 3.0f
         private const val DEFAULT_DASHBOARD_ONLY = false
         private const val DEFAULT_PERF_TIMER = false
