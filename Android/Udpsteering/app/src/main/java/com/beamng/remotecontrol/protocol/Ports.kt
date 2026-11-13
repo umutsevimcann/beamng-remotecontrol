@@ -13,4 +13,7 @@ object Ports {
 
     /** Phone listens here: optional MotionSim stream (drift meter). */
     const val MOTION = 4446
+
+    /** The RemoteControlPro mod listens here (its own port; it replies to the sender). */
+    const val MOD = 4450
 }
