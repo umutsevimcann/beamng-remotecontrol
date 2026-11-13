@@ -43,3 +43,6 @@ local.properties
 
 # Java heap dumps
 *.hprof
+
+# Brainstorm companion scratch (mockups, local only)
+.superpowers/
