@@ -144,16 +144,12 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
         // Low-pass filter
         smoothedRoll = smoothedRoll * (1f - SMOOTHING) + rawAngle * SMOOTHING
 
-        // Normalize to -1..1
-        val sensitivity = settings.sensitivity
-        val effectiveMax = MAX_STEER_ANGLE / maxOf(0.1f, sensitivity)
-        val normalized = (smoothedRoll / effectiveMax).coerceIn(-1f, 1f)
-
-        // Power curve: precise near center, aggressive at extremes
-        val sign = kotlin.math.sign(normalized)
-        currentSteering = sign * Math.pow(
-            kotlin.math.abs(normalized).toDouble(), STEERING_EXPONENT.toDouble()
-        ).toFloat()
+        // Normalize to -1..1: full lock at the user's chosen tilt angle. Linear on
+        // purpose — the game's own binding already softens the centre (linearity
+        // 2.5 in bngremotectrlv1.json); stacking a second curve here made small
+        // tilts do nothing and the last few degrees do everything.
+        val lockAngle = settings.steeringLockDeg
+        currentSteering = (smoothedRoll / lockAngle).coerceIn(-1f, 1f)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -161,7 +157,5 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
 
     companion object {
         private const val SMOOTHING = 0.5f
-        private const val MAX_STEER_ANGLE = 45f
-        private const val STEERING_EXPONENT = 1.4f
     }
 }

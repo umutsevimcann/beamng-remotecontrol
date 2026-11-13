@@ -126,11 +126,11 @@
     <string name="settings_language">SPRACHE</string>
     <string name="settings_title">Steuerung &amp; Cockpit</string>
     <string name="settings_control_type">STEUERUNGSART</string>
-    <string name="control_buttons">Tasten</string>
-    <string name="control_slider">Schieberegler</string>
-    <string name="control_gyro">Gyroskop</string>
-    <string name="settings_sensitivity">Empfindlichkeit</string>
-    <string name="settings_sensitivity_sub">Gyro-Lenkübersetzung</string>
+    <string name="control_buttons">Pfeiltasten</string>
+    <string name="control_slider">Lenkrad</string>
+    <string name="control_gyro">Handy neigen</string>
+    <string name="settings_lock_angle">Neigung für Vollausschlag</string>
+    <string name="settings_lock_angle_sub">So weit neigen für vollen Lenkeinschlag</string>
     <string name="settings_dead_zone">Totzone</string>
     <string name="settings_dead_zone_sub">Toleranz um die Mitte</string>
     <string name="settings_units">Einheiten</string>

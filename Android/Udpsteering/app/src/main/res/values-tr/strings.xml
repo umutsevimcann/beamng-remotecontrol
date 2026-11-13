@@ -126,11 +126,11 @@
     <string name="settings_language">DİL</string>
     <string name="settings_title">Kontroller ve Gösterge</string>
     <string name="settings_control_type">KONTROL TİPİ</string>
-    <string name="control_buttons">Butonlar</string>
-    <string name="control_slider">Kaydırıcı</string>
-    <string name="control_gyro">Jiroskop</string>
-    <string name="settings_sensitivity">Hassasiyet</string>
-    <string name="settings_sensitivity_sub">Jiroskop direksiyon oranı</string>
+    <string name="control_buttons">Ok tuşları</string>
+    <string name="control_slider">Direksiyon</string>
+    <string name="control_gyro">Telefonu eğ</string>
+    <string name="settings_lock_angle">Tam kırma açısı</string>
+    <string name="settings_lock_angle_sub">Telefonu bu kadar eğince direksiyon tam kırar</string>
     <string name="settings_dead_zone">Ölü bölge</string>
     <string name="settings_dead_zone_sub">Merkez toleransı</string>
     <string name="settings_units">Birimler</string>

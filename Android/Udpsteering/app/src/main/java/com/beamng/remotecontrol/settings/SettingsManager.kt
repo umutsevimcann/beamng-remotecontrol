@@ -25,11 +25,12 @@ class SettingsManager private constructor(context: Context) {
             else -> "Gyroscope"
         }
 
-    // ==================== SENSITIVITY ====================
+    // ==================== GYRO LOCK ANGLE ====================
 
-    var sensitivity: Float
-        get() = prefs.getFloat(KEY_SENSITIVITY, DEFAULT_SENSITIVITY)
-        set(value) = prefs.edit().putFloat(KEY_SENSITIVITY, value.coerceIn(0.1f, 1.0f)).apply()
+    /** Phone tilt, in degrees, that gives full steering lock in gyro mode. */
+    var steeringLockDeg: Float
+        get() = prefs.getFloat(KEY_STEERING_LOCK, DEFAULT_STEERING_LOCK)
+        set(value) = prefs.edit().putFloat(KEY_STEERING_LOCK, value.coerceIn(30f, 120f)).apply()
 
     // ==================== UNITS ====================
 
@@ -85,7 +86,7 @@ class SettingsManager private constructor(context: Context) {
 
         // Setting keys
         const val KEY_CONTROL_TYPE = "control_type"
-        const val KEY_SENSITIVITY = "sensitivity"
+        const val KEY_STEERING_LOCK = "steering_lock_deg"
         const val KEY_USE_METRIC = "use_metric"
         const val KEY_HAPTIC_ENABLED = "haptic_enabled"
         const val KEY_LAST_IP = "last_ip"
@@ -101,7 +102,7 @@ class SettingsManager private constructor(context: Context) {
 
         // Defaults
         private const val DEFAULT_CONTROL_TYPE = CONTROL_GYROSCOPE
-        private const val DEFAULT_SENSITIVITY = 0.5f
+        private const val DEFAULT_STEERING_LOCK = 70f
         private const val DEFAULT_USE_METRIC = true
         private const val DEFAULT_HAPTIC_ENABLED = true
         private const val DEFAULT_ANALOG_PEDALS = false

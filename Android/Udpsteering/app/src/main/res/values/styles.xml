@@ -1,5 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- MIUI/Android "force dark" recolours our own dark UI (dim icons turned white). -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="windowActionBar">false</item>

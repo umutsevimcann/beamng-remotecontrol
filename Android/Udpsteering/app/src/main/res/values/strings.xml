@@ -126,11 +126,11 @@
     <string name="settings_language">LANGUAGE</string>
     <string name="settings_title">Controls &amp; Dashboard</string>
     <string name="settings_control_type">CONTROL TYPE</string>
-    <string name="control_buttons">Buttons</string>
-    <string name="control_slider">Slider</string>
-    <string name="control_gyro">Gyro</string>
-    <string name="settings_sensitivity">Sensitivity</string>
-    <string name="settings_sensitivity_sub">Gyro steering ratio</string>
+    <string name="control_buttons">Arrow buttons</string>
+    <string name="control_slider">Steering wheel</string>
+    <string name="control_gyro">Tilt phone</string>
+    <string name="settings_lock_angle">Full-lock tilt</string>
+    <string name="settings_lock_angle_sub">Tilt the phone this far for full steering lock</string>
     <string name="settings_dead_zone">Dead zone</string>
     <string name="settings_dead_zone_sub">Center tolerance</string>
     <string name="settings_units">Units</string>

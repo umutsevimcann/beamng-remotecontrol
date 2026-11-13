@@ -44,7 +44,7 @@ import com.beamng.remotecontrol.ui.theme.NightGarageTheme
 @Composable
 fun SettingsScreen(settings: SettingsManager) {
     var controlType by remember { mutableIntStateOf(settings.controlType) }
-    var sensitivity by remember { mutableFloatStateOf(settings.sensitivity) }
+    var lockAngle by remember { mutableFloatStateOf(settings.steeringLockDeg) }
     var deadZone by remember { mutableFloatStateOf(settings.deadZone) }
     var metric by remember { mutableStateOf(settings.useMetricUnits()) }
     var dashboardOnly by remember { mutableStateOf(settings.isDashboardOnly) }
@@ -112,16 +112,16 @@ fun SettingsScreen(settings: SettingsManager) {
 
         GarageCard(title = "") {
             SettingRow(
-                title = stringResource(R.string.settings_sensitivity),
-                subtitle = stringResource(R.string.settings_sensitivity_sub),
-                value = "${Math.round(sensitivity * 100)}%",
+                title = stringResource(R.string.settings_lock_angle),
+                subtitle = stringResource(R.string.settings_lock_angle_sub),
+                value = "${Math.round(lockAngle)}°",
             ) {
                 GarageSlider(
-                    value = sensitivity,
-                    range = 0.1f..1.0f,
+                    value = lockAngle,
+                    range = 30f..120f,
                     onChange = {
-                        sensitivity = it
-                        settings.sensitivity = it
+                        lockAngle = it
+                        settings.steeringLockDeg = it
                     },
                 )
             }
