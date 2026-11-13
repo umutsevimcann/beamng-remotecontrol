@@ -56,8 +56,9 @@ fun ModernDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                     ) {
                         DashLabel(stringResource(R.string.drive_gear), u)
                         Text(
-                            t.gear, color = Graphite.Blue, fontSize = (u * 17).asSp(),
+                            t.gear, color = Graphite.Blue, fontSize = (u * 17 * gearScale(t.gear)).asSp(),
                             lineHeight = (u * 17).asSp(), fontWeight = FontWeight.ExtraBold,
+                            maxLines = 1, softWrap = false,
                         )
                     }
                 }

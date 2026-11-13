@@ -61,8 +61,9 @@ fun ClassicDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    t.gear, color = Graphite.Text, fontSize = (u * 15).asSp(),
+                    t.gear, color = Graphite.Text, fontSize = (u * 15 * gearScale(t.gear)).asSp(),
                     lineHeight = (u * 15).asSp(), fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1, softWrap = false,
                 )
                 DashLabel(stringResource(R.string.drive_gear), u)
                 Spacer(Modifier.height(u * 3))

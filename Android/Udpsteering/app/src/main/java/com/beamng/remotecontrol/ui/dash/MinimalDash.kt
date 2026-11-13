@@ -40,7 +40,7 @@ fun MinimalDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             DashLabel(stringResource(if (state.metricUnits) R.string.speed_kmh else R.string.speed_mph), u)
             Spacer(Modifier.width(u * 5))
-            Text(state.telemetry.gear, color = Graphite.Orange, fontSize = (u * 8).asSp(), fontWeight = FontWeight.Bold)
+            Text(state.telemetry.gear, color = Graphite.Orange, fontSize = (u * 8).asSp(), fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
             Spacer(Modifier.width(u * 1.5f))
             DashLabel(stringResource(R.string.drive_gear), u)
         }

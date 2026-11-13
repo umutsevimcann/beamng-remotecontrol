@@ -31,3 +31,9 @@ internal fun DashState.speed(): Float =
 /** RPM that is safe to draw: a garbage packet must never reach a layout pass as NaN. */
 internal fun DashState.safeRpm(): Float =
     if (telemetry.rpm.isFinite()) telemetry.rpm.coerceAtLeast(0f) else 0f
+
+/**
+ * Font scale for the gear glyph: trucks reach two-digit gears and multi-reverse
+ * gearboxes send "R2", which would wrap or spill at the single-character size.
+ */
+internal fun gearScale(gear: String): Float = if (gear.length > 1) 0.62f else 1f

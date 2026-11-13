@@ -71,7 +71,8 @@ fun RaceDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                 DashLabel(stringResource(R.string.drive_gear), u, modifier = Modifier.align(Alignment.TopCenter).padding(top = u * 1.5f))
                 Text(
                     t.gear, color = Color(0xFFFFE14D), fontFamily = FontFamily.Monospace,
-                    fontSize = (u * 30).asSp(), lineHeight = (u * 30).asSp(), fontWeight = FontWeight.Bold,
+                    fontSize = (u * 30 * gearScale(t.gear)).asSp(), lineHeight = (u * 30).asSp(), fontWeight = FontWeight.Bold,
+                    maxLines = 1, softWrap = false,
                 )
             }
             Column(Modifier.weight(1.25f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(u * 2)) {

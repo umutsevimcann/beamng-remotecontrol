@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.view.WindowCompat
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -59,6 +60,9 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Draw edge to edge on every Android version; the screens pad themselves
+        // with safeDrawingPadding (system bars + display cutout).
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         settings = SettingsManager.getInstance(this)
         setContent {
             RemoteTheme {

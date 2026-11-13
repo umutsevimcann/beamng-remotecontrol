@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,7 +63,7 @@ enum class SettingsSection { DRIVING, DASHBOARD, FEEDBACK, GENERAL }
 @Composable
 fun SettingsScreen(settings: SettingsManager, onBack: () -> Unit, onSetupGuide: () -> Unit) {
     var section by rememberSaveable { mutableStateOf(SettingsSection.DRIVING) }
-    BoxWithConstraints(Modifier.fillMaxSize().background(screenBackground()).systemBarsPadding()) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(screenBackground()).safeDrawingPadding()) {
         val u = maxHeight / 100
         Column(Modifier.fillMaxSize().padding(horizontal = u * 6, vertical = u * 4)) {
             Row(Modifier.fillMaxWidth().height(u * 10), verticalAlignment = Alignment.CenterVertically) {

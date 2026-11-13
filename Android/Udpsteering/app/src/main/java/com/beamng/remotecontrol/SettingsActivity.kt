@@ -1,6 +1,7 @@
 package com.beamng.remotecontrol
 
 import android.os.Bundle
+import androidx.core.view.WindowCompat
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.beamng.remotecontrol.settings.SettingsManager
@@ -16,6 +17,9 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Draw edge to edge on every Android version; the screens pad themselves
+        // with safeDrawingPadding (system bars + display cutout).
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             RemoteTheme {
                 SettingsScreen(
