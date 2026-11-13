@@ -14,7 +14,7 @@ import com.beamng.remotecontrol.settings.SettingsManager
 /**
  * Tilt-based steering using Android's fused rotation vector sensor.
  * Uses GAME_ROTATION_VECTOR (accel+gyro fusion, no magnetometer).
- * Pipeline: Rotation Vector → Rotation Matrix → Landscape Remap → Orientation
+ * Pipeline: Rotation Vector → world-up vector → in-screen-plane angle
  *           → Dead Zone → Smoothing → Power Curve
  */
 class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEventListener {
@@ -28,14 +28,10 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
     @Volatile
     private var currentSteering = 0f
     private var smoothedRoll = 0f
-    private var calibrationOffset = 0f
-    private var calibrated = false
     private var useAccelerometerFallback = false
     private var lastRotation = -1
 
     private val rotationMatrix = FloatArray(9)
-    private val remappedMatrix = FloatArray(9)
-    private val orientation = FloatArray(3)
     private val accelSamples = FloatArray(8)
     private var accelSampleIndex = 0
     private var accelSampleCount = 0
@@ -43,7 +39,6 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
     override fun getSteeringValue(): Float = currentSteering
 
     override fun start() {
-        calibrated = false
         smoothedRoll = 0f
         currentSteering = 0f
 
@@ -74,64 +69,68 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
     override fun requiresUIControls(): Boolean = false
 
     override fun onSensorChanged(event: SensorEvent) {
-        // sensorLandscape allows both 90° and 270° rotations; the axis remap below
-        // assumes ROTATION_90, so the roll sign must flip in reverse landscape.
+        // sensorLandscape allows both 90° and 270° rotations (handled below).
         // The flip can happen mid-session (configChanges suppresses recreation),
-        // so re-center the calibration whenever the rotation changes.
+        // so reset the smoothing whenever the rotation changes.
         val rotation = display.rotation
         if (rotation != lastRotation) {
             lastRotation = rotation
-            calibrated = false
             smoothedRoll = 0f
         }
 
-        var rollDegrees: Float
-
+        // "Up" (opposite of gravity) in device coordinates. Both sensor paths
+        // yield the same physical vector, so both share one steering formula.
+        val upX: Float
+        val upY: Float
+        val upZ: Float
         if (useAccelerometerFallback && event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            // Accelerometer fallback: use tilt angle from gravity.
-            // Android reports accelerometer in device coordinates (portrait);
-            // in landscape values[1] carries the steering tilt (positive = left).
-            val gx = event.values[0]
-            val gy = event.values[1]
-            val gz = event.values[2]
-            var magnitude = kotlin.math.sqrt(gx * gx + gy * gy + gz * gz)
-            if (magnitude < 0.1f) magnitude = 1f
-            // gy / magnitude gives sin of tilt angle. Positive = left tilt.
-            val rawAngle = Math.toDegrees(kotlin.math.asin(gy / magnitude).toDouble()).toFloat()
+            // At rest the accelerometer reads +g along the axis pointing up.
+            upX = event.values[0]
+            upY = event.values[1]
+            upZ = event.values[2]
+        } else if (event.sensor.type == Sensor.TYPE_GAME_ROTATION_VECTOR
+            || event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+            // Row 2 of the device→world rotation matrix is world-up in device coords.
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+            upX = rotationMatrix[6]
+            upY = rotationMatrix[7]
+            upZ = rotationMatrix[8]
+        } else {
+            return
+        }
 
-            // Rolling average for noise reduction
-            accelSamples[accelSampleIndex] = rawAngle
+        // Steering = how far the screen's left/right edge dips: the sideways
+        // (device Y) share of "up", as an angle. This is the one measure that
+        // behaves the same however the phone is held — flat like a tray, tilted
+        // back, or upright like a wheel — with neutral at 0° and no singularity.
+        // (An in-screen-plane atan2 was tried and breaks when the phone lies
+        // flat-ish: upX ≈ 0 there, so tiny tilts read as ±90°.)
+        // The screen's sideways axis is device -Y in ROTATION_90 and +Y in
+        // ROTATION_270, hence the mirror. Sign: positive = right.
+        var magnitude = kotlin.math.sqrt(upX * upX + upY * upY + upZ * upZ)
+        if (magnitude < 0.1f) magnitude = 1f
+        val mirror = if (rotation == Surface.ROTATION_270) -1f else 1f
+        val side = (mirror * upY / magnitude).coerceIn(-1f, 1f)
+        // (Sign confirmed on device: with a leading minus, steering was mirrored.)
+        var rollDegrees = Math.toDegrees(kotlin.math.asin(side.toDouble())).toFloat()
+
+        if (useAccelerometerFallback) {
+            // Rolling average for noise reduction (raw accelerometer is jittery)
+            accelSamples[accelSampleIndex] = rollDegrees
             accelSampleIndex = (accelSampleIndex + 1) % 8
             if (accelSampleCount < 8) accelSampleCount++
 
             var avg = 0f
             for (i in 0 until accelSampleCount) avg += accelSamples[i]
             rollDegrees = avg / accelSampleCount
-
-        } else if (event.sensor.type == Sensor.TYPE_GAME_ROTATION_VECTOR
-            || event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
-            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-            SensorManager.remapCoordinateSystem(
-                rotationMatrix,
-                SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X, remappedMatrix
-            )
-            SensorManager.getOrientation(remappedMatrix, orientation)
-            rollDegrees = Math.toDegrees(orientation[2].toDouble()).toFloat()
-        } else {
-            return
         }
 
-        if (rotation == Surface.ROTATION_270) {
-            rollDegrees = -rollDegrees
-        }
-
-        // Auto-calibrate: first reading = center position
-        if (!calibrated) {
-            calibrationOffset = rollDegrees
-            calibrated = true
-        }
-
-        var rawAngle = rollDegrees - calibrationOffset
+        // No "first reading = center" calibration: this angle is absolute (0° =
+        // screen level side to side), so level is always straight ahead. The old
+        // auto-calibration latched whatever tilt the phone had when the screen
+        // opened, which shifted the centre and left one direction short of full
+        // lock (reported on device: left easy, right weak).
+        var rawAngle = rollDegrees
 
         // Dead zone with smooth transition
         val deadZone = settings.deadZone
