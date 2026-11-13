@@ -70,7 +70,7 @@ private fun ArrowButton(glyph: String, u: Dp, modifier: Modifier, onPress: (Bool
     Box(
         modifier
             .background(
-                Brush.verticalGradient(if (pressed) listOf(Color(0xFF3A2410), Color(0xFF24160A)) else listOf(Graphite.PanelTop, Graphite.PanelBottom)),
+                Brush.verticalGradient(if (pressed) listOf(Graphite.Selected, Graphite.Selected) else listOf(Graphite.PanelTop, Graphite.PanelBottom)),
                 shape,
             )
             .border(if (pressed) 2.dp else 1.dp, if (pressed) Graphite.Orange else Graphite.Edge, shape)

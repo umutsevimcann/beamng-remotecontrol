@@ -56,8 +56,6 @@ class ButtonInputHandler(context: Context) : SteeringInputHandler {
         rightPressed = false
     }
 
-    override fun requiresUIControls(): Boolean = true
-
     fun pressLeft(pressed: Boolean) {
         leftPressed = pressed
         updateTarget()

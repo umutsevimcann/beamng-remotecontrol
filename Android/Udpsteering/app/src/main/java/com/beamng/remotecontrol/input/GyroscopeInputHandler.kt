@@ -14,8 +14,8 @@ import com.beamng.remotecontrol.settings.SettingsManager
 /**
  * Tilt-based steering using Android's fused rotation vector sensor.
  * Uses GAME_ROTATION_VECTOR (accel+gyro fusion, no magnetometer).
- * Pipeline: Rotation Vector → world-up vector → in-screen-plane angle
- *           → Dead Zone → Smoothing → Power Curve
+ * Pipeline: rotation vector → world-up vector → sideways tilt angle
+ *           → dead zone → smoothing → linear map to the full-lock tilt
  */
 class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEventListener {
 
@@ -66,8 +66,6 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
         smoothedRoll = 0f
     }
 
-    override fun requiresUIControls(): Boolean = false
-
     override fun onSensorChanged(event: SensorEvent) {
         // sensorLandscape allows both 90° and 270° rotations (handled below).
         // The flip can happen mid-session (configChanges suppresses recreation),
@@ -99,19 +97,15 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
             return
         }
 
-        // Steering = how far the screen's left/right edge dips: the sideways
-        // (device Y) share of "up", as an angle. This is the one measure that
-        // behaves the same however the phone is held — flat like a tray, tilted
-        // back, or upright like a wheel — with neutral at 0° and no singularity.
-        // (An in-screen-plane atan2 was tried and breaks when the phone lies
-        // flat-ish: upX ≈ 0 there, so tiny tilts read as ±90°.)
-        // The screen's sideways axis is device -Y in ROTATION_90 and +Y in
-        // ROTATION_270, hence the mirror. Sign: positive = right.
+        // Steering = how far the screen's left/right edge dips: the sideways share
+        // of "up", as an angle. This is the one measure that behaves the same
+        // however the phone is held — flat like a tray, tilted back, or upright
+        // like a wheel — with neutral at 0° and no singularity. (An in-screen-plane
+        // atan2 was tried and breaks when the phone lies flat-ish: tiny tilts read
+        // as ±90° there.) Positive = right.
         var magnitude = kotlin.math.sqrt(upX * upX + upY * upY + upZ * upZ)
         if (magnitude < 0.1f) magnitude = 1f
-        val mirror = if (rotation == Surface.ROTATION_270) -1f else 1f
-        val side = (mirror * upY / magnitude).coerceIn(-1f, 1f)
-        // (Sign confirmed on device: with a leading minus, steering was mirrored.)
+        val side = tiltSide(rotation, upX / magnitude, upY / magnitude).coerceIn(-1f, 1f)
         var rollDegrees = Math.toDegrees(kotlin.math.asin(side.toDouble())).toFloat()
 
         if (useAccelerometerFallback) {
@@ -158,4 +152,20 @@ class GyroscopeInputHandler(context: Context) : SteeringInputHandler, SensorEven
     companion object {
         private const val SMOOTHING = 0.5f
     }
+}
+
+/**
+ * The component of "up" along the screen's left edge, for a unit up-vector in device
+ * coordinates — i.e. how far the screen is tilted to the right, as a sine.
+ *
+ * Which device axis is "sideways" depends on how the screen is rotated. Phones on a
+ * sensorLandscape screen report ROTATION_90 or ROTATION_270 (device Y is sideways;
+ * signs confirmed on a device). Tablets whose natural orientation is landscape
+ * report ROTATION_0 or ROTATION_180, where device X is sideways instead.
+ */
+internal fun tiltSide(rotation: Int, upX: Float, upY: Float): Float = when (rotation) {
+    Surface.ROTATION_90 -> upY
+    Surface.ROTATION_270 -> -upY
+    Surface.ROTATION_180 -> upX
+    else -> -upX // ROTATION_0
 }

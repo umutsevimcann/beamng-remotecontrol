@@ -15,7 +15,6 @@
     <string name="speed_mph">MPH</string>
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">HAZIR</string>
-    <string name="drive_timer_best">REKOR</string>
     <string name="drive_drift">DRIFT</string>
     <string name="drive_thr">GAZ</string>
     <string name="drive_brk">FRN</string>
@@ -132,6 +131,11 @@
 
     <!-- Settings -->
     <string name="settings_language">DİL</string>
+    <string name="percent_value">%%%1$d</string>
+    <string name="settings_theme">TEMA</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_system">Sistem</string>
     <string name="settings_heading">Ayarlar</string>
     <string name="settings_sec_driving">Sürüş</string>
     <string name="settings_sec_dashboard">Gösterge</string>

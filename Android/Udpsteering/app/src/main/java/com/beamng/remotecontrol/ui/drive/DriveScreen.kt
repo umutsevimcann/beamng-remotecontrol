@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -86,14 +87,18 @@ fun DriveScreen(
 
         val isTilt = controlType == SettingsManager.CONTROL_GYROSCOPE
         // Tilt: mirror the sensor every frame. Touch modes: the control's own state.
-        val tiltValue by produceState(0f, isTilt) {
+        val tiltState = produceState(0f, isTilt) {
             while (isTilt) {
                 withFrameNanos { }
                 value = steering()
             }
         }
         var touchValue by remember(controlType) { mutableFloatStateOf(0f) }
-        val steerValue = if (isTilt) tiltValue else touchValue
+        // Both arrows can be down at once; the bar shows their sum.
+        var leftDown by remember(controlType) { mutableStateOf(false) }
+        var rightDown by remember(controlType) { mutableStateOf(false) }
+        // Read lazily (draw phase) so tilt, which changes every frame, doesn't recompose the screen.
+        val steerValue = { if (isTilt) tiltState.value else touchValue }
 
         val centre: @Composable RowScope.() -> Unit = {
             Column(
@@ -125,11 +130,13 @@ fun DriveScreen(
                         ArrowButtons(
                             size = wheelSize, u = u,
                             onLeft = { pressed ->
-                                touchValue = if (pressed) -1f else 0f
+                                leftDown = pressed
+                                touchValue = (if (rightDown) 1f else 0f) - (if (leftDown) 1f else 0f)
                                 onSteerLeft(pressed)
                             },
                             onRight = { pressed ->
-                                touchValue = if (pressed) 1f else 0f
+                                rightDown = pressed
+                                touchValue = (if (rightDown) 1f else 0f) - (if (leftDown) 1f else 0f)
                                 onSteerRight(pressed)
                             },
                         )
@@ -137,7 +144,7 @@ fun DriveScreen(
                         SteeringWheel(
                             size = wheelSize,
                             draggable = !isTilt,
-                            displayValue = tiltValue,
+                            displayValue = { tiltState.value },
                             onValue = { v ->
                                 touchValue = v
                                 onWheel(v)
@@ -158,7 +165,7 @@ fun DriveScreen(
                     horizontalArrangement = Arrangement.spacedBy(cu * 3),
                 ) {
                     Pedal(
-                        stringResource(R.string.drive_brake), Color(0xFFFF6B6B), cu * 21, u * 46,
+                        stringResource(R.string.drive_brake), Graphite.Red, cu * 21, u * 46,
                         plateFraction = 0.52f, analog = analogPedals, u = cu, onValue = onBrake,
                     )
                     Pedal(

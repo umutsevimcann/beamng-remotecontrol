@@ -72,16 +72,17 @@ fun WarningRow(telemetry: TelemetryUiState, u: Dp, modifier: Modifier = Modifier
 
 /** How far the steering is turned, -1..1, as a bar growing from the centre mark. */
 @Composable
-fun SteerBar(value: Float, modifier: Modifier = Modifier) {
+fun SteerBar(value: () -> Float, modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val barH = size.height * 0.26f
         val y = (size.height - barH) / 2f
         val r = CornerRadius(barH / 2f)
-        drawRoundRect(Color(0xFF1D2027), Offset(0f, y), Size(size.width, barH), r)
+        drawRoundRect(Graphite.Track, Offset(0f, y), Size(size.width, barH), r)
         val mid = size.width / 2f
-        val len = (if (value.isFinite()) value else 0f).coerceIn(-1f, 1f) * mid
+        val v = value() // read while drawing: a per-frame value redraws, it doesn't recompose
+        val len = (if (v.isFinite()) v else 0f).coerceIn(-1f, 1f) * mid
         drawRoundRect(Graphite.Orange, Offset(if (len >= 0) mid else mid + len, y), Size(abs(len), barH), r)
-        drawRect(Color(0xFF5A5E66), Offset(mid - 1f, 0f), Size(2f, size.height))
+        drawRect(Graphite.Muted, Offset(mid - 1f, 0f), Size(2f, size.height))
     }
 }
 

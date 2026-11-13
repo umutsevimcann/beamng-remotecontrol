@@ -15,6 +15,4 @@ interface SteeringInputHandler {
     /** Stop the handler and release resources. */
     fun stop()
 
-    /** Whether this handler needs on-screen controls (Buttons/Slider: yes, Gyro: no). */
-    fun requiresUIControls(): Boolean
 }

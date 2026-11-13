@@ -1,6 +1,7 @@
 package com.beamng.remotecontrol.settings
 
 import com.beamng.remotecontrol.ui.dash.DashLayout
+import com.beamng.remotecontrol.ui.theme.ThemeMode
 import android.content.Context
 import android.content.SharedPreferences
 
@@ -18,13 +19,6 @@ class SettingsManager private constructor(context: Context) {
     var controlType: Int
         get() = prefs.getInt(KEY_CONTROL_TYPE, DEFAULT_CONTROL_TYPE)
         set(type) = prefs.edit().putInt(KEY_CONTROL_TYPE, type).apply()
-
-    val controlTypeName: String
-        get() = when (controlType) {
-            CONTROL_BUTTONS -> "Buttons"
-            CONTROL_SLIDER -> "Slider"
-            else -> "Gyroscope"
-        }
 
     // ==================== GYRO LOCK ANGLE ====================
 
@@ -88,6 +82,12 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_MIRRORED, DEFAULT_MIRRORED)
         set(enabled) = prefs.edit().putBoolean(KEY_MIRRORED, enabled).apply()
 
+    // ==================== THEME ====================
+
+    var themeMode: ThemeMode
+        get() = ThemeMode.fromKey(prefs.getString(KEY_THEME, null))
+        set(mode) = prefs.edit().putString(KEY_THEME, mode.key).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -109,6 +109,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_ANALOG_PEDALS = "analog_pedals"
         const val KEY_DASH_LAYOUT = "dash_layout"
         const val KEY_MIRRORED = "mirrored_layout"
+        const val KEY_THEME = "theme_mode"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0

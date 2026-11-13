@@ -24,8 +24,6 @@ class SliderInputHandler(context: Context) : SteeringInputHandler {
         currentSteering = 0f
     }
 
-    override fun requiresUIControls(): Boolean = true
-
     /** UI pushes the current slider position, -1 (left) .. 1 (right). */
     fun setValue(value: Float) {
         currentSteering = value.coerceIn(-1f, 1f)

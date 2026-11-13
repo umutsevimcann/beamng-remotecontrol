@@ -35,16 +35,12 @@ import androidx.compose.ui.unit.sp
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.ui.theme.Graphite
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
+import com.beamng.remotecontrol.ui.theme.screenBackground
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
-/** Warm cockpit backdrop shared by the portrait screens. */
-fun cockpitBackground() = Brush.radialGradient(
-    colorStops = arrayOf(
-        0.0f to Graphite.Bg0,
-        0.55f to Graphite.Bg1,
-        1.0f to Graphite.Bg2,
-    ),
-    radius = 1400f,
-)
+/** The screen backdrop (kept under its old name for the setup guide). */
+fun cockpitBackground() = screenBackground()
 
 @Composable
 fun GarageCard(title: String, content: @Composable () -> Unit) {
@@ -52,7 +48,7 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Brush.verticalGradient(listOf(Color(0xDD241C12), Color(0xDD1A140E))),
+                Brush.verticalGradient(listOf(Graphite.PanelTop, Graphite.PanelBottom)),
                 RoundedCornerShape(14.dp),
             )
             .border(1.dp, Graphite.Edge, RoundedCornerShape(14.dp))
@@ -102,6 +98,8 @@ fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit, onPickP
                 .fillMaxWidth()
                 .background(Graphite.PanelTop, RoundedCornerShape(16.dp))
                 .border(1.dp, Graphite.Edge, RoundedCornerShape(16.dp))
+                // Landscape phones are ~360dp tall: the dialog must scroll, not clip.
+                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
         ) {
             Text(

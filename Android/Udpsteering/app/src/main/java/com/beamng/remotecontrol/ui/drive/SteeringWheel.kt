@@ -65,11 +65,15 @@ import kotlinx.coroutines.launch
 /** Finger-driven lock: a road car turns about 900° lock to lock, 450° each way. */
 const val WHEEL_LOCK_DEG = 450f
 
+/** Fraction of the wheel radius around the hub where dragging does not steer. */
+private const val HUB_DEAD_RADIUS = 0.22f
+
 /**
  * The steering wheel of the drive screen.
  *
  * [draggable] = false: a display. It shows [displayValue] (-1..1) as the angle the
- * car's wheel is at, value × [WHEEL_LOCK_DEG].
+ * car's wheel is at, value × [WHEEL_LOCK_DEG]. It is a lambda read in the draw
+ * phase, so a value that changes every frame (tilt) redraws without recomposing.
  * [draggable] = true: the control. Drag it around its centre, up to ±450°
  * (multi-turn); it emits -1..1 through [onValue] and springs back on release.
  */
@@ -77,7 +81,7 @@ const val WHEEL_LOCK_DEG = 450f
 fun SteeringWheel(
     size: Dp,
     draggable: Boolean,
-    displayValue: Float,
+    displayValue: () -> Float,
     onValue: (Float) -> Unit,
     onRelease: () -> Unit,
     modifier: Modifier = Modifier,
@@ -86,7 +90,6 @@ fun SteeringWheel(
     val drag = remember { Animatable(0f) } // degrees, touch modes only
     val currentOnValue by rememberUpdatedState(onValue)
     val currentOnRelease by rememberUpdatedState(onRelease)
-    val angle = if (draggable) drag.value else displayValue * WHEEL_LOCK_DEG
 
     // The gesture coroutine outlives recompositions, hence currentOnValue/currentOnRelease:
     // with stale lambdas the wheel kept driving the previous control type's handler.
@@ -96,12 +99,23 @@ fun SteeringWheel(
             val cx = this.size.width / 2f
             val cy = this.size.height / 2f
             var last = atan2(down.position.y - cy, down.position.x - cx)
+            // Grabbed while still springing back: carry on from where the wheel is
+            // and tell the handler, which was already reset to 0 on release —
+            // otherwise the first move would jump from 0 to that angle.
             var current = drag.value
+            scope.launch { drag.stop() }
+            currentOnValue(current / WHEEL_LOCK_DEG)
+            val deadRadius = minOf(cx, cy) * HUB_DEAD_RADIUS
             try {
                 while (true) {
                     val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
                     if (!change.pressed) break
-                    val a = atan2(change.position.y - cy, change.position.x - cx)
+                    val dx = change.position.x - cx
+                    val dy = change.position.y - cy
+                    // Near the hub a few pixels are a huge angle, and crossing the
+                    // centre flips it by 180°: ignore movement in there.
+                    if (dx * dx + dy * dy < deadRadius * deadRadius) continue
+                    val a = atan2(dy, dx)
                     var delta = Math.toDegrees((a - last).toDouble()).toFloat()
                     if (delta > 180f) delta -= 360f
                     if (delta < -180f) delta += 360f
@@ -126,7 +140,11 @@ fun SteeringWheel(
                 radius = this.size.minDimension * 0.56f, center = center + Offset(0f, this.size.minDimension * 0.03f),
             )
         }
-        Canvas(Modifier.fillMaxSize().graphicsLayer { rotationZ = angle }) { drawWheel() }
+        Canvas(
+            Modifier.fillMaxSize().graphicsLayer {
+                rotationZ = if (draggable) drag.value else displayValue() * WHEEL_LOCK_DEG
+            },
+        ) { drawWheel() }
     }
 }
 

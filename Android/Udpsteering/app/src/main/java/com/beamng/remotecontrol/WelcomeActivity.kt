@@ -47,6 +47,8 @@ class WelcomeActivity : AppCompatActivity() {
     // Search state: null = idle.
     private var sweepJob: Job? = null
     private var search by mutableStateOf<SearchUi?>(null)
+    /** Bumped per search; late callbacks from an older sweep are ignored. */
+    private var searchGeneration = 0
 
     private val cameraPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -219,12 +221,17 @@ class WelcomeActivity : AppCompatActivity() {
         }
         val slow = !NetworkUtils.isWifi5Ghz(this)
 
+        val generation = ++searchGeneration
         search = SearchUi(if (lastHost != null) SweepPhase.SAVED_PC else SweepPhase.FULL_SEARCH, 0f)
         sweepJob = lifecycleScope.launch {
             val result = UdpDiscovery.sweep(
                 broadcast, lastHost, slow, network,
-                onPhase = { phase -> runOnUiThread { search = search?.copy(phase = phase, progress = 0f) } },
-                onProgress = { tried, total -> runOnUiThread { search = search?.copy(progress = tried.toFloat() / total) } },
+                onPhase = { phase ->
+                    runOnUiThread { if (generation == searchGeneration) search = search?.copy(phase = phase, progress = 0f) }
+                },
+                onProgress = { tried, total ->
+                    runOnUiThread { if (generation == searchGeneration) search = search?.copy(progress = tried.toFloat() / total) }
+                },
             )
             search = null
             when (result) {
@@ -251,6 +258,7 @@ class WelcomeActivity : AppCompatActivity() {
     }
 
     private fun cancelSearch() {
+        searchGeneration++
         sweepJob?.cancel()
         sweepJob = null
         search = null

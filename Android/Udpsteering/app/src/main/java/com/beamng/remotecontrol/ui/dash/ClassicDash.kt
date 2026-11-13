@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -68,7 +69,7 @@ fun ClassicDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                 DashLabel(stringResource(R.string.drive_gear), u)
                 Spacer(Modifier.height(u * 3))
                 Text(
-                    "%${(t.fuel * 100).roundToInt()}", color = Graphite.Green,
+                    stringResource(R.string.percent_value, (t.fuel * 100).roundToInt()), color = Graphite.Green,
                     fontSize = (u * 3.2f).asSp(), fontWeight = FontWeight.Bold,
                 )
                 DashLabel(stringResource(R.string.drive_fuel), u)
@@ -91,9 +92,8 @@ private const val DIAL_START = 135f  // degrees; the dial opens downward
 private const val DIAL_SWEEP = 270f
 
 private fun DrawScope.dialFace(r: Float) {
-    drawCircle(Brush.radialGradient(listOf(Color(0xFF16181D), Color(0xFF0A0B0D)), center, r), r, center)
+    drawCircle(Brush.radialGradient(listOf(Graphite.PanelTop, Graphite.Inset), center, r), r, center)
     drawCircle(Graphite.Edge, r, center, style = Stroke(r * 0.02f))
-    drawCircle(Color.White.copy(alpha = 0.06f), r * 0.97f, center, style = Stroke(r * 0.008f))
 }
 
 private fun DrawScope.arc(color: Color, r: Float, from: Float, sweep: Float, width: Float) {
@@ -109,6 +109,9 @@ private fun Tachometer(state: DashState, modifier: Modifier) {
     val rpm by animateFloatAsState(state.safeRpm(), spring(stiffness = Spring.StiffnessMediumLow), label = "needle")
     val scale = state.rpmScale
     val label = stringResource(R.string.drive_rpm_x1000)
+    // Reused across frames: the needle animates, so this draws constantly.
+    val paint = remember { Paint().apply { isAntiAlias = true; textAlign = Paint.Align.CENTER } }
+    val boldFace = remember { Typeface.create(Typeface.DEFAULT, Typeface.BOLD) }
     Canvas(modifier.padding(4.dpCompat())) {
         val r = size.minDimension / 2f
         dialFace(r)
@@ -119,13 +122,9 @@ private fun Tachometer(state: DashState, modifier: Modifier) {
 
         // Ticks and numbers every 1000 rpm.
         val thousands = (scale.max / 1000f).toInt()
-        val paint = Paint().apply {
-            isAntiAlias = true
-            color = Graphite.Text.toArgb()
-            textAlign = Paint.Align.CENTER
-            textSize = r * 0.15f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
+        paint.color = Graphite.Text.toArgb()
+        paint.textSize = r * 0.15f
+        paint.typeface = boldFace
         for (k in 0..thousands) {
             val a = Math.toRadians((DIAL_START + DIAL_SWEEP * (k * 1000f / scale.max)).toDouble())
             val dir = Offset(cos(a).toFloat(), sin(a).toFloat())
@@ -145,7 +144,7 @@ private fun Tachometer(state: DashState, modifier: Modifier) {
         val a = Math.toRadians((DIAL_START + DIAL_SWEEP * (rpm / scale.max).coerceIn(0f, 1f)).toDouble())
         val dir = Offset(cos(a).toFloat(), sin(a).toFloat())
         drawLine(Graphite.Orange, center - dir * (r * 0.12f), center + dir * (r * 0.78f), r * 0.03f, StrokeCap.Round)
-        drawCircle(Color(0xFF1D2027), r * 0.11f, center)
+        drawCircle(Graphite.Track, r * 0.11f, center)
         drawCircle(Graphite.Edge, r * 0.11f, center, style = Stroke(r * 0.015f))
     }
 }

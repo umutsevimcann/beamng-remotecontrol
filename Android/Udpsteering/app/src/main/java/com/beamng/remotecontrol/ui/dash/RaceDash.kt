@@ -37,9 +37,8 @@ import kotlin.math.roundToInt
 private const val LED_COUNT = 12
 private const val LEDS_START_AT = 0.60f // fraction of redline where the first LED lights
 
-private val LedGreen = Color(0xFF2BD45C)
-private val LedAmber = Color(0xFFF2C230)
-private val LedOff = Color(0xFF1C1E23)
+private val LedGreen get() = Graphite.Green
+private val LedAmber get() = Graphite.Amber
 
 /**
  * "Race": a race-wheel display. Shift lights on top, a very large gear in the
@@ -64,25 +63,27 @@ fun RaceDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                 Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .background(Color(0xFF0B0C0E), RoundedCornerShape(6.dp))
+                    .background(Graphite.Inset, RoundedCornerShape(6.dp))
                     .border(2.dp, Graphite.Orange, RoundedCornerShape(6.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 DashLabel(stringResource(R.string.drive_gear), u, modifier = Modifier.align(Alignment.TopCenter).padding(top = u * 1.5f))
                 Text(
-                    t.gear, color = Color(0xFFFFE14D), fontFamily = FontFamily.Monospace,
+                    t.gear, color = if (Graphite.isDark) Color(0xFFFFE14D) else Graphite.Orange, fontFamily = FontFamily.Monospace,
                     fontSize = (u * 30 * gearScale(t.gear)).asSp(), lineHeight = (u * 30).asSp(), fontWeight = FontWeight.Bold,
                     maxLines = 1, softWrap = false,
                 )
             }
             Column(Modifier.weight(1.25f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(u * 2)) {
-                val timer = (t.timerLiveSec ?: t.timerLastSec)?.let { "%.2f".format(it) } ?: "-.--"
-                if (state.perfTimerEnabled) {
-                    DataBox(stringResource(R.string.drive_timer_label), timer, u * 8, LedGreen, u, Modifier.weight(1f))
-                } else if (t.hasTurbo) {
-                    DataBox(stringResource(R.string.drive_boost), "%.1f".format(t.turbo), u * 8, Graphite.Amber, u, Modifier.weight(1f))
-                } else {
-                    DataBox(
+                // Top box: the 0-100 timer, else boost, else drift — and nothing at all
+                // when none applies (the fuel/temp row then takes the full height).
+                when {
+                    state.perfTimerEnabled -> {
+                        val timer = (t.timerLiveSec ?: t.timerLastSec)?.let { "%.2f".format(it) } ?: "-.--"
+                        DataBox(stringResource(R.string.drive_timer_label), timer, u * 8, LedGreen, u, Modifier.weight(1f))
+                    }
+                    t.hasTurbo -> DataBox(stringResource(R.string.drive_boost), "%.1f".format(t.turbo), u * 8, Graphite.Amber, u, Modifier.weight(1f))
+                    t.driftMaxDeg != null -> DataBox(
                         stringResource(R.string.drive_drift), "${kotlin.math.abs(t.driftDeg ?: 0f).roundToInt()}°",
                         u * 8, Graphite.Amber, u, Modifier.weight(1f),
                     )
@@ -106,8 +107,8 @@ private fun DataBox(label: String, value: String, size: Dp, color: Color, u: Dp,
     Column(
         modifier
             .fillMaxWidth()
-            .background(Color(0xFF0B0C0E), RoundedCornerShape(6.dp))
-            .border(1.5.dp, Color(0xFF3A3F49), RoundedCornerShape(6.dp))
+            .background(Graphite.Inset, RoundedCornerShape(6.dp))
+            .border(1.5.dp, Graphite.Edge, RoundedCornerShape(6.dp))
             .padding(horizontal = u * 1.8f, vertical = u * 1f),
         verticalArrangement = Arrangement.Center,
     ) {
@@ -142,7 +143,7 @@ private fun ShiftLights(rpm: Float, scale: RpmScale, u: Dp, modifier: Modifier) 
         for (i in 0 until LED_COUNT) {
             val on = i < lit
             val color = when {
-                !on -> LedOff
+                !on -> Graphite.Track
                 over -> Graphite.Red
                 i < 5 -> LedGreen
                 i < 9 -> LedAmber

@@ -67,14 +67,14 @@ class Receivepacket(data: ByteArray, length: Int) {
                 val bb = ByteBuffer.wrap(data)
                 hasTurbo = (EndianUtils.readSwappedUnsignedShort(data, 8) and FLAG_TURBO) != 0
                 gearByte = bb.get(10)
-                speed = finiteFloat(data, 12)
-                rpm = finiteFloat(data, 16)
-                turbo = finiteFloat(data, 20)
-                engineTemp = finiteFloat(data, 24)
-                fuel = finiteFloat(data, 28)
-                throttle = finiteFloat(data, 48)
-                brake = finiteFloat(data, 52)
-                clutch = finiteFloat(data, 56)
+                speed = saneFloat(data, 12, 0f, MAX_SPEED_MS)
+                rpm = saneFloat(data, 16, 0f, MAX_RPM)
+                turbo = saneFloat(data, 20, -1f, MAX_TURBO_BAR)
+                engineTemp = saneFloat(data, 24, MIN_TEMP_C, MAX_TEMP_C)
+                fuel = saneFloat(data, 28, 0f, 1f)
+                throttle = saneFloat(data, 48, 0f, 1f)
+                brake = saneFloat(data, 52, 0f, 1f)
+                clutch = saneFloat(data, 56, 0f, 1f)
                 showLights = EndianUtils.readSwappedInteger(data, 44)
                 id = EndianUtils.readSwappedInteger(data, 92)
                 odometer = if (length >= 100) EndianUtils.readSwappedInteger(data, 96) else 0
@@ -86,13 +86,14 @@ class Receivepacket(data: ByteArray, length: Int) {
     }
 
     /**
-     * Reads a float and replaces NaN/Infinity with 0. Port 4445 accepts datagrams
-     * from anyone on the LAN, and a non-finite value would crash the UI
-     * (Float.roundToInt() throws on NaN).
+     * Reads a float, replaces NaN/Infinity with 0 and clamps the rest to [min, max].
+     * Port 4445 accepts datagrams from anyone on the LAN: a non-finite value would
+     * crash the UI (Float.roundToInt() throws on NaN) and an absurd finite one
+     * overflows once converted (3.6f * 3e38 is Infinity again).
      */
-    private fun finiteFloat(data: ByteArray, offset: Int): Float {
+    private fun saneFloat(data: ByteArray, offset: Int, min: Float, max: Float): Float {
         val v = EndianUtils.readSwappedFloat(data, offset)
-        return if (v.isFinite()) v else 0f
+        return if (v.isFinite()) v.coerceIn(min, max) else 0f
     }
 
     val activeLightsArr: BooleanArray
@@ -132,6 +133,13 @@ class Receivepacket(data: ByteArray, length: Int) {
         // Stock BeamNG OutGauge (Options > Other) sends the standard 96-byte LFS struct;
         // the companion mod appends a 4-byte odometer (100 bytes). Accept both.
         const val MIN_PACKET_LENGTH = 96
+
+        // Plausibility limits for telemetry (anything beyond is noise or abuse).
+        private const val MAX_SPEED_MS = 150f   // 540 km/h
+        private const val MAX_RPM = 25000f
+        private const val MAX_TURBO_BAR = 10f
+        private const val MIN_TEMP_C = -60f
+        private const val MAX_TEMP_C = 300f
 
         // Indices into activeLightsArr (= bit positions in the game's showLights).
         // UI code maps icons with these instead of magic numbers.

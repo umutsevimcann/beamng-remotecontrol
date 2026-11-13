@@ -64,7 +64,7 @@ fun ModernDash(state: DashState, u: Dp, modifier: Modifier = Modifier) {
                 }
                 Panel(Modifier.weight(1f).fillMaxWidth()) {
                     Column(Modifier.fillMaxSize().padding(horizontal = u * 2.4f), verticalArrangement = Arrangement.Center) {
-                        Meter(stringResource(R.string.drive_fuel), "%${(t.fuel * 100).roundToInt()}", t.fuel, Graphite.Green, u)
+                        Meter(stringResource(R.string.drive_fuel), stringResource(R.string.percent_value, (t.fuel * 100).roundToInt()), t.fuel, Graphite.Green, u)
                         Spacer(Modifier.height(u * 2.4f))
                         if (t.hasTurbo) {
                             Meter(

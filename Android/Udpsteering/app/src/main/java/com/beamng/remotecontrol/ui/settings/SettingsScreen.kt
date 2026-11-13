@@ -43,6 +43,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Canvas
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.AppLanguage
@@ -51,6 +60,8 @@ import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.dash.sampleDashState
 import com.beamng.remotecontrol.ui.theme.Graphite
 import com.beamng.remotecontrol.ui.theme.Panel
+import com.beamng.remotecontrol.ui.theme.ThemeMode
+import com.beamng.remotecontrol.ui.theme.ThemeState
 import com.beamng.remotecontrol.ui.theme.asSp
 import com.beamng.remotecontrol.ui.theme.screenBackground
 import kotlin.math.roundToInt
@@ -125,7 +136,7 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
         for ((type, title, sub) in options) {
             ChoiceCard(
                 title = stringResource(title), subtitle = stringResource(sub), selected = controlType == type, u = u,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                glyph = type, modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
                 controlType = type
                 settings.controlType = type
@@ -189,7 +200,7 @@ private fun DashboardSection(settings: SettingsManager, u: Dp) {
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(1.35f)
-                        .background(Graphite.Bg2, RoundedCornerShape(u * 2.5f))
+                        .background(Graphite.Inset, RoundedCornerShape(u * 2.5f))
                         .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, RoundedCornerShape(u * 2.5f))
                         .padding(u * 1.6f),
                 ) {
@@ -237,6 +248,19 @@ private fun FeedbackSection(settings: SettingsManager, u: Dp) {
 
 @Composable
 private fun GeneralSection(u: Dp, onSetupGuide: () -> Unit) {
+    val context = LocalContext.current
+    Heading(stringResource(R.string.settings_theme), u)
+    Row(horizontalArrangement = Arrangement.spacedBy(u * 1.5f)) {
+        val options = listOf(
+            ThemeMode.DARK to R.string.theme_dark, ThemeMode.LIGHT to R.string.theme_light, ThemeMode.SYSTEM to R.string.theme_system,
+        )
+        for ((mode, label) in options) {
+            Pill(stringResource(label), ThemeState.mode == mode, u) {
+                ThemeState.mode = mode // repaints every screen at once
+                SettingsManager.getInstance(context).themeMode = mode
+            }
+        }
+    }
     var current by remember { mutableStateOf(AppLanguage.current()) }
     Heading(stringResource(R.string.settings_language), u)
     Row(horizontalArrangement = Arrangement.spacedBy(u * 1.5f)) {
@@ -250,7 +274,6 @@ private fun GeneralSection(u: Dp, onSetupGuide: () -> Unit) {
     RowLabel(stringResource(R.string.guide_title), "", u, Modifier.clip(RoundedCornerShape(u * 2)).clickable(onClick = onSetupGuide)) {
         Text("›", color = Graphite.Muted, fontSize = (u * 5).asSp())
     }
-    val context = LocalContext.current
     val version = remember {
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
     }
@@ -289,19 +312,52 @@ private fun Heading(text: String, u: Dp) {
 }
 
 @Composable
-private fun ChoiceCard(title: String, subtitle: String, selected: Boolean, u: Dp, modifier: Modifier, onClick: () -> Unit) {
+private fun ChoiceCard(title: String, subtitle: String, selected: Boolean, u: Dp, glyph: Int, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(u * 2.5f)
     Column(
         modifier
             .clip(shape)
-            .background(if (selected) Color(0xFF2A1C10) else Graphite.Bg2)
+            .background(if (selected) Graphite.Selected else Graphite.Inset)
             .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = u * 3, vertical = u * 3.4f),
     ) {
+        ControlGlyph(glyph, if (selected) Graphite.Orange else Graphite.Muted, Modifier.size(u * 9))
+        Spacer(Modifier.height(u * 1.6f))
         Text(title, color = Graphite.Text, fontSize = (u * 3.5f).asSp(), fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(u * 0.8f))
         Text(subtitle, color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+    }
+}
+
+/** A small drawing of what the steering side becomes: tilted phone, wheel, or two arrows. */
+@Composable
+private fun ControlGlyph(controlType: Int, color: Color, modifier: Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        val stroke = Stroke(w * 0.07f, cap = StrokeCap.Round)
+        when (controlType) {
+            SettingsManager.CONTROL_GYROSCOPE -> rotate(-18f) {
+                // a phone, tilted
+                drawRoundRect(color, Offset(w * 0.12f, h * 0.30f), Size(w * 0.76f, h * 0.40f), CornerRadius(w * 0.08f), style = stroke)
+                drawCircle(color, w * 0.03f, Offset(w * 0.78f, h * 0.50f))
+            }
+            SettingsManager.CONTROL_SLIDER -> {
+                // a steering wheel
+                drawCircle(color, w * 0.40f, center, style = stroke)
+                drawCircle(color, w * 0.10f, center)
+                drawLine(color, Offset(w * 0.12f, h * 0.50f), Offset(w * 0.88f, h * 0.50f), stroke.width, StrokeCap.Round)
+                drawLine(color, center, Offset(w * 0.50f, h * 0.88f), stroke.width, StrokeCap.Round)
+            }
+            else -> {
+                // two arrows
+                val left = Path().apply { moveTo(w * 0.40f, h * 0.22f); lineTo(w * 0.10f, h * 0.50f); lineTo(w * 0.40f, h * 0.78f); close() }
+                val right = Path().apply { moveTo(w * 0.60f, h * 0.22f); lineTo(w * 0.90f, h * 0.50f); lineTo(w * 0.60f, h * 0.78f); close() }
+                drawPath(left, color)
+                drawPath(right, color)
+            }
+        }
     }
 }
 

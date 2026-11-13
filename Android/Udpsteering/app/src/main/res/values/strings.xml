@@ -15,7 +15,6 @@
     <string name="speed_mph">MPH</string>
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">READY</string>
-    <string name="drive_timer_best">BEST</string>
     <string name="drive_drift">DRIFT</string>
     <string name="drive_thr">THR</string>
     <string name="drive_brk">BRK</string>
@@ -132,6 +131,11 @@
 
     <!-- Settings -->
     <string name="settings_language">LANGUAGE</string>
+    <string name="percent_value">%1$d%%</string>
+    <string name="settings_theme">THEME</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
     <string name="settings_heading">Settings</string>
     <string name="settings_sec_driving">Driving</string>
     <string name="settings_sec_dashboard">Dashboard</string>
