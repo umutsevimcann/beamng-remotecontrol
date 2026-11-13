@@ -187,12 +187,10 @@ class QRCodeScanner : AppCompatActivity() {
             return
         }
         try {
-            val ip = NetworkUtils.wifiIpv4String(this)
-                ?: throw IllegalStateException("Wi-Fi is down")
-
-            (application as RemoteControlApplication).ip = ip
-
-            val broadcastAddress = NetworkUtils.broadcastAddress(NetworkUtils.localInetAddress())!!
+            // Broadcast address only — see WelcomeActivity.startAutoConnect (hotspot).
+            val broadcastAddress = NetworkUtils.broadcastAddress(
+                NetworkUtils.localInetAddress(NetworkUtils.wifiIpv4String(this)),
+            ) ?: throw IllegalStateException("No Wi-Fi or hotspot interface")
             Log.i("Broadcast Address", broadcastAddress.hostAddress ?: "?")
 
             connectingText.text = getString(R.string.connecting_dialog_title)
@@ -200,7 +198,7 @@ class QRCodeScanner : AppCompatActivity() {
 
             val network = NetworkUtils.wifiNetwork(this)
             discoveryJob = lifecycleScope.launch {
-                when (val result = UdpDiscovery.discover(broadcastAddress, ip, code, network)) {
+                when (val result = UdpDiscovery.discover(broadcastAddress, code, network)) {
                     is UdpDiscovery.Result.Connected -> {
                         val app = application as RemoteControlApplication
                         app.hostAddress = result.host

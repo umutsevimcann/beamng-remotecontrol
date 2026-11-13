@@ -32,7 +32,11 @@ object QrImageDecoder {
     fun decode(bitmap: Bitmap, onResult: (String?) -> Unit) {
         // ZBar on a background thread (grayscale conversion + scan can be heavy).
         Thread {
-            val zbarText = decodeWithZbar(bitmap)
+            val zbarText = try {
+                decodeWithZbar(bitmap)
+            } catch (e: OutOfMemoryError) {
+                null // fall through to ML Kit rather than crash the app
+            }
             if (zbarText != null) {
                 mainHandler.post { onResult(zbarText) }
             } else {
@@ -46,16 +50,21 @@ object QrImageDecoder {
         val width = bitmap.width
         val height = bitmap.height
         if (width <= 0 || height <= 0) return null
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        // Row by row: a full-frame IntArray would double peak memory (48 MB
+        // extra for a 12 MP photo) on top of the bitmap itself.
+        val row = IntArray(width)
         val luma = ByteArray(width * height)
-        for (i in pixels.indices) {
-            val p = pixels[i]
-            val r = (p shr 16) and 0xFF
-            val g = (p shr 8) and 0xFF
-            val b = p and 0xFF
-            // Rec. 601 luma, integer approximation.
-            luma[i] = ((77 * r + 150 * g + 29 * b) shr 8).toByte()
+        for (y in 0 until height) {
+            bitmap.getPixels(row, 0, width, 0, y, width, 1)
+            val base = y * width
+            for (x in 0 until width) {
+                val p = row[x]
+                val r = (p shr 16) and 0xFF
+                val g = (p shr 8) and 0xFF
+                val b = p and 0xFF
+                // Rec. 601 luma, integer approximation.
+                luma[base + x] = ((77 * r + 150 * g + 29 * b) shr 8).toByte()
+            }
         }
         return ZbarDecoder.decode(luma, width, height)
     }

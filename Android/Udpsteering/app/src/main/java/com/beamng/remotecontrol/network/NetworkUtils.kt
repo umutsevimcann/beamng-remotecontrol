@@ -5,6 +5,11 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.os.Build
+import android.util.Log
+import java.io.IOException
+import java.net.DatagramSocket
+import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.SocketException
@@ -36,6 +41,20 @@ object NetworkUtils {
         }
     }
 
+    /**
+     * Pins [socket] to [network] (Wi-Fi) so it can't fall back to cellular. This
+     * is what makes discovery and control work with mobile data on — see
+     * [wifiNetwork]. No-op when [network] is null (e.g. phone is the hotspot).
+     */
+    fun bindToNetwork(network: Network?, socket: DatagramSocket) {
+        if (network == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) return
+        try {
+            network.bindSocket(socket)
+        } catch (e: IOException) {
+            Log.w("NetworkUtils", "Could not pin socket to Wi-Fi", e)
+        }
+    }
+
     /** Phone's Wi-Fi IPv4 as "a.b.c.d", or null when Wi-Fi is down. */
     @Suppress("DEPRECATION")
     fun wifiIpv4String(context: Context): String? {
@@ -51,24 +70,56 @@ object NetworkUtils {
         }
     }
 
-    /** First non-loopback address on a wlan0/eth0/ap0 interface. */
-    fun localInetAddress(): InetAddress? {
+    /**
+     * The phone's IPv4 on the LAN the game is on: the Wi-Fi client address, or —
+     * when the phone itself is the hotspot the PC joined — the hotspot address
+     * (WifiManager reports 0 in that case). Null if neither exists.
+     */
+    fun phoneIpv4String(context: Context): String? =
+        wifiIpv4String(context) ?: localInetAddress()?.hostAddress
+
+    /**
+     * IPv4 of the Wi-Fi client or hotspot interface (one that has a broadcast
+     * address, which discovery needs). Interface names vary by vendor: wlan0/wlan1
+     * for the client, ap0/swlan0/softap0/wlan1 for the hotspot. When [preferIp] is
+     * given (the Wi-Fi client IP), that interface wins.
+     */
+    fun localInetAddress(preferIp: String? = null): InetAddress? {
+        var fallback: InetAddress? = null
         try {
-            for (singleInterface in NetworkInterface.getNetworkInterfaces()) {
-                for (inetAddress in singleInterface.inetAddresses) {
-                    if (!inetAddress.isLoopbackAddress &&
-                        (singleInterface.displayName.contains("wlan0") ||
-                            singleInterface.displayName.contains("eth0") ||
-                            singleInterface.displayName.contains("ap0"))
-                    ) {
-                        return inetAddress
-                    }
+            for (iface in NetworkInterface.getNetworkInterfaces()) {
+                if (!iface.isUp || iface.isLoopback) continue
+                val name = iface.name.lowercase(Locale.US)
+                if (LAN_IFACE_PREFIXES.none { name.startsWith(it) }) continue
+                for (ifaceAddress in iface.interfaceAddresses) {
+                    val address = ifaceAddress.address
+                    if (address !is Inet4Address || ifaceAddress.broadcast == null) continue
+                    if (preferIp == null || address.hostAddress == preferIp) return address
+                    if (fallback == null) fallback = address
                 }
             }
         } catch (ex: SocketException) {
             ex.printStackTrace()
         }
-        return null
+        return fallback
+    }
+
+    private val LAN_IFACE_PREFIXES = listOf("wlan", "swlan", "ap", "softap", "eth")
+
+    /**
+     * True only when the phone is a Wi-Fi client on the 5/6 GHz band. Auto-connect
+     * uses it to pick its broadcast pace: 2.4 GHz APs (and the phone's own
+     * hotspot, where this is false) can't take a fast broadcast sweep.
+     */
+    @Suppress("DEPRECATION")
+    fun isWifi5Ghz(context: Context): Boolean {
+        return try {
+            val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val info = wm.connectionInfo
+            info.ipAddress != 0 && info.frequency >= 4900
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /** Broadcast address of the interface owning [inetAddr]. */

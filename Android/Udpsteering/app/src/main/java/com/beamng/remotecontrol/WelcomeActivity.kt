@@ -3,6 +3,7 @@ package com.beamng.remotecontrol
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -18,11 +19,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
+import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.AutoConnectDialog
 import com.beamng.remotecontrol.ui.WelcomeScreen
 import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.InetAddress
 
 class WelcomeActivity : AppCompatActivity() {
 
@@ -85,27 +90,59 @@ class WelcomeActivity : AppCompatActivity() {
 
     /** Decode the game QR from a photo the user took (works when live scan can't). */
     private fun decodeFromPhoto(uri: Uri) {
-        val bitmap = try {
-            contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
+        lifecycleScope.launch {
+            // Off the main thread: full-size camera photos (12–108 MP) take
+            // hundreds of ms to decode and can exhaust the heap.
+            val bitmap = withContext(Dispatchers.IO) { loadPhoto(uri) }
+            if (bitmap == null) {
+                Toast.makeText(this@WelcomeActivity, getString(R.string.toast_no_qr_in_photo), Toast.LENGTH_LONG).show()
+                return@launch
+            }
+            QrImageDecoder.decode(bitmap) { text ->
+                if (text != null) {
+                    connectManually(text)
+                } else {
+                    Toast.makeText(this@WelcomeActivity, getString(R.string.toast_no_qr_in_photo), Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * Decodes [uri] with power-of-two downsampling so the long edge stays ≤
+     * [MAX_PHOTO_EDGE_PX]. Deliberately generous: the game draws its QR tiny, so
+     * it often covers few pixels of the photo and aggressive downsampling would
+     * make it unreadable. Retries smaller if the heap still runs out.
+     */
+    private fun loadPhoto(uri: Uri): Bitmap? {
+        return try {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+            val longEdge = maxOf(bounds.outWidth, bounds.outHeight)
+            if (longEdge <= 0) return null
+
+            var sample = 1
+            while (longEdge / sample > MAX_PHOTO_EDGE_PX) sample *= 2
+
+            while (sample <= 16) {
+                try {
+                    val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+                    return contentResolver.openInputStream(uri)?.use {
+                        BitmapFactory.decodeStream(it, null, opts)
+                    }
+                } catch (e: OutOfMemoryError) {
+                    sample *= 2
+                }
+            }
+            null
         } catch (e: Exception) {
             null
-        }
-        if (bitmap == null) {
-            Toast.makeText(this, getString(R.string.toast_no_qr_in_photo), Toast.LENGTH_LONG).show()
-            return
-        }
-        QrImageDecoder.decode(bitmap) { text ->
-            if (text != null) {
-                connectManually(text)
-            } else {
-                Toast.makeText(this, getString(R.string.toast_no_qr_in_photo), Toast.LENGTH_LONG).show()
-            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        phoneIp = NetworkUtils.wifiIpv4String(this)
+        phoneIp = NetworkUtils.phoneIpv4String(this)
     }
 
     /**
@@ -114,23 +151,32 @@ class WelcomeActivity : AppCompatActivity() {
      */
     private fun startAutoConnect() {
         if (sweeping) return
-        val ip = NetworkUtils.wifiIpv4String(this)
+        // Only the broadcast address is required. The Wi-Fi client IP is merely
+        // preferred: it's absent when the phone is the hotspot the PC joined, and
+        // aborting on it broke hotspot play in v3.0.0–3.0.2.
+        val local = NetworkUtils.localInetAddress(NetworkUtils.wifiIpv4String(this))
         val broadcast = try {
-            NetworkUtils.broadcastAddress(NetworkUtils.localInetAddress())
+            NetworkUtils.broadcastAddress(local)
         } catch (e: Exception) {
             null
         }
-        if (ip == null || broadcast == null) {
+        if (broadcast == null) {
             Toast.makeText(this, getString(R.string.toast_wifi_required), Toast.LENGTH_LONG).show()
             return
         }
-        (application as RemoteControlApplication).ip = ip
+        // Null on hotspot (no Wi-Fi client network) → sockets stay unbound and
+        // route by subnet, which is the hotspot interface.
         val network = NetworkUtils.wifiNetwork(this)
 
         sweepProgress = 0f
         sweeping = true
         sweepJob = lifecycleScope.launch {
-            val result = UdpDiscovery.sweep(broadcast, ip, network) { tried, total ->
+            val settings = SettingsManager.getInstance(this@WelcomeActivity)
+            // Literal IP, so no DNS lookup happens here.
+            val lastHost = settings.lastIP.takeIf { it.isNotEmpty() }
+                ?.let { runCatching { InetAddress.getByName(it) }.getOrNull() }
+            val slow = !NetworkUtils.isWifi5Ghz(this@WelcomeActivity)
+            val result = UdpDiscovery.sweep(broadcast, lastHost, slow, network) { tried, total ->
                 runOnUiThread { sweepProgress = tried.toFloat() / total }
             }
             sweeping = false
@@ -139,6 +185,8 @@ class WelcomeActivity : AppCompatActivity() {
                     val app = application as RemoteControlApplication
                     app.hostAddress = result.host
                     app.securityCode = result.code
+                    // Next time we sweep this PC by unicast first (fast, no flood).
+                    result.host.hostAddress?.let { settings.lastIP = it }
                     startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
                 }
                 is UdpDiscovery.Result.Failed -> {
@@ -170,5 +218,9 @@ class WelcomeActivity : AppCompatActivity() {
 
     private fun openScanner() {
         startActivity(Intent(this, QRCodeScanner::class.java))
+    }
+
+    private companion object {
+        const val MAX_PHOTO_EDGE_PX = 4096
     }
 }

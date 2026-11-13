@@ -26,6 +26,6 @@ class SetupGuideActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        phoneIp = NetworkUtils.wifiIpv4String(this)
+        phoneIp = NetworkUtils.phoneIpv4String(this)
     }
 }
