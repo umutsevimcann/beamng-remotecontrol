@@ -138,6 +138,13 @@
     <string name="theme_system">Sistem</string>
     <string name="settings_guide_sub">Senin değerlerinle, adım adım</string>
     <string name="settings_about_sub">BeamNG\'nin Remote Control uygulamasının topluluk sürümü. BeamNG GmbH ile bağlantılı değildir.</string>
+    <string name="settings_haptics_when">NE ZAMAN TİTREŞİR</string>
+    <string name="haptic_gear">Vites değişimi</string>
+    <string name="haptic_gear_sub">Her vites geçişinde kısa bir tık</string>
+    <string name="haptic_impact">Çarpma</string>
+    <string name="haptic_impact_sub">Darbe sertleştikçe güçlenir</string>
+    <string name="haptic_abs">ABS</string>
+    <string name="haptic_abs_sub">ABS devredeyken kesik kesik</string>
     <string name="settings_heading">Ayarlar</string>
     <string name="settings_sec_driving">Sürüş</string>
     <string name="settings_sec_dashboard">Gösterge</string>

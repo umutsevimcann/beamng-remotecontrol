@@ -37,6 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -149,6 +151,7 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
     }
     // These two only shape tilt steering; elsewhere they would be dead controls.
     if (controlType == SettingsManager.CONTROL_GYROSCOPE) {
+        CardBox(u) {
         SliderRow(
             stringResource(R.string.settings_lock_angle), stringResource(R.string.settings_lock_angle_sub),
             "${lockAngle.roundToInt()}°", lockAngle, 30f..120f, u,
@@ -156,6 +159,7 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
             lockAngle = it
             settings.steeringLockDeg = it
         }
+        Spacer(Modifier.height(u * 2.6f))
         SliderRow(
             stringResource(R.string.settings_dead_zone), stringResource(R.string.settings_dead_zone_sub),
             "${deadZone.roundToInt()}°", deadZone, 0f..10f, u,
@@ -163,14 +167,23 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
             deadZone = it
             settings.deadZone = it
         }
+        }
     }
-    ToggleRow(stringResource(R.string.settings_analog_pedals), stringResource(R.string.settings_analog_pedals_sub), analogPedals, u) {
-        analogPedals = it
-        settings.isAnalogPedals = it
-    }
-    ToggleRow(stringResource(R.string.settings_mirrored), stringResource(R.string.settings_mirrored_sub), mirrored, u) {
-        mirrored = it
-        settings.isMirrored = it
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.settings_analog_pedals), stringResource(R.string.settings_analog_pedals_sub),
+            analogPedals, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            analogPedals = it
+            settings.isAnalogPedals = it
+        }
+        ToggleCard(
+            stringResource(R.string.settings_mirrored), stringResource(R.string.settings_mirrored_sub),
+            mirrored, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            mirrored = it
+            settings.isMirrored = it
+        }
     }
 }
 
@@ -219,14 +232,23 @@ private fun DashboardSection(settings: SettingsManager, u: Dp) {
             }
         }
     }
-    ToggleRow(stringResource(R.string.settings_dashboard_only), stringResource(R.string.settings_dashboard_only_sub), dashboardOnly, u) {
-        dashboardOnly = it
-        settings.isDashboardOnly = it
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.settings_dashboard_only), stringResource(R.string.settings_dashboard_only_sub),
+            dashboardOnly, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            dashboardOnly = it
+            settings.isDashboardOnly = it
+        }
+        ToggleCard(
+            stringResource(R.string.settings_perf_timer), stringResource(R.string.settings_perf_timer_sub),
+            perfTimer, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            perfTimer = it
+            settings.isPerfTimerEnabled = it
+        }
     }
-    ToggleRow(stringResource(R.string.settings_perf_timer), stringResource(R.string.settings_perf_timer_sub), perfTimer, u) {
-        perfTimer = it
-        settings.isPerfTimerEnabled = it
-    }
+    CardBox(u) {
     RowLabel(stringResource(R.string.settings_units), stringResource(R.string.settings_units_sub), u) {
         Row(horizontalArrangement = Arrangement.spacedBy(u * 1.5f)) {
             Pill(stringResource(R.string.unit_kmh), metric, u) {
@@ -239,14 +261,31 @@ private fun DashboardSection(settings: SettingsManager, u: Dp) {
             }
         }
     }
+    }
 }
 
 @Composable
 private fun FeedbackSection(settings: SettingsManager, u: Dp) {
     var haptics by remember { mutableStateOf(settings.isHapticEnabled) }
-    ToggleRow(stringResource(R.string.settings_haptics), stringResource(R.string.settings_haptics_sub), haptics, u) {
+    ToggleCard(stringResource(R.string.settings_haptics), stringResource(R.string.settings_haptics_sub), haptics, u, Modifier.fillMaxWidth()) {
         haptics = it
         settings.isHapticEnabled = it
+    }
+    // What the phone actually reacts to, so the switch isn't a mystery.
+    Heading(stringResource(R.string.settings_haptics_when), u)
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        val events = listOf(
+            R.string.haptic_gear to R.string.haptic_gear_sub,
+            R.string.haptic_impact to R.string.haptic_impact_sub,
+            R.string.haptic_abs to R.string.haptic_abs_sub,
+        )
+        for ((title, sub) in events) {
+            CardBox(u, Modifier.weight(1f).fillMaxHeight().alpha(if (haptics) 1f else 0.45f)) {
+                Text(stringResource(title), color = Graphite.Text, fontSize = (u * 3.3f).asSp(), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(u * 0.8f))
+                Text(stringResource(sub), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+            }
+        }
     }
 }
 
@@ -487,14 +526,44 @@ private fun RowLabel(title: String, subtitle: String, u: Dp, modifier: Modifier 
     }
 }
 
+/** The recessed card every settings group sits in. */
 @Composable
-private fun ToggleRow(title: String, subtitle: String, checked: Boolean, u: Dp, onChange: (Boolean) -> Unit) {
-    RowLabel(title, subtitle, u) {
+private fun CardBox(u: Dp, modifier: Modifier = Modifier.fillMaxWidth(), selected: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+    val shape = RoundedCornerShape(u * 2.5f)
+    Column(
+        modifier
+            .background(if (selected) Graphite.Selected else Graphite.Inset, shape)
+            .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
+            .padding(u * 3),
+        verticalArrangement = Arrangement.Center,
+        content = content,
+    )
+}
+
+/** An on/off setting as a card: the whole card is the target, and it lights up when on. */
+@Composable
+private fun ToggleCard(title: String, subtitle: String, checked: Boolean, u: Dp, modifier: Modifier, onChange: (Boolean) -> Unit) {
+    val shape = RoundedCornerShape(u * 2.5f)
+    Row(
+        modifier
+            .clip(shape)
+            .background(if (checked) Graphite.Selected else Graphite.Inset)
+            .border(if (checked) 2.dp else 1.dp, if (checked) Graphite.Orange else Graphite.Edge, shape)
+            .clickable { onChange(!checked) }
+            .padding(u * 3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, color = Graphite.Text, fontSize = (u * 3.4f).asSp(), fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(u * 0.8f))
+            Text(subtitle, color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+        }
+        Spacer(Modifier.width(u * 2))
         Switch(
             checked = checked, onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Graphite.OnOrange, checkedTrackColor = Graphite.Orange,
-                uncheckedThumbColor = Graphite.Muted, uncheckedTrackColor = Graphite.Bg2, uncheckedBorderColor = Graphite.Edge,
+                uncheckedThumbColor = Graphite.Muted, uncheckedTrackColor = Graphite.Track, uncheckedBorderColor = Graphite.Edge,
             ),
         )
     }

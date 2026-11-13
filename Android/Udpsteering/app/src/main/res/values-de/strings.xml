@@ -138,6 +138,13 @@
     <string name="theme_system">System</string>
     <string name="settings_guide_sub">Schritt für Schritt, mit deinen Werten</string>
     <string name="settings_about_sub">Community-Fork der Remote-Control-App von BeamNG. Nicht mit der BeamNG GmbH verbunden.</string>
+    <string name="settings_haptics_when">VIBRIERT BEI</string>
+    <string name="haptic_gear">Gangwechsel</string>
+    <string name="haptic_gear_sub">Kurzer Tick bei jedem Schalten</string>
+    <string name="haptic_impact">Aufprall</string>
+    <string name="haptic_impact_sub">Je härter, desto stärker</string>
+    <string name="haptic_abs">ABS</string>
+    <string name="haptic_abs_sub">Pulsiert, solange das ABS regelt</string>
     <string name="settings_heading">Einstellungen</string>
     <string name="settings_sec_driving">Fahren</string>
     <string name="settings_sec_dashboard">Anzeige</string>
