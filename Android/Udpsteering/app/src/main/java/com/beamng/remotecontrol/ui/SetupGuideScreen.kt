@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,8 +45,7 @@ fun SetupGuideScreen(phoneIp: String?) {
             .fillMaxSize()
             .background(cockpitBackground())
             .systemBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+            .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         Text(
             stringResource(R.string.guide_eyebrow),
@@ -65,86 +65,94 @@ fun SetupGuideScreen(phoneIp: String?) {
         )
         Spacer(Modifier.height(14.dp))
 
-        // Live identity box — the single source of truth for this phone
-        GarageCard(title = stringResource(R.string.guide_ip_label)) {
-            Text(
-                text = phoneIp ?: stringResource(R.string.guide_ip_missing),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = if (phoneIp != null) 26.sp else 13.sp,
-                ),
-                color = if (phoneIp != null) Graphite.Text else Graphite.Red,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        Spacer(Modifier.height(14.dp))
+        // Landscape: two columns that scroll on their own — what to do on the left,
+        // the optional streams and troubleshooting on the right.
+        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                // Live identity box — the single source of truth for this phone
+                GarageCard(title = stringResource(R.string.guide_ip_label)) {
+                    Text(
+                        text = phoneIp ?: stringResource(R.string.guide_ip_missing),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = if (phoneIp != null) 26.sp else 13.sp,
+                        ),
+                        color = if (phoneIp != null) Graphite.Text else Graphite.Red,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
 
-        // 1 · Connect
-        GarageCard(title = stringResource(R.string.guide_connect_title)) {
-            WhatYouGet(stringResource(R.string.guide_connect_what))
-            GuideStep(1, stringResource(R.string.guide_connect_s1))
-            GuideStep(2, stringResource(R.string.guide_connect_s2))
-            GuideStep(3, stringResource(R.string.guide_connect_s3))
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.guide_connect_s_note),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Graphite.Muted,
-            )
-        }
-        Spacer(Modifier.height(14.dp))
+                // 1 · Connect
+                GarageCard(title = stringResource(R.string.guide_connect_title)) {
+                    WhatYouGet(stringResource(R.string.guide_connect_what))
+                    GuideStep(1, stringResource(R.string.guide_connect_s1))
+                    GuideStep(2, stringResource(R.string.guide_connect_s2))
+                    GuideStep(3, stringResource(R.string.guide_connect_s3))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.guide_connect_s_note),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Graphite.Muted,
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
 
-        // Other ways to connect (+ how to obtain the code)
-        GarageCard(title = stringResource(R.string.guide_ways_title)) {
-            Text(
-                stringResource(R.string.guide_ways_intro),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Graphite.Muted,
-                modifier = Modifier.padding(bottom = 6.dp),
-            )
-            GuideWay(
-                stringResource(R.string.guide_way_scan_t),
-                stringResource(R.string.guide_way_scan_b),
-            )
-            GuideWay(
-                stringResource(R.string.guide_way_photo_t),
-                stringResource(R.string.guide_way_photo_b),
-            )
-            GuideWay(
-                stringResource(R.string.guide_way_code_t),
-                stringResource(R.string.guide_way_code_b),
-            )
-        }
-        Spacer(Modifier.height(14.dp))
+                // Other ways to connect (+ how to obtain the code)
+                GarageCard(title = stringResource(R.string.guide_ways_title)) {
+                    Text(
+                        stringResource(R.string.guide_ways_intro),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Graphite.Muted,
+                        modifier = Modifier.padding(bottom = 6.dp),
+                    )
+                    GuideWay(
+                        stringResource(R.string.guide_way_scan_t),
+                        stringResource(R.string.guide_way_scan_b),
+                    )
+                    GuideWay(
+                        stringResource(R.string.guide_way_photo_t),
+                        stringResource(R.string.guide_way_photo_b),
+                    )
+                    GuideWay(
+                        stringResource(R.string.guide_way_code_t),
+                        stringResource(R.string.guide_way_code_b),
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
+            }
+            Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                // 2 · Live dashboard (OutGauge)
+                GarageCard(title = stringResource(R.string.guide_dash_title)) {
+                    WhatYouGet(stringResource(R.string.guide_dash_what))
+                    GuideStep(1, stringResource(R.string.guide_dash_s1))
+                    GuideStep(2, stringResource(R.string.guide_dash_s2))
+                    ValueTable(phoneIp, port = Ports.APP.toString())
+                    GuideStep(3, stringResource(R.string.guide_dash_s3))
+                }
+                Spacer(Modifier.height(14.dp))
 
-        // 2 · Live dashboard (OutGauge)
-        GarageCard(title = stringResource(R.string.guide_dash_title)) {
-            WhatYouGet(stringResource(R.string.guide_dash_what))
-            GuideStep(1, stringResource(R.string.guide_dash_s1))
-            GuideStep(2, stringResource(R.string.guide_dash_s2))
-            ValueTable(phoneIp, port = Ports.APP.toString())
-            GuideStep(3, stringResource(R.string.guide_dash_s3))
-        }
-        Spacer(Modifier.height(14.dp))
+                // 3 · Drift meter (MotionSim)
+                GarageCard(title = stringResource(R.string.guide_drift_title)) {
+                    WhatYouGet(stringResource(R.string.guide_drift_what))
+                    GuideStep(1, stringResource(R.string.guide_drift_s1))
+                    GuideStep(2, stringResource(R.string.guide_drift_s2))
+                    ValueTable(phoneIp, port = Ports.MOTION.toString())
+                    GuideStep(3, stringResource(R.string.guide_drift_s3))
+                }
+                Spacer(Modifier.height(14.dp))
 
-        // 3 · Drift meter (MotionSim)
-        GarageCard(title = stringResource(R.string.guide_drift_title)) {
-            WhatYouGet(stringResource(R.string.guide_drift_what))
-            GuideStep(1, stringResource(R.string.guide_drift_s1))
-            GuideStep(2, stringResource(R.string.guide_drift_s2))
-            ValueTable(phoneIp, port = Ports.MOTION.toString())
-            GuideStep(3, stringResource(R.string.guide_drift_s3))
+                // Troubleshooting
+                GarageCard(title = stringResource(R.string.guide_trouble_title)) {
+                    Bullet(stringResource(R.string.guide_trouble_1))
+                    Bullet(stringResource(R.string.guide_trouble_2))
+                    Bullet(stringResource(R.string.guide_trouble_3))
+                    Bullet(stringResource(R.string.guide_trouble_4))
+            Bullet(stringResource(R.string.guide_trouble_5))
+            Bullet(stringResource(R.string.guide_trouble_6))
+                }
+            }
         }
-        Spacer(Modifier.height(14.dp))
-
-        // Troubleshooting
-        GarageCard(title = stringResource(R.string.guide_trouble_title)) {
-            Bullet(stringResource(R.string.guide_trouble_1))
-            Bullet(stringResource(R.string.guide_trouble_2))
-            Bullet(stringResource(R.string.guide_trouble_3))
-            Bullet(stringResource(R.string.guide_trouble_4))
-        }
-        Spacer(Modifier.height(10.dp))
     }
 }
 

@@ -13,7 +13,6 @@
     <string name="drive_boost">TURBO</string>
     <string name="speed_kmh">KM/S</string>
     <string name="speed_mph">MPH</string>
-    <string name="drive_gyro_hint">Direksiyon için telefonu eğ — ortalamak için düz tut</string>
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">HAZIR</string>
     <string name="drive_timer_best">REKOR</string>
@@ -36,7 +35,6 @@
     <string name="drive_drift_best">rekor %1$d°</string>
 
     <!-- Brand -->
-    <string name="brand_subtitle">UZAKTAN KUMANDA</string>
 
     <!-- Welcome: connect card -->
     <string name="menu_computer">BİLGİSAYAR</string>
@@ -55,28 +53,14 @@
     <string name="menu_steps_title">3 adımda hazır</string>
     <string name="menu_step_3">Sağdaki butona bas</string>
     <string name="menu_same_wifi">Telefon ve PC aynı Wi-Fi\'de olmalı</string>
-    <string name="connect_card_title">BAĞLANTI</string>
     <string name="connect_step_1">PC\'de BeamNG.drive\'ı aç</string>
     <string name="connect_step_2">Seçenekler → Kontroller → Donanım → telefonu etkinleştir</string>
-    <string name="connect_step_3">Otomatik Bağlan\'a dokun — QR gerekmez</string>
 
     <!-- Welcome: extras card -->
-    <string name="extras_card_title">OYUNDAN AÇILAN EKSTRALAR</string>
-    <string name="extras_dashboard_line">OutGauge → canlı gösterge paneli: hız, devir, vites, yakıt, uyarı ışıkları, kaza titreşimi</string>
-    <string name="extras_drift_line">MotionSim → seans rekorlu drift metre</string>
-    <string name="extras_guide_hint">Adım adım, SENİN değerlerinle:</string>
 
     <!-- Welcome: actions -->
-    <string name="auto_connect_button">OTOMATİK BAĞLAN — QR YOK</string>
-    <string name="scan_qr_button">QR KODU TARA</string>
-    <string name="settings_button">AYARLAR</string>
-    <string name="guide_button">KURULUM REHBERİ</string>
-    <string name="manual_button">TARAYAMIYOR MUSUN? KODU GİR</string>
 
     <!-- Auto-connect (kamerasız, oyunun kod uzayını Wi-Fi üzerinden tarar) -->
-    <string name="auto_connect_title">BeamNG.drive aranıyor…</string>
-    <string name="auto_connect_sub">QR yok, kamera yok. Sadece oyunda uzaktan kumandanın açık olduğundan emin ol.</string>
-    <string name="auto_connect_progress">%%%1$d</string>
     <string name="toast_auto_connect_failed">BeamNG.drive bulunamadı. Oyunda Seçenekler → Kontroller → Donanım → “Telefonunu ya da tabletini kullan” seçeneğini aç ve telefonu aynı Wi-Fi\'da tut.</string>
 
     <!-- Manual connect (camera-free fallback) -->
@@ -103,7 +87,7 @@
     <string name="guide_connect_what">Telefonunu, oyundaki arabanın direksiyonu, gazı ve freni yap.</string>
     <string name="guide_connect_s1">Telefonunu PC\'nle AYNI Wi-Fi\'a bağla — aynı ev ağı / modem. Doğru olması gereken tek şey bu.</string>
     <string name="guide_connect_s2">PC\'de BeamNG.drive içinde: Seçenekler → Kontroller → Donanım\'ı aç, “Telefonunu ya da tabletini kullan” seçeneğini bul ve Evet yap. Bir QR çıkacak — onu görmezden gelebilirsin.</string>
-    <string name="guide_connect_s3">Bu uygulamaya dön ve büyük OTOMATİK BAĞLAN düğmesine bas. Birkaç saniye bekle — oyunu kendisi bulup bağlanır. QR yok, yazmak yok.</string>
+    <string name="guide_connect_s3">Bu uygulamaya dön ve büyük BAĞLAN düğmesine bas. İlk arama 2.4 GHz Wi-Fi\'de 2–3 dakika sürebilir; sonrakiler saniyeler sürer. QR yok, yazmak yok.</string>
     <string name="guide_connect_s_note">Neden QR değil de Otomatik Bağlan: v0.39\'dan beri oyunun QR\'ı çoğu telefon kamerasının okuyamayacağı kadar yoğunlaştı. Otomatik Bağlan kamerayı tamamen atlar ve oyunu Wi-Fi üzerinden bulur; her telefonda çalışır.</string>
 
     <!-- Kurulum rehberi: alternatif bağlanma yolları + kod nereden alınır -->
@@ -133,6 +117,8 @@
     <string name="guide_trouble_2">Misafir/otel Wi-Fi ağları telefonla PC\'nin konuşmasını çoğu zaman engeller — kendi ağını ya da telefonun hotspot\'unu kullan.</string>
     <string name="guide_trouble_3">Modem telefona yeni IP mi verdi? Bu sayfayı yeniden kontrol et, oyundaki değeri güncelle, sonra Ctrl+R.</string>
     <string name="guide_trouble_4">Oyun güncellemesinden sonra göstergeler dondu mu? Kutuları yeniden işaretle — ayarlar bazen sıfırlanır.</string>
+    <string name="guide_trouble_5">Router yok mu? Telefonun hotspot\'unu aç, PC\'yi ona bağla ve bu sayfanın başındaki adresi kullan.</string>
+    <string name="guide_trouble_6">Bölünmüş ekranda göstergeler boş mu? Oyun, çoklu koltuk açıkken gösterge akışını kapatır.</string>
 
     <!-- Scanner -->
     <string name="scan_eyebrow">BAĞLAN</string>
@@ -150,9 +136,16 @@
     <string name="toast_wifi_required">Telefon ve PC aynı Wi-Fi ağında olmalı — ya da PC telefonun hotspot\'una bağlı olmalı</string>
 
     <!-- Settings -->
-    <string name="settings_eyebrow">AYARLAR</string>
     <string name="settings_language">DİL</string>
-    <string name="settings_title">Kontroller ve Gösterge</string>
+    <string name="settings_heading">Ayarlar</string>
+    <string name="settings_sec_driving">Sürüş</string>
+    <string name="settings_sec_dashboard">Gösterge</string>
+    <string name="settings_sec_feedback">Geri bildirim</string>
+    <string name="settings_sec_general">Genel</string>
+    <string name="control_gyro_sub">Telefonu direksiyon gibi eğ</string>
+    <string name="control_slider_sub">Ekrandaki direksiyonu parmağınla çevir</string>
+    <string name="control_buttons_sub">Ekrandaki ◀ ve ▶ tuşlarına bas</string>
+    <string name="settings_version">Sürüm</string>
     <string name="settings_dash_layout">GÖSTERGE DÜZENİ</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Klasik</string>
@@ -180,6 +173,5 @@
     <string name="settings_perf_timer_sub">Kalkış süreleri ekranda, seans rekoru tutulur</string>
     <string name="settings_analog_pedals">Analog pedallar</string>
     <string name="settings_analog_pedals_sub">Pedal parmak konumunu izler — RemoteControlPro modu gerekir</string>
-    <string name="settings_instant_save">değişiklikler anında kaydedilir</string>
 
 </resources>

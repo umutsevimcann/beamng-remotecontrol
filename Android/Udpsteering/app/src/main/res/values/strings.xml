@@ -13,7 +13,6 @@
     <string name="drive_boost">BOOST</string>
     <string name="speed_kmh">KM/H</string>
     <string name="speed_mph">MPH</string>
-    <string name="drive_gyro_hint">Tilt to steer — hold level to center</string>
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">READY</string>
     <string name="drive_timer_best">BEST</string>
@@ -36,7 +35,6 @@
     <string name="drive_drift_best">best %1$d°</string>
 
     <!-- Brand -->
-    <string name="brand_subtitle">REMOTE CONTROL</string>
 
     <!-- Welcome: connect card -->
     <string name="menu_computer">COMPUTER</string>
@@ -55,28 +53,14 @@
     <string name="menu_steps_title">Ready in 3 steps</string>
     <string name="menu_step_3">Press the button on the right</string>
     <string name="menu_same_wifi">Phone and PC must be on the same Wi-Fi</string>
-    <string name="connect_card_title">CONNECT</string>
     <string name="connect_step_1">Open BeamNG.drive on your PC</string>
     <string name="connect_step_2">Options → Controls → Hardware → enable phone</string>
-    <string name="connect_step_3">Tap Auto-Connect — no QR needed</string>
 
     <!-- Welcome: extras card -->
-    <string name="extras_card_title">OPTIONAL EXTRAS — ENABLE IN GAME</string>
-    <string name="extras_dashboard_line">OutGauge → live dashboard: speed, RPM, gear, fuel, warning lights, crash haptics</string>
-    <string name="extras_drift_line">MotionSim → drift meter with session record</string>
-    <string name="extras_guide_hint">Step-by-step with YOUR values:</string>
 
     <!-- Welcome: actions -->
-    <string name="auto_connect_button">AUTO-CONNECT — NO QR</string>
-    <string name="scan_qr_button">SCAN QR CODE</string>
-    <string name="settings_button">SETTINGS</string>
-    <string name="guide_button">SETUP GUIDE</string>
-    <string name="manual_button">CAN\'T SCAN? ENTER CODE</string>
 
     <!-- Auto-connect (camera-free, sweeps the game\'s code space over Wi-Fi) -->
-    <string name="auto_connect_title">Searching for BeamNG.drive…</string>
-    <string name="auto_connect_sub">No QR, no camera. Just make sure remote control is enabled in the game.</string>
-    <string name="auto_connect_progress">%1$d%%</string>
     <string name="toast_auto_connect_failed">Couldn\'t find BeamNG.drive. In the game enable Options → Controls → Hardware → “Use your phone or tablet”, and keep the phone on the same Wi-Fi.</string>
 
     <!-- Manual connect (camera-free fallback) -->
@@ -103,7 +87,7 @@
     <string name="guide_connect_what">Turn your phone into the steering wheel, gas and brake for the car in the game.</string>
     <string name="guide_connect_s1">Connect your phone to the SAME Wi-Fi as your PC — the same home network / router. This is the one thing that must be right.</string>
     <string name="guide_connect_s2">On your PC in BeamNG.drive: open Options → Controls → Hardware, find “Use your phone or tablet” and set it to Yes. A QR code appears — you can ignore it.</string>
-    <string name="guide_connect_s3">Come back to this app and tap the big AUTO-CONNECT button. Wait a few seconds — it finds the game by itself and connects. No QR, no typing.</string>
+    <string name="guide_connect_s3">Come back to this app and tap the big CONNECT button. The first search can take 2–3 minutes on 2.4 GHz Wi-Fi; after that it connects in seconds. No QR, no typing.</string>
     <string name="guide_connect_s_note">Why Auto-Connect and not the QR: since v0.39 the game’s QR became too dense for most phone cameras to read. Auto-Connect skips the camera entirely and finds the game over your Wi-Fi, so it works on any phone.</string>
 
     <!-- Setup guide: alternative connection methods + where the code comes from -->
@@ -133,6 +117,8 @@
     <string name="guide_trouble_2">Guest/hotel Wi-Fi often blocks phones from talking to PCs — use your own network or the phone\'s hotspot.</string>
     <string name="guide_trouble_3">Router gave the phone a new IP? Re-check this page and update the game, then Ctrl+R.</string>
     <string name="guide_trouble_4">Gauges frozen after a game update? Re-tick the options — settings occasionally reset.</string>
+    <string name="guide_trouble_5">No router? Turn on the phone\'s hotspot, connect the PC to it, and use the address shown at the top of this page.</string>
+    <string name="guide_trouble_6">Gauges stay empty in split-screen? The game switches its dashboard stream off while multi-seat is on.</string>
 
     <!-- Scanner -->
     <string name="scan_eyebrow">CONNECT</string>
@@ -150,9 +136,16 @@
     <string name="toast_wifi_required">Phone and PC must be on the same Wi-Fi — or the PC on the phone\'s hotspot</string>
 
     <!-- Settings -->
-    <string name="settings_eyebrow">SETTINGS</string>
     <string name="settings_language">LANGUAGE</string>
-    <string name="settings_title">Controls &amp; Dashboard</string>
+    <string name="settings_heading">Settings</string>
+    <string name="settings_sec_driving">Driving</string>
+    <string name="settings_sec_dashboard">Dashboard</string>
+    <string name="settings_sec_feedback">Feedback</string>
+    <string name="settings_sec_general">General</string>
+    <string name="control_gyro_sub">Tilt the phone like a steering wheel</string>
+    <string name="control_slider_sub">Turn the wheel on the screen with your finger</string>
+    <string name="control_buttons_sub">Hold ◀ and ▶ on the screen</string>
+    <string name="settings_version">Version</string>
     <string name="settings_dash_layout">DASH LAYOUT</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Classic</string>
@@ -180,6 +173,5 @@
     <string name="settings_perf_timer_sub">Launch times on the dash, session best</string>
     <string name="settings_analog_pedals">Analog pedals</string>
     <string name="settings_analog_pedals_sub">Pedal follows finger position — requires the RemoteControlPro mod</string>
-    <string name="settings_instant_save">changes save instantly</string>
 
 </resources>

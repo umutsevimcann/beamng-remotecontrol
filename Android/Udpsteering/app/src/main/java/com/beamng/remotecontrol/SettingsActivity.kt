@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.beamng.remotecontrol.settings.SettingsManager
-import com.beamng.remotecontrol.ui.SettingsScreen
+import android.content.Intent
+import com.beamng.remotecontrol.ui.settings.SettingsScreen
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 /**
@@ -17,7 +18,11 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             RemoteTheme {
-                SettingsScreen(SettingsManager.getInstance(this))
+                SettingsScreen(
+                    settings = SettingsManager.getInstance(this),
+                    onBack = ::finish,
+                    onSetupGuide = { startActivity(Intent(this, SetupGuideActivity::class.java)) },
+                )
             }
         }
     }

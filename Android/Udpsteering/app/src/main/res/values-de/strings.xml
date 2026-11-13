@@ -13,7 +13,6 @@
     <string name="drive_boost">LADEDRUCK</string>
     <string name="speed_kmh">KM/H</string>
     <string name="speed_mph">MPH</string>
-    <string name="drive_gyro_hint">Zum Lenken das Handy neigen — gerade halten zum Zentrieren</string>
     <string name="drive_timer_label">0-100</string>
     <string name="drive_timer_ready">BEREIT</string>
     <string name="drive_timer_best">REKORD</string>
@@ -36,7 +35,6 @@
     <string name="drive_drift_best">Rekord %1$d°</string>
 
     <!-- Brand -->
-    <string name="brand_subtitle">FERNSTEUERUNG</string>
 
     <!-- Welcome: connect card -->
     <string name="menu_computer">COMPUTER</string>
@@ -55,28 +53,14 @@
     <string name="menu_steps_title">In 3 Schritten bereit</string>
     <string name="menu_step_3">Rechts auf den Button tippen</string>
     <string name="menu_same_wifi">Handy und PC müssen im selben WLAN sein</string>
-    <string name="connect_card_title">VERBINDEN</string>
     <string name="connect_step_1">BeamNG.drive am PC starten</string>
     <string name="connect_step_2">Optionen → Steuerung → Hardware → Handy aktivieren</string>
-    <string name="connect_step_3">Auf Auto-Verbinden tippen — kein QR nötig</string>
 
     <!-- Welcome: extras card -->
-    <string name="extras_card_title">OPTIONALE EXTRAS — IM SPIEL AKTIVIEREN</string>
-    <string name="extras_dashboard_line">OutGauge → Live-Cockpit: Tempo, Drehzahl, Gang, Tank, Warnleuchten, Crash-Vibration</string>
-    <string name="extras_drift_line">MotionSim → Drift-Anzeige mit Sitzungsrekord</string>
-    <string name="extras_guide_hint">Schritt für Schritt mit DEINEN Werten:</string>
 
     <!-- Welcome: actions -->
-    <string name="auto_connect_button">AUTO-VERBINDEN — KEIN QR</string>
-    <string name="scan_qr_button">QR-CODE SCANNEN</string>
-    <string name="settings_button">EINSTELLUNGEN</string>
-    <string name="guide_button">EINRICHTUNGSANLEITUNG</string>
-    <string name="manual_button">SCAN KLAPPT NICHT? CODE EINGEBEN</string>
 
     <!-- Auto-connect (kameralos, durchsucht den Code-Raum des Spiels per WLAN) -->
-    <string name="auto_connect_title">Suche BeamNG.drive…</string>
-    <string name="auto_connect_sub">Kein QR, keine Kamera. Stelle nur sicher, dass die Fernsteuerung im Spiel aktiviert ist.</string>
-    <string name="auto_connect_progress">%1$d%%</string>
     <string name="toast_auto_connect_failed">BeamNG.drive nicht gefunden. Aktiviere im Spiel Optionen → Steuerung → Hardware → „Handy oder Tablet verwenden“ und bleibe im selben WLAN.</string>
 
     <!-- Manual connect (camera-free fallback) -->
@@ -103,7 +87,7 @@
     <string name="guide_connect_what">Mach dein Handy zum Lenkrad, Gas und Bremse für das Auto im Spiel.</string>
     <string name="guide_connect_s1">Verbinde dein Handy mit dem GLEICHEN WLAN wie dein PC — dasselbe Heimnetz / derselbe Router. Das ist das Einzige, das stimmen muss.</string>
     <string name="guide_connect_s2">Am PC in BeamNG.drive: Optionen → Steuerung → Hardware öffnen, „Handy oder Tablet verwenden“ finden und auf Ja stellen. Ein QR-Code erscheint — den kannst du ignorieren.</string>
-    <string name="guide_connect_s3">Zurück in dieser App auf den großen AUTO-VERBINDEN-Knopf tippen. Ein paar Sekunden warten — es findet das Spiel von selbst und verbindet. Kein QR, kein Tippen.</string>
+    <string name="guide_connect_s3">Zurück in diese App und den großen VERBINDEN-Button antippen. Die erste Suche kann im 2,4-GHz-WLAN 2–3 Minuten dauern; danach geht es in Sekunden. Kein QR, kein Tippen.</string>
     <string name="guide_connect_s_note">Warum Auto-Verbinden statt QR: Seit v0.39 ist der QR des Spiels zu dicht, als dass ihn die meisten Handykameras lesen könnten. Auto-Verbinden überspringt die Kamera komplett und findet das Spiel per WLAN — funktioniert auf jedem Handy.</string>
 
     <!-- Setup-Guide: alternative Verbindungswege + woher der Code kommt -->
@@ -133,6 +117,8 @@
     <string name="guide_trouble_2">Gäste-/Hotel-WLAN blockiert oft die Verbindung zwischen Handy und PC — eigenes Netz oder Handy-Hotspot verwenden.</string>
     <string name="guide_trouble_3">Router hat dem Handy eine neue IP gegeben? Diese Seite prüfen, den Wert im Spiel aktualisieren, dann Strg+R.</string>
     <string name="guide_trouble_4">Anzeigen nach einem Spiel-Update eingefroren? Häkchen neu setzen — Einstellungen werden gelegentlich zurückgesetzt.</string>
+    <string name="guide_trouble_5">Kein Router? Hotspot des Handys einschalten, den PC damit verbinden und die oben angezeigte Adresse verwenden.</string>
+    <string name="guide_trouble_6">Anzeigen bleiben im Splitscreen leer? Das Spiel schaltet den Datenstrom ab, solange Multi-Seat aktiv ist.</string>
 
     <!-- Scanner -->
     <string name="scan_eyebrow">VERBINDEN</string>
@@ -150,9 +136,16 @@
     <string name="toast_wifi_required">Handy und PC müssen im selben WLAN sein — oder der PC im Hotspot des Handys</string>
 
     <!-- Settings -->
-    <string name="settings_eyebrow">EINSTELLUNGEN</string>
     <string name="settings_language">SPRACHE</string>
-    <string name="settings_title">Steuerung &amp; Cockpit</string>
+    <string name="settings_heading">Einstellungen</string>
+    <string name="settings_sec_driving">Fahren</string>
+    <string name="settings_sec_dashboard">Anzeige</string>
+    <string name="settings_sec_feedback">Feedback</string>
+    <string name="settings_sec_general">Allgemein</string>
+    <string name="control_gyro_sub">Handy wie ein Lenkrad neigen</string>
+    <string name="control_slider_sub">Lenkrad auf dem Bildschirm mit dem Finger drehen</string>
+    <string name="control_buttons_sub">◀ und ▶ auf dem Bildschirm halten</string>
+    <string name="settings_version">Version</string>
     <string name="settings_dash_layout">ANZEIGE-LAYOUT</string>
     <string name="dash_modern">Modern</string>
     <string name="dash_classic">Klassisch</string>
@@ -180,6 +173,5 @@
     <string name="settings_perf_timer_sub">Startzeiten auf dem Display, Sitzungsrekord</string>
     <string name="settings_analog_pedals">Analoge Pedale</string>
     <string name="settings_analog_pedals_sub">Pedal folgt der Fingerposition — erfordert die RemoteControlPro-Mod</string>
-    <string name="settings_instant_save">Änderungen werden sofort gespeichert</string>
 
 </resources>

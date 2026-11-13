@@ -41,7 +41,7 @@
 
         <activity 
             android:name=".QRCodeScanner"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|keyboardHidden|screenSize" />
 
         <activity 
@@ -51,13 +51,13 @@
             
         <activity
             android:name=".SettingsActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme" />
 
         <activity
             android:name=".SetupGuideActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme" />
     </application>
