@@ -5,10 +5,13 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.beamng.remotecontrol.ui.dash.RpmScale
 
 /** Compose-observable snapshot of the game's OutGauge stream (UI-thread only). */
 class TelemetryUiState {
     var connected by mutableStateOf(false)
+    /** Tachometer range; grows with the highest RPM seen this session. */
+    var rpmScale by mutableStateOf(RpmScale(8000f, 6500f))
     var speedMs by mutableFloatStateOf(0f)
     var rpm by mutableFloatStateOf(0f)
     var gear by mutableStateOf("N")

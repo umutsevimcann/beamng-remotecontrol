@@ -39,7 +39,9 @@ import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
 import com.beamng.remotecontrol.protocol.SteeringCurve
 import com.beamng.remotecontrol.settings.SettingsManager
-import com.beamng.remotecontrol.ui.DriveScreen
+import com.beamng.remotecontrol.ui.dash.DashLayout
+import com.beamng.remotecontrol.ui.dash.RpmScaleTracker
+import com.beamng.remotecontrol.ui.drive.DriveScreen
 import com.beamng.remotecontrol.ui.TelemetryUiState
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
@@ -62,6 +64,9 @@ class MainActivity : AppCompatActivity() {
     private var metricUnits by mutableStateOf(true)
     private var perfTimer by mutableStateOf(false)
     private var analogPedals by mutableStateOf(false)
+    private var dashLayout by mutableStateOf(DashLayout.MODERN)
+    private var mirrored by mutableStateOf(false)
+    private val rpmScaleTracker = RpmScaleTracker() // UI thread only
 
     // 0-100 timer state machine (UI thread only)
     private var timerArmed = false
@@ -130,6 +135,9 @@ class MainActivity : AppCompatActivity() {
                     dashboardOnly = dashboardOnly,
                     perfTimerEnabled = perfTimer,
                     analogPedals = analogPedals,
+                    layout = dashLayout,
+                    mirrored = mirrored,
+                    steering = { steeringInputHandler?.getSteeringValue() ?: 0f },
                     onThrottle = { value -> thrpushed = value },
                     onBrake = { value -> brpushed = value },
                     onSteerLeft = { pressed ->
@@ -138,10 +146,10 @@ class MainActivity : AppCompatActivity() {
                     onSteerRight = { pressed ->
                         (steeringInputHandler as? ButtonInputHandler)?.pressRight(pressed)
                     },
-                    onSliderChange = { value ->
+                    onWheel = { value ->
                         (steeringInputHandler as? SliderInputHandler)?.setValue(value)
                     },
-                    onSliderRelease = {
+                    onWheelRelease = {
                         (steeringInputHandler as? SliderInputHandler)?.release()
                     },
                     onOpenSettings = {
@@ -162,6 +170,8 @@ class MainActivity : AppCompatActivity() {
         controlType = settingsManager.controlType
         perfTimer = settingsManager.isPerfTimerEnabled
         analogPedals = settingsManager.isAnalogPedals
+        dashLayout = settingsManager.dashLayout
+        mirrored = settingsManager.isMirrored
 
         setupInputHandler()
         steeringInputHandler?.start()
@@ -456,6 +466,7 @@ class MainActivity : AppCompatActivity() {
         telemetry.connected = true
         telemetry.speedMs = p.speed
         telemetry.rpm = p.rpm
+        telemetry.rpmScale = rpmScaleTracker.observe(p.rpm)
         telemetry.gear = p.gear
         telemetry.fuel = p.fuel
         telemetry.engTemp = p.engineTemp

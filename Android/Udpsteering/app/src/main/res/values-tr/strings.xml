@@ -22,6 +22,18 @@
     <string name="drive_thr">GAZ</string>
     <string name="drive_brk">FRN</string>
     <string name="drive_clt">DBR</string>
+    <string name="drive_rpm">DEVİR</string>
+    <string name="drive_steering">DİREKSİYON</string>
+    <string name="warn_highbeam">FAR</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">YAĞ</string>
+    <string name="warn_battery">AKÜ</string>
+    <string name="drive_timer_value">%1$.2f sn</string>
+    <string name="drive_timer_best_value">en iyi %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">rekor %1$d°</string>
 
     <!-- Brand -->
     <string name="brand_subtitle">UZAKTAN KUMANDA</string>

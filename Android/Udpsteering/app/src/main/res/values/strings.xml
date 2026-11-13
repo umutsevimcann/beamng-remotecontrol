@@ -22,6 +22,18 @@
     <string name="drive_thr">THR</string>
     <string name="drive_brk">BRK</string>
     <string name="drive_clt">CLT</string>
+    <string name="drive_rpm">RPM</string>
+    <string name="drive_steering">STEERING</string>
+    <string name="warn_highbeam">HI</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">OIL</string>
+    <string name="warn_battery">BAT</string>
+    <string name="drive_timer_value">%1$.2f s</string>
+    <string name="drive_timer_best_value">best %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">best %1$d°</string>
 
     <!-- Brand -->
     <string name="brand_subtitle">REMOTE CONTROL</string>

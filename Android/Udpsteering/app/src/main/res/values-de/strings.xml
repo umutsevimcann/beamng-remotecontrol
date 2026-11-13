@@ -22,6 +22,18 @@
     <string name="drive_thr">GAS</string>
     <string name="drive_brk">BRE</string>
     <string name="drive_clt">KUP</string>
+    <string name="drive_rpm">U/MIN</string>
+    <string name="drive_steering">LENKUNG</string>
+    <string name="warn_highbeam">FERN</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">ÖL</string>
+    <string name="warn_battery">BAT</string>
+    <string name="drive_timer_value">%1$.2f s</string>
+    <string name="drive_timer_best_value">Bestzeit %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">Rekord %1$d°</string>
 
     <!-- Brand -->
     <string name="brand_subtitle">FERNSTEUERUNG</string>
