@@ -17,12 +17,10 @@
     <string name="drive_timer_ready">HAZIR</string>
     <string name="drive_timer_best">REKOR</string>
     <string name="drive_drift">DRIFT</string>
-    <string name="drive_drift_max">MAKS</string>
     <string name="drive_thr">GAZ</string>
     <string name="drive_brk">FRN</string>
     <string name="drive_clt">DBR</string>
     <string name="drive_rpm">DEVİR</string>
-    <string name="drive_steering">DİREKSİYON</string>
     <string name="warn_highbeam">FAR</string>
     <string name="warn_handbrake">P</string>
     <string name="warn_abs">ABS</string>
@@ -121,10 +119,7 @@
     <string name="guide_trouble_6">Bölünmüş ekranda göstergeler boş mu? Oyun, çoklu koltuk açıkken gösterge akışını kapatır.</string>
 
     <!-- Scanner -->
-    <string name="scan_eyebrow">BAĞLAN</string>
-    <string name="scan_title">QR Tara</string>
     <string name="scan_hint">Oyundaki kodu çerçeveye hizala — bağlantı kendiliğinden kurulur</string>
-    <string name="scan_camera_note">kamera yalnızca bu ekranda açık</string>
 
     <!-- Connection / status -->
     <string name="connecting_dialog_title">BeamNG.drive\'a bağlanılıyor</string>

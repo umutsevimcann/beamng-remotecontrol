@@ -6,7 +6,7 @@
     <color name="beamng_orange_light">#FF8833</color>
 
     <!-- Backgrounds -->
-    <color name="background_dark">#0D0D0D</color>
+    <color name="background_dark">#0D0E12</color>
     <color name="surface_dark">#161616</color>
     <color name="surface_elevated">#1E1E1E</color>
     <color name="surface_card">#222222</color>

@@ -2,6 +2,10 @@
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- MIUI/Android "force dark" recolours our own dark UI (dim icons turned white). -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <!-- Use the strip beside a notch/punch-hole instead of leaving it black. -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+        <!-- What shows in the cutout strip and before Compose draws its first frame. -->
+        <item name="android:windowBackground">@color/background_dark</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="windowActionBar">false</item>

@@ -17,12 +17,10 @@
     <string name="drive_timer_ready">BEREIT</string>
     <string name="drive_timer_best">REKORD</string>
     <string name="drive_drift">DRIFT</string>
-    <string name="drive_drift_max">MAX</string>
     <string name="drive_thr">GAS</string>
     <string name="drive_brk">BRE</string>
     <string name="drive_clt">KUP</string>
     <string name="drive_rpm">U/MIN</string>
-    <string name="drive_steering">LENKUNG</string>
     <string name="warn_highbeam">FERN</string>
     <string name="warn_handbrake">P</string>
     <string name="warn_abs">ABS</string>
@@ -121,10 +119,7 @@
     <string name="guide_trouble_6">Anzeigen bleiben im Splitscreen leer? Das Spiel schaltet den Datenstrom ab, solange Multi-Seat aktiv ist.</string>
 
     <!-- Scanner -->
-    <string name="scan_eyebrow">VERBINDEN</string>
-    <string name="scan_title">QR scannen</string>
     <string name="scan_hint">Den Code aus dem Spiel in den Rahmen halten — verbindet sich automatisch</string>
-    <string name="scan_camera_note">Kamera nur auf diesem Bildschirm aktiv</string>
 
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Verbinde mit BeamNG.drive</string>

@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,7 +69,10 @@ fun DriveScreen(
     onWheelRelease: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize().background(screenBackground())) {
+    // Background runs under the display cutout; content stays clear of it.
+    BoxWithConstraints(
+        Modifier.fillMaxSize().background(screenBackground()).windowInsetsPadding(WindowInsets.displayCutout),
+    ) {
         val w = maxWidth
         val h = maxHeight
         val u = h / 100

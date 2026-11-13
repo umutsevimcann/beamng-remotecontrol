@@ -17,12 +17,10 @@
     <string name="drive_timer_ready">READY</string>
     <string name="drive_timer_best">BEST</string>
     <string name="drive_drift">DRIFT</string>
-    <string name="drive_drift_max">MAX</string>
     <string name="drive_thr">THR</string>
     <string name="drive_brk">BRK</string>
     <string name="drive_clt">CLT</string>
     <string name="drive_rpm">RPM</string>
-    <string name="drive_steering">STEERING</string>
     <string name="warn_highbeam">HI</string>
     <string name="warn_handbrake">P</string>
     <string name="warn_abs">ABS</string>
@@ -121,10 +119,7 @@
     <string name="guide_trouble_6">Gauges stay empty in split-screen? The game switches its dashboard stream off while multi-seat is on.</string>
 
     <!-- Scanner -->
-    <string name="scan_eyebrow">CONNECT</string>
-    <string name="scan_title">Scan QR</string>
     <string name="scan_hint">Align the code shown in the game — connects automatically</string>
-    <string name="scan_camera_note">camera active only on this screen</string>
 
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
