@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BeamNG.drive — télécommande</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">FREIN</string>
+    <string name="drive_gas">GAZ</string>
+    <string name="drive_gear">RAPPORT</string>
+    <string name="drive_rpm_x1000">×1000 TR/MIN</string>
+    <string name="drive_fuel">CARBURANT</string>
+    <string name="drive_temp">TEMP.</string>
+    <string name="drive_boost">TURBO</string>
+    <string name="speed_kmh">KM/H</string>
+    <string name="speed_mph">MPH</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">PRÊT</string>
+    <string name="drive_drift">DRIFT</string>
+    <string name="drive_thr">GAZ</string>
+    <string name="drive_brk">FRN</string>
+    <string name="drive_clt">EMB</string>
+    <string name="drive_rpm">TR/MIN</string>
+    <string name="warn_highbeam">PHARE</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">HUILE</string>
+    <string name="warn_battery">BAT</string>
+    <string name="drive_timer_value">%1$.2f s</string>
+    <string name="drive_timer_best_value">record %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">record %1$d°</string>
+
+    <!-- Brand -->
+
+    <!-- Welcome: connect card -->
+    <string name="menu_computer">ORDINATEUR</string>
+    <string name="menu_not_connected">Pas encore connecté</string>
+    <string name="menu_first_note">La première recherche peut prendre 2 à 3 minutes en Wi-Fi 2,4 GHz. Ensuite, quelques secondes suffisent.</string>
+    <string name="menu_saved_note">Dernier PC utilisé</string>
+    <string name="menu_connect">CONNECTER</string>
+    <string name="menu_find">TROUVER LE PC ET CONNECTER</string>
+    <string name="menu_other_ways">Autres moyens :</string>
+    <string name="menu_qr">Scanner le QR</string>
+    <string name="menu_code">Saisir le code</string>
+    <string name="menu_new_pc">Nouveau PC</string>
+    <string name="menu_control">Commande</string>
+    <string name="menu_phase_saved">Essai de votre PC…</string>
+    <string name="menu_phase_full">Recherche sur le réseau… cela peut prendre 2 à 3 minutes</string>
+    <string name="menu_steps_title">Prêt en 3 étapes</string>
+    <string name="menu_step_3">Appuyez sur le bouton à droite</string>
+    <string name="menu_same_wifi">Le téléphone et le PC doivent être sur le même Wi-Fi</string>
+    <string name="connect_step_1">Lancez BeamNG.drive sur votre PC</string>
+    <string name="connect_step_2">Options → Contrôles → Matériel → activez le téléphone</string>
+
+    <!-- Welcome: extras card -->
+
+    <!-- Welcome: actions -->
+
+    <!-- Auto-connect (camera-free, sweeps the game\'s code space over Wi-Fi) -->
+    <string name="toast_auto_connect_failed">BeamNG.drive est introuvable. Dans le jeu, activez Options → Contrôles → Matériel → utilisation du téléphone ou de la tablette, et gardez le téléphone sur le même Wi-Fi.</string>
+
+    <!-- Manual connect (camera-free fallback) -->
+    <string name="manual_title">Se connecter sans scanner</string>
+    <string name="manual_hint">Le plus simple est le bouton Connecter — aucun code nécessaire. Sinon, prenez une photo nette du QR du jeu et lisez-la ici, ou collez le lien / saisissez le code à 5 chiffres si vous l\'avez déjà.</string>
+    <string name="manual_field">Lien ou code</string>
+    <string name="manual_connect">CONNECTER</string>
+    <string name="manual_cancel">ANNULER</string>
+    <string name="manual_or">— ou —</string>
+    <string name="photo_button">LIRE LE QR DEPUIS UNE PHOTO</string>
+    <string name="toast_no_qr_in_photo">Aucun QR trouvé sur cette photo — prenez une photo plus proche et plus nette du QR seul.</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">MODE D\'EMPLOI</string>
+    <string name="guide_title">Guide d\'installation</string>
+    <string name="guide_intro">Cette page affiche VOS vraies valeurs. Saisissez-les dans le jeu exactement comme indiqué — sans deviner ni recopier des captures d\'écran.</string>
+    <string name="guide_ip_label">ADRESSE IP DE VOTRE TÉLÉPHONE</string>
+    <string name="guide_ip_missing">— connectez le téléphone au Wi-Fi (ou activez son point d\'accès) et l\'adresse s\'affichera ici —</string>
+    <string name="guide_value_address">Adresse</string>
+    <string name="guide_value_port">Port</string>
+    <string name="guide_value_rate">Fréquence de mise à jour max.</string>
+
+    <string name="guide_connect_title">1 · CONNEXION — OBLIGATOIRE</string>
+    <string name="guide_connect_what">Transformez votre téléphone en volant, accélérateur et frein pour la voiture du jeu.</string>
+    <string name="guide_connect_s1">Connectez votre téléphone au MÊME Wi-Fi que votre PC — le même réseau domestique / routeur. C\'est la seule chose qui doit être correcte.</string>
+    <string name="guide_connect_s2">Sur votre PC, dans BeamNG.drive : ouvrez Options → Contrôles → Matériel, trouvez l\'option d\'utilisation du téléphone ou de la tablette et activez-la. Un code QR apparaît — vous pouvez l\'ignorer.</string>
+    <string name="guide_connect_s3">Revenez dans l\'application et appuyez sur le grand bouton CONNECTER. La première recherche peut prendre 2 à 3 minutes en Wi-Fi 2,4 GHz ; ensuite, la connexion prend quelques secondes. Pas de QR, rien à saisir.</string>
+    <string name="guide_connect_s_note">Pourquoi pas le QR : depuis la v0.39, le QR du jeu est trop dense pour la plupart des appareils photo. Le bouton Connecter se passe de l\'appareil photo et trouve le jeu par le Wi-Fi ; il fonctionne donc sur tous les téléphones.</string>
+
+    <!-- Setup guide: alternative connection methods + where the code comes from -->
+    <string name="guide_ways_title">AUTRES MOYENS DE SE CONNECTER</string>
+    <string name="guide_ways_intro">Le bouton Connecter fonctionne pour presque tout le monde. S\'il ne trouve pas le jeu (quelques réseaux Wi-Fi le bloquent), essayez l\'une de ces méthodes :</string>
+    <string name="guide_way_scan_t">A · Scanner le QR en direct</string>
+    <string name="guide_way_scan_b">Appuyez sur Scanner le QR et pointez l\'appareil photo du téléphone vers le QR sur l\'écran du PC. Tenez le téléphone stable et assez près — la connexion se fait toute seule.</string>
+    <string name="guide_way_photo_t">B · Lire le QR depuis une photo</string>
+    <string name="guide_way_photo_b">Prenez une photo nette et rapprochée du QR sur l\'écran du PC. Appuyez ensuite sur Saisir le code → LIRE LE QR DEPUIS UNE PHOTO et choisissez cette photo. L\'application la lit et se connecte.</string>
+    <string name="guide_way_code_t">C · Saisir le code à 5 chiffres</string>
+    <string name="guide_way_code_b">Seulement si vous avez déjà le code. Où le trouver : pointez N\'IMPORTE QUELLE application QR — l\'appareil photo habituel ou Google Lens — vers le QR du jeu. Elle ouvre un lien Google Play qui se termine par « #12345 ». Ces 5 derniers chiffres SONT votre code. Saisissez-les via Saisir le code.</string>
+
+    <string name="guide_dash_title">2 · TABLEAU DE BORD EN DIRECT — FACULTATIF</string>
+    <string name="guide_dash_what">Débloque sur l\'écran de conduite : vitesse, compte-tours, rapport, carburant, température moteur, pression de turbo, vrais témoins (clignotants, feux de route, frein à main, ABS, TC, huile, batterie) et vibration en cas de choc.</string>
+    <string name="guide_dash_s1">Dans le jeu (v0.39+) : Options → Avancées → Protocoles</string>
+    <string name="guide_dash_s2">Cochez « Protocole UDP OutGauge » et renseignez les valeurs ci-dessous</string>
+    <string name="guide_dash_s3">Rechargez le véhicule une fois (Ctrl+R) — le jeu lit ce réglage à l\'apparition de la voiture</string>
+
+    <string name="guide_drift_title">3 · COMPTEUR DE DRIFT — FACULTATIF</string>
+    <string name="guide_drift_what">Affiche l\'angle de dérive au-dessus du compteur pendant la glisse, ainsi que votre record de session. Idéal avec le chrono 0–100 (à activer dans les réglages de l\'application).</string>
+    <string name="guide_drift_s1">Dans le jeu : Options → Avancées → Protocoles (même endroit)</string>
+    <string name="guide_drift_s2">Cochez « Protocole UDP MotionSim » et renseignez les valeurs ci-dessous</string>
+    <string name="guide_drift_s3">Rechargez le véhicule une fois (Ctrl+R)</string>
+
+    <string name="guide_trouble_title">DÉPANNAGE</string>
+    <string name="guide_trouble_1">Rien n\'arrive ? Autorisez BeamNG.drive dans le pare-feu Windows.</string>
+    <string name="guide_trouble_2">Les Wi-Fi invités ou d\'hôtel empêchent souvent le téléphone de parler au PC — utilisez votre propre réseau ou le point d\'accès du téléphone.</string>
+    <string name="guide_trouble_3">Le routeur a donné une nouvelle IP au téléphone ? Revérifiez cette page, mettez à jour le jeu, puis Ctrl+R.</string>
+    <string name="guide_trouble_4">Compteurs figés après une mise à jour du jeu ? Recochez les options — les réglages sont parfois réinitialisés.</string>
+    <string name="guide_trouble_5">Pas de routeur ? Activez le point d\'accès du téléphone, connectez-y le PC et utilisez l\'adresse affichée en haut de cette page.</string>
+    <string name="guide_trouble_6">Compteurs vides en écran partagé ? Le jeu coupe son flux de données tant que le mode multi-joueurs local est actif.</string>
+
+    <!-- Scanner -->
+    <string name="scan_hint">Visez le code affiché dans le jeu — la connexion est automatique</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">Connexion à BeamNG.drive</string>
+    <string name="status_connected">Connecté</string>
+    <string name="status_no_telemetry">Pas de données du tableau de bord</string>
+    <string name="toast_no_connection">Pas de connexion — connectez-vous d\'abord depuis le menu principal</string>
+    <string name="toast_invalid_qr">Code QR invalide</string>
+    <string name="toast_invalid_qr_format">Format de code QR invalide</string>
+    <string name="toast_wifi_required">Le téléphone et le PC doivent être sur le même Wi-Fi — ou le PC sur le point d\'accès du téléphone</string>
+
+    <!-- Settings -->
+    <string name="settings_language">LANGUE</string>
+    <string name="percent_value">%1$d %%</string>
+    <string name="settings_theme">THÈME</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_system">Système</string>
+    <string name="settings_guide_sub">Pas à pas, avec vos propres valeurs</string>
+    <string name="settings_about_sub">Version communautaire de l\'application Remote Control de BeamNG. Sans lien avec BeamNG GmbH.</string>
+    <string name="settings_haptics_when">VIBRE LORS DE</string>
+    <string name="haptic_gear">Changement de rapport</string>
+    <string name="haptic_gear_sub">Un petit clic à chaque passage</string>
+    <string name="haptic_impact">Choc</string>
+    <string name="haptic_impact_sub">Plus le choc est fort, plus ça vibre</string>
+    <string name="haptic_abs">ABS</string>
+    <string name="haptic_abs_sub">Pulse tant que l\'ABS agit</string>
+    <string name="settings_heading">Réglages</string>
+    <string name="settings_sec_driving">Conduite</string>
+    <string name="settings_sec_dashboard">Tableau de bord</string>
+    <string name="settings_sec_feedback">Retour</string>
+    <string name="settings_sec_general">Général</string>
+    <string name="control_gyro_sub">Inclinez le téléphone comme un volant</string>
+    <string name="control_slider_sub">Tournez le volant à l\'écran avec le doigt</string>
+    <string name="control_buttons_sub">Maintenez ◀ et ▶ à l\'écran</string>
+    <string name="settings_dash_layout">STYLE DU TABLEAU DE BORD</string>
+    <string name="dash_modern">Moderne</string>
+    <string name="dash_classic">Classique</string>
+    <string name="dash_race">Course</string>
+    <string name="dash_minimal">Minimal</string>
+    <string name="settings_mirrored">Disposition inversée</string>
+    <string name="settings_mirrored_sub">Volant à droite, pédales à gauche</string>
+    <string name="settings_control_type">TYPE DE COMMANDE</string>
+    <string name="control_buttons">Flèches</string>
+    <string name="control_slider">Volant</string>
+    <string name="control_gyro">Inclinaison</string>
+    <string name="settings_lock_angle">Inclinaison de butée</string>
+    <string name="settings_lock_angle_sub">Inclinaison du téléphone pour braquer à fond</string>
+    <string name="settings_dead_zone">Zone morte</string>
+    <string name="settings_dead_zone_sub">Tolérance au centre</string>
+    <string name="settings_units">Unités</string>
+    <string name="settings_units_sub">Compteur de vitesse</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_mph">mph</string>
+    <string name="settings_dashboard_only">Tableau de bord seul</string>
+    <string name="settings_dashboard_only_sub">Commandes désactivées, compteurs uniquement</string>
+    <string name="settings_haptics">Vibrations</string>
+    <string name="settings_haptics_sub">Retour sur les rapports et les chocs</string>
+    <string name="settings_perf_timer">Chrono 0–100</string>
+    <string name="settings_perf_timer_sub">Temps de départ à l\'écran, record de session</string>
+    <string name="settings_analog_pedals">Pédales analogiques</string>
+    <string name="settings_analog_pedals_sub">La pédale suit la position du doigt — nécessite le mod RemoteControlPro</string>
+
+</resources>

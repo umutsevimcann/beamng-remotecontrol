@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BeamNG.drive — пульт управления</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">ТОРМОЗ</string>
+    <string name="drive_gas">ГАЗ</string>
+    <string name="drive_gear">ПЕРЕДАЧА</string>
+    <string name="drive_rpm_x1000">×1000 ОБ/МИН</string>
+    <string name="drive_fuel">ТОПЛИВО</string>
+    <string name="drive_temp">ТЕМП.</string>
+    <string name="drive_boost">НАДДУВ</string>
+    <string name="speed_kmh">КМ/Ч</string>
+    <string name="speed_mph">МИЛЬ/Ч</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">ГОТОВ</string>
+    <string name="drive_drift">ДРИФТ</string>
+    <string name="drive_thr">ГАЗ</string>
+    <string name="drive_brk">ТОРМ</string>
+    <string name="drive_clt">СЦЕП</string>
+    <string name="drive_rpm">ОБ/МИН</string>
+    <string name="warn_highbeam">ДАЛЬН</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">МАСЛО</string>
+    <string name="warn_battery">АКБ</string>
+    <string name="drive_timer_value">%1$.2f с</string>
+    <string name="drive_timer_best_value">лучшее %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">рекорд %1$d°</string>
+
+    <!-- Brand -->
+
+    <!-- Welcome: connect card -->
+    <string name="menu_computer">КОМПЬЮТЕР</string>
+    <string name="menu_not_connected">Ещё не подключено</string>
+    <string name="menu_first_note">Первый поиск в сети Wi-Fi 2,4 ГГц может занять 2–3 минуты. Дальше — несколько секунд.</string>
+    <string name="menu_saved_note">Последний использованный ПК</string>
+    <string name="menu_connect">ПОДКЛЮЧИТЬ</string>
+    <string name="menu_find">НАЙТИ ПК И ПОДКЛЮЧИТЬ</string>
+    <string name="menu_other_ways">Другие способы:</string>
+    <string name="menu_qr">Сканировать QR</string>
+    <string name="menu_code">Ввести код</string>
+    <string name="menu_new_pc">Новый ПК</string>
+    <string name="menu_control">Управление</string>
+    <string name="menu_phase_saved">Пробуем ваш ПК…</string>
+    <string name="menu_phase_full">Поиск в сети… это может занять 2–3 минуты</string>
+    <string name="menu_steps_title">Готово за 3 шага</string>
+    <string name="menu_step_3">Нажмите кнопку справа</string>
+    <string name="menu_same_wifi">Телефон и ПК должны быть в одной сети Wi-Fi</string>
+    <string name="connect_step_1">Запустите BeamNG.drive на ПК</string>
+    <string name="connect_step_2">Настройки → Управление → Устройства → включите телефон</string>
+
+    <!-- Welcome: extras card -->
+
+    <!-- Welcome: actions -->
+
+    <!-- Auto-connect (camera-free, sweeps the game\'s code space over Wi-Fi) -->
+    <string name="toast_auto_connect_failed">BeamNG.drive не найден. В игре включите Настройки → Управление → Устройства → использование телефона или планшета и держите телефон в той же сети Wi-Fi.</string>
+
+    <!-- Manual connect (camera-free fallback) -->
+    <string name="manual_title">Подключение без сканирования</string>
+    <string name="manual_hint">Проще всего кнопка «Подключить» — код не нужен. Иначе сделайте чёткое фото QR-кода из игры и откройте его здесь, либо вставьте ссылку или введите 5-значный код, если он у вас есть.</string>
+    <string name="manual_field">Ссылка или код</string>
+    <string name="manual_connect">ПОДКЛЮЧИТЬ</string>
+    <string name="manual_cancel">ОТМЕНА</string>
+    <string name="manual_or">— или —</string>
+    <string name="photo_button">ПРОЧИТАТЬ QR С ФОТО</string>
+    <string name="toast_no_qr_in_photo">На фото нет QR-кода — снимите ближе и чётче, только сам QR.</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">ИНСТРУКЦИЯ</string>
+    <string name="guide_title">Руководство по настройке</string>
+    <string name="guide_intro">На этой странице показаны ВАШИ реальные значения. Вводите их в игру точно как написано — без догадок и скриншотов.</string>
+    <string name="guide_ip_label">IP-АДРЕС ТЕЛЕФОНА</string>
+    <string name="guide_ip_missing">— подключите телефон к Wi-Fi (или включите точку доступа), и адрес появится здесь —</string>
+    <string name="guide_value_address">Адрес</string>
+    <string name="guide_value_port">Порт</string>
+    <string name="guide_value_rate">Макс. частота обновления</string>
+
+    <string name="guide_connect_title">1 · ПОДКЛЮЧЕНИЕ — ОБЯЗАТЕЛЬНО</string>
+    <string name="guide_connect_what">Превратите телефон в руль, газ и тормоз для машины в игре.</string>
+    <string name="guide_connect_s1">Подключите телефон к ТОЙ ЖЕ сети Wi-Fi, что и ПК — та же домашняя сеть / роутер. Это единственное, что должно быть верно.</string>
+    <string name="guide_connect_s2">На ПК в BeamNG.drive: откройте Настройки → Управление → Устройства, найдите опцию использования телефона или планшета и включите её. Появится QR-код — его можно игнорировать.</string>
+    <string name="guide_connect_s3">Вернитесь в приложение и нажмите большую кнопку «ПОДКЛЮЧИТЬ». Первый поиск в сети Wi-Fi 2,4 ГГц может занять 2–3 минуты; дальше подключение занимает секунды. Без QR, без ввода.</string>
+    <string name="guide_connect_s_note">Почему не QR: начиная с v0.39 QR-код игры стал слишком плотным для большинства камер. Кнопка «Подключить» обходится без камеры и находит игру по Wi-Fi, поэтому работает на любом телефоне.</string>
+
+    <!-- Setup guide: alternative connection methods + where the code comes from -->
+    <string name="guide_ways_title">ДРУГИЕ СПОСОБЫ ПОДКЛЮЧЕНИЯ</string>
+    <string name="guide_ways_intro">Кнопка «Подключить» работает почти у всех. Если игра не находится (некоторые сети Wi-Fi это блокируют), попробуйте один из способов:</string>
+    <string name="guide_way_scan_t">A · Сканировать QR камерой</string>
+    <string name="guide_way_scan_b">Нажмите «Сканировать QR» и наведите камеру телефона на QR-код на экране ПК. Держите телефон ровно и довольно близко — подключение произойдёт само.</string>
+    <string name="guide_way_photo_t">B · Прочитать QR с фото</string>
+    <string name="guide_way_photo_b">Сделайте чёткое фото QR-кода на экране ПК крупным планом. Затем нажмите «Ввести код» → «ПРОЧИТАТЬ QR С ФОТО» и выберите это фото. Приложение прочитает его и подключится.</string>
+    <string name="guide_way_code_t">C · Ввести 5-значный код</string>
+    <string name="guide_way_code_b">Только если код у вас уже есть. Где его взять: наведите ЛЮБОЕ приложение для QR — обычную камеру или Google Lens — на QR-код игры. Откроется ссылка Google Play, которая заканчивается на «#12345». Эти последние 5 цифр и ЕСТЬ ваш код. Введите их через «Ввести код».</string>
+
+    <string name="guide_dash_title">2 · ЖИВАЯ ПАНЕЛЬ ПРИБОРОВ — ПО ЖЕЛАНИЮ</string>
+    <string name="guide_dash_what">Открывает на экране вождения: скорость, обороты, передачу, топливо, температуру двигателя, наддув, настоящие контрольные лампы (поворотники, дальний свет, ручник, ABS, TC, масло, АКБ) и вибрацию при ударе.</string>
+    <string name="guide_dash_s1">В игре (v0.39+): Настройки → Расширенные параметры → Протоколы</string>
+    <string name="guide_dash_s2">Отметьте «UDP-протокол OutGauge» и введите значения ниже</string>
+    <string name="guide_dash_s3">Перезагрузите машину один раз (Ctrl+R) — игра читает настройку при появлении машины</string>
+
+    <string name="guide_drift_title">3 · ИЗМЕРИТЕЛЬ ДРИФТА — ПО ЖЕЛАНИЮ</string>
+    <string name="guide_drift_what">Показывает угол заноса над спидометром во время скольжения и рекорд за сессию. Отлично сочетается с таймером 0–100 (включается в настройках приложения).</string>
+    <string name="guide_drift_s1">В игре: Настройки → Расширенные параметры → Протоколы (там же)</string>
+    <string name="guide_drift_s2">Отметьте «UDP-протокол MotionSim» и введите значения ниже</string>
+    <string name="guide_drift_s3">Перезагрузите машину один раз (Ctrl+R)</string>
+
+    <string name="guide_trouble_title">РЕШЕНИЕ ПРОБЛЕМ</string>
+    <string name="guide_trouble_1">Ничего не приходит? Разрешите BeamNG.drive в брандмауэре Windows.</string>
+    <string name="guide_trouble_2">Гостевой Wi-Fi и сети отелей часто не дают телефону общаться с ПК — используйте свою сеть или точку доступа телефона.</string>
+    <string name="guide_trouble_3">Роутер выдал телефону новый IP? Проверьте эту страницу, обновите адрес в игре, затем Ctrl+R.</string>
+    <string name="guide_trouble_4">Приборы замерли после обновления игры? Отметьте опции заново — настройки иногда сбрасываются.</string>
+    <string name="guide_trouble_5">Нет роутера? Включите точку доступа на телефоне, подключите к ней ПК и используйте адрес, показанный вверху страницы.</string>
+    <string name="guide_trouble_6">В режиме разделённого экрана приборы пустые? Игра отключает поток данных, пока включён режим нескольких игроков.</string>
+
+    <!-- Scanner -->
+    <string name="scan_hint">Наведите на код из игры — подключение произойдёт автоматически</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">Подключение к BeamNG.drive</string>
+    <string name="status_connected">Подключено</string>
+    <string name="status_no_telemetry">Нет данных приборов</string>
+    <string name="toast_no_connection">Нет подключения — сначала подключитесь из главного меню</string>
+    <string name="toast_invalid_qr">Неверный QR-код</string>
+    <string name="toast_invalid_qr_format">Неверный формат QR-кода</string>
+    <string name="toast_wifi_required">Телефон и ПК должны быть в одной сети Wi-Fi — или ПК подключён к точке доступа телефона</string>
+
+    <!-- Settings -->
+    <string name="settings_language">ЯЗЫК</string>
+    <string name="percent_value">%1$d %%</string>
+    <string name="settings_theme">ТЕМА</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_system">Системная</string>
+    <string name="settings_guide_sub">Шаг за шагом, с вашими значениями</string>
+    <string name="settings_about_sub">Версия от сообщества на основе приложения Remote Control от BeamNG. Не связана с BeamNG GmbH.</string>
+    <string name="settings_haptics_when">КОГДА ВИБРИРУЕТ</string>
+    <string name="haptic_gear">Смена передачи</string>
+    <string name="haptic_gear_sub">Короткий щелчок при каждом переключении</string>
+    <string name="haptic_impact">Удар</string>
+    <string name="haptic_impact_sub">Чем сильнее удар, тем сильнее вибрация</string>
+    <string name="haptic_abs">ABS</string>
+    <string name="haptic_abs_sub">Пульсирует, пока работает ABS</string>
+    <string name="settings_heading">Настройки</string>
+    <string name="settings_sec_driving">Вождение</string>
+    <string name="settings_sec_dashboard">Приборы</string>
+    <string name="settings_sec_feedback">Отклик</string>
+    <string name="settings_sec_general">Общие</string>
+    <string name="control_gyro_sub">Наклоняйте телефон как руль</string>
+    <string name="control_slider_sub">Крутите руль на экране пальцем</string>
+    <string name="control_buttons_sub">Удерживайте ◀ и ▶ на экране</string>
+    <string name="settings_dash_layout">ВИД ПАНЕЛИ</string>
+    <string name="dash_modern">Модерн</string>
+    <string name="dash_classic">Классика</string>
+    <string name="dash_race">Гонка</string>
+    <string name="dash_minimal">Минимум</string>
+    <string name="settings_mirrored">Зеркальная раскладка</string>
+    <string name="settings_mirrored_sub">Руль справа, педали слева</string>
+    <string name="settings_control_type">ТИП УПРАВЛЕНИЯ</string>
+    <string name="control_buttons">Стрелки</string>
+    <string name="control_slider">Руль</string>
+    <string name="control_gyro">Наклон телефона</string>
+    <string name="settings_lock_angle">Наклон до упора</string>
+    <string name="settings_lock_angle_sub">Наклон телефона, при котором руль вывернут полностью</string>
+    <string name="settings_dead_zone">Мёртвая зона</string>
+    <string name="settings_dead_zone_sub">Допуск в центре</string>
+    <string name="settings_units">Единицы</string>
+    <string name="settings_units_sub">Спидометр</string>
+    <string name="unit_kmh">км/ч</string>
+    <string name="unit_mph">миль/ч</string>
+    <string name="settings_dashboard_only">Только приборы</string>
+    <string name="settings_dashboard_only_sub">Управление выключено, только приборы</string>
+    <string name="settings_haptics">Вибрация</string>
+    <string name="settings_haptics_sub">Отклик на передачи и удары</string>
+    <string name="settings_perf_timer">Таймер 0–100</string>
+    <string name="settings_perf_timer_sub">Время разгона на панели, лучший результат за сессию</string>
+    <string name="settings_analog_pedals">Аналоговые педали</string>
+    <string name="settings_analog_pedals_sub">Педаль следует за пальцем — нужен мод RemoteControlPro</string>
+
+</resources>

@@ -62,7 +62,7 @@
 
     <!-- Manual connect (camera-free fallback) -->
     <string name="manual_title">Taramadan bağlan</string>
-    <string name="manual_hint">En kolayı Otomatik Bağlan — kod gerekmez. Alternatif olarak oyundaki QR\'ın net bir fotoğrafını çekip burada okut, ya da kodu/linki başka yerden aldıysan 5 haneli kodu yaz / linki yapıştır.</string>
+    <string name="manual_hint">En kolayı Bağlan düğmesi — kod gerekmez. Alternatif olarak oyundaki QR\'ın net bir fotoğrafını çekip burada okut, ya da linki yapıştır / 5 haneli kodu zaten biliyorsan yaz.</string>
     <string name="manual_field">Link veya kod</string>
     <string name="manual_connect">BAĞLAN</string>
     <string name="manual_cancel">İPTAL</string>
@@ -85,17 +85,17 @@
     <string name="guide_connect_s1">Telefonunu PC\'nle AYNI Wi-Fi\'a bağla — aynı ev ağı / modem. Doğru olması gereken tek şey bu.</string>
     <string name="guide_connect_s2">PC\'de BeamNG.drive içinde: Seçenekler → Kontroller → Donanım\'ı aç, “Telefonunu ya da tabletini kullan” seçeneğini bul ve Evet yap. Bir QR çıkacak — onu görmezden gelebilirsin.</string>
     <string name="guide_connect_s3">Bu uygulamaya dön ve büyük BAĞLAN düğmesine bas. İlk arama 2.4 GHz Wi-Fi\'de 2–3 dakika sürebilir; sonrakiler saniyeler sürer. QR yok, yazmak yok.</string>
-    <string name="guide_connect_s_note">Neden QR değil de Otomatik Bağlan: v0.39\'dan beri oyunun QR\'ı çoğu telefon kamerasının okuyamayacağı kadar yoğunlaştı. Otomatik Bağlan kamerayı tamamen atlar ve oyunu Wi-Fi üzerinden bulur; her telefonda çalışır.</string>
+    <string name="guide_connect_s_note">Neden QR değil: v0.39\'dan beri oyunun QR\'ı çoğu telefon kamerasının okuyamayacağı kadar yoğun. Bağlan düğmesi kamerayı hiç kullanmaz ve oyunu Wi-Fi üzerinden bulur, bu yüzden her telefonda çalışır.</string>
 
     <!-- Kurulum rehberi: alternatif bağlanma yolları + kod nereden alınır -->
     <string name="guide_ways_title">DİĞER BAĞLANMA YOLLARI</string>
-    <string name="guide_ways_intro">Otomatik Bağlan neredeyse herkeste çalışır. Eğer oyunu bulamazsa (bazı Wi-Fi ağları engeller), şunlardan birini dene:</string>
+    <string name="guide_ways_intro">Bağlan düğmesi neredeyse herkeste çalışır. Eğer oyunu bulamazsa (birkaç Wi-Fi ağı bunu engeller), şunlardan birini dene:</string>
     <string name="guide_way_scan_t">A · QR\'ı canlı tara</string>
-    <string name="guide_way_scan_b">QR KODU TARA\'ya bas ve telefon kamerasını PC ekranındaki QR\'a tut. Telefonu sabit ve oldukça yakın tut — kendisi bağlanır.</string>
+    <string name="guide_way_scan_b">QR tara\'ya bas ve telefon kamerasını PC ekranındaki QR\'a tut. Telefonu sabit ve oldukça yakın tut — kendiliğinden bağlanır.</string>
     <string name="guide_way_photo_t">B · QR\'ı fotoğraftan oku</string>
-    <string name="guide_way_photo_b">PC ekranındaki QR\'ın net ve yakın bir fotoğrafını çek. Sonra KODU GİR → FOTOĞRAFTAN QR OKU\'ya basıp o fotoğrafı seç. Uygulama okur ve bağlanır.</string>
+    <string name="guide_way_photo_b">PC ekranındaki QR\'ın net ve yakın bir fotoğrafını çek. Sonra Kod gir → FOTOĞRAFTAN QR OKU\'ya bas ve o fotoğrafı seç. Uygulama okur ve bağlanır.</string>
     <string name="guide_way_code_t">C · 5 haneli kodu yaz</string>
-    <string name="guide_way_code_b">Sadece kodu zaten aldıysan. Kodu nereden bulursun: HERHANGİ bir QR uygulamasını — normal telefon kameran ya da Google Lens — oyundaki QR\'a tut. “#12345” ile biten bir Google Play linki açılır. O son 5 rakam senin kodun. KODU GİR altına yaz.</string>
+    <string name="guide_way_code_b">Sadece kodu zaten aldıysan. Kodu nereden bulursun: HERHANGİ bir QR uygulamasını — telefonunun normal kamerasını ya da Google Lens\'i — oyundaki QR\'a tut. “#12345” ile biten bir Google Play linki açılır. O son 5 rakam SENİN kodun. Onları Kod gir\'e yaz.</string>
 
     <string name="guide_dash_title">2 · CANLI GÖSTERGE — İSTEĞE BAĞLI</string>
     <string name="guide_dash_what">Sürüş ekranında açılır: canlı hız, devir ibresi, vites, yakıt, motor sıcaklığı, turbo basıncı, gerçek uyarı ışıkları (sinyaller, uzun far, el freni, ABS, TC, yağ, akü) ve kaza titreşimi.</string>
@@ -124,7 +124,7 @@
     <string name="connecting_dialog_title">BeamNG.drive\'a bağlanılıyor</string>
     <string name="status_connected">Bağlı</string>
     <string name="status_no_telemetry">Gösterge verisi yok</string>
-    <string name="toast_no_connection">Bağlantı yok — önce QR kodu tarat</string>
+    <string name="toast_no_connection">Bağlantı yok — önce ana menüden bağlan</string>
     <string name="toast_invalid_qr">Geçersiz QR kodu</string>
     <string name="toast_invalid_qr_format">Geçersiz QR kod biçimi</string>
     <string name="toast_wifi_required">Telefon ve PC aynı Wi-Fi ağında olmalı — ya da PC telefonun hotspot\'una bağlı olmalı</string>

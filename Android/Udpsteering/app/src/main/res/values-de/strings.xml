@@ -91,9 +91,9 @@
     <string name="guide_ways_title">ANDERE WEGE ZUM VERBINDEN</string>
     <string name="guide_ways_intro">Auto-Verbinden funktioniert bei fast jedem. Wenn es das Spiel nicht findet (manche WLANs blockieren es), probiere eines davon:</string>
     <string name="guide_way_scan_t">A · Den QR live scannen</string>
-    <string name="guide_way_scan_b">Auf QR-CODE SCANNEN tippen und die Handykamera auf den QR am PC-Bildschirm richten. Halte das Handy ruhig und ziemlich nah — es verbindet von selbst.</string>
+    <string name="guide_way_scan_b">Auf QR scannen tippen und die Handykamera auf den QR am PC-Bildschirm richten. Handy ruhig und recht nah halten — es verbindet sich von selbst.</string>
     <string name="guide_way_photo_t">B · Den QR vom Foto lesen</string>
-    <string name="guide_way_photo_b">Mach ein scharfes, nahes Foto vom QR am PC-Bildschirm. Dann auf CODE EINGEBEN → QR VOM FOTO LESEN tippen und das Foto wählen. Die App liest ihn und verbindet.</string>
+    <string name="guide_way_photo_b">Mach ein scharfes, nahes Foto vom QR am PC-Bildschirm. Dann auf Code eingeben → QR VOM FOTO LESEN tippen und das Foto wählen. Die App liest es und verbindet.</string>
     <string name="guide_way_code_t">C · Den 5-stelligen Code eingeben</string>
     <string name="guide_way_code_b">Nur wenn du den Code schon hast. Wo du ihn findest: Richte IRGENDEINE QR-App — deine normale Handykamera oder Google Lens — auf den QR des Spiels. Es öffnet einen Google-Play-Link, der mit „#12345“ endet. Diese letzten 5 Ziffern SIND dein Code. Gib sie unter CODE EINGEBEN ein.</string>
 
@@ -124,7 +124,7 @@
     <string name="connecting_dialog_title">Verbinde mit BeamNG.drive</string>
     <string name="status_connected">Verbunden</string>
     <string name="status_no_telemetry">Keine Dashboard-Daten</string>
-    <string name="toast_no_connection">Keine Verbindung — zuerst den QR-Code scannen</string>
+    <string name="toast_no_connection">Keine Verbindung — bitte zuerst im Hauptmenü verbinden</string>
     <string name="toast_invalid_qr">Ungültiger QR-Code</string>
     <string name="toast_invalid_qr_format">Ungültiges QR-Code-Format</string>
     <string name="toast_wifi_required">Handy und PC müssen im selben WLAN sein — oder der PC im Hotspot des Handys</string>

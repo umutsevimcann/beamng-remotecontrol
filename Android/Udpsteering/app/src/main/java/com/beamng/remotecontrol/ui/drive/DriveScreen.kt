@@ -117,8 +117,9 @@ fun DriveScreen(
         }
 
         if (dashboardOnly) {
-            // Nobody steers from this phone: gauges, plus what the game is applying.
-            Row(Modifier.fillMaxSize().padding(horizontal = w * 0.14f), horizontalArrangement = Arrangement.spacedBy(u * 6)) {
+            // Nobody steers from this phone: the gauges take the whole width, with
+            // what the game is applying alongside.
+            Row(Modifier.fillMaxSize().padding(horizontal = u * 6), horizontalArrangement = Arrangement.spacedBy(u * 6)) {
                 centre()
                 EchoBars(telemetry, u, Modifier.align(Alignment.Bottom).padding(bottom = u * 4))
             }

@@ -310,36 +310,35 @@ private fun GeneralSection(u: Dp, onSetupGuide: () -> Unit) {
     // ---- language ----
     var current by remember { mutableStateOf(AppLanguage.current()) }
     Heading(stringResource(R.string.settings_language), u)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
-        for (language in AppLanguage.entries) {
-            val selected = language == current
-            val shape = RoundedCornerShape(u * 2.5f)
-            Row(
-                Modifier
-                    .weight(1f)
-                    .clip(shape)
-                    .background(if (selected) Graphite.Selected else Graphite.Inset)
-                    .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
-                    .clickable {
-                        current = language
-                        AppLanguage.apply(language)
-                    }
-                    .padding(horizontal = u * 2.6f, vertical = u * 2.6f),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    language.tag.uppercase(), color = if (selected) Graphite.OnOrange else Graphite.Muted,
-                    fontSize = (u * 2.5f).asSp(), fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(if (selected) Graphite.Orange else Graphite.Track, RoundedCornerShape(u * 1.2f))
-                        .padding(horizontal = u * 1.5f, vertical = u * 0.7f),
-                )
-                Spacer(Modifier.width(u * 2))
-                Text(
-                    language.nativeName, color = Graphite.Text, fontSize = (u * 3.3f).asSp(),
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = 1,
-                )
+    // Three to a row: nine languages make a 3×3 grid.
+    for (rowLanguages in AppLanguage.entries.chunked(3)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+            for (language in rowLanguages) {
+                val selected = language == current
+                val shape = RoundedCornerShape(u * 2.5f)
+                Row(
+                    Modifier
+                        .weight(1f)
+                        .clip(shape)
+                        .background(if (selected) Graphite.Selected else Graphite.Inset)
+                        .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, shape)
+                        .clickable {
+                            current = language
+                            AppLanguage.apply(language)
+                        }
+                        .padding(horizontal = u * 2.4f, vertical = u * 2.2f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(language.flag, fontSize = (u * 4.4f).asSp())
+                    Spacer(Modifier.width(u * 1.8f))
+                    Text(
+                        language.nativeName, color = Graphite.Text, fontSize = (u * 3.1f).asSp(),
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = 1, softWrap = false,
+                    )
+                }
             }
+            // keep the last row's cards the same width as the others
+            repeat(3 - rowLanguages.size) { Spacer(Modifier.weight(1f)) }
         }
     }
 

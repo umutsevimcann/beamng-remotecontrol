@@ -62,7 +62,7 @@
 
     <!-- Manual connect (camera-free fallback) -->
     <string name="manual_title">Connect without scanning</string>
-    <string name="manual_hint">Easiest is Auto-Connect — no code needed. Otherwise take a clear photo of the game\'s QR and read it here, or paste the link / type the 5-digit code if you already have it.</string>
+    <string name="manual_hint">Easiest is the Connect button — no code needed. Otherwise take a clear photo of the game\'s QR and read it here, or paste the link / type the 5-digit code if you already have it.</string>
     <string name="manual_field">Link or code</string>
     <string name="manual_connect">CONNECT</string>
     <string name="manual_cancel">CANCEL</string>
@@ -85,28 +85,28 @@
     <string name="guide_connect_s1">Connect your phone to the SAME Wi-Fi as your PC — the same home network / router. This is the one thing that must be right.</string>
     <string name="guide_connect_s2">On your PC in BeamNG.drive: open Options → Controls → Hardware, find “Use your phone or tablet” and set it to Yes. A QR code appears — you can ignore it.</string>
     <string name="guide_connect_s3">Come back to this app and tap the big CONNECT button. The first search can take 2–3 minutes on 2.4 GHz Wi-Fi; after that it connects in seconds. No QR, no typing.</string>
-    <string name="guide_connect_s_note">Why Auto-Connect and not the QR: since v0.39 the game’s QR became too dense for most phone cameras to read. Auto-Connect skips the camera entirely and finds the game over your Wi-Fi, so it works on any phone.</string>
+    <string name="guide_connect_s_note">Why not the QR: since v0.39 the game’s QR became too dense for most phone cameras to read. The Connect button skips the camera and finds the game over your Wi-Fi, so it works on any phone.</string>
 
     <!-- Setup guide: alternative connection methods + where the code comes from -->
     <string name="guide_ways_title">OTHER WAYS TO CONNECT</string>
-    <string name="guide_ways_intro">Auto-Connect works for almost everyone. If it can’t find the game (a few Wi-Fi networks block it), try one of these:</string>
+    <string name="guide_ways_intro">The Connect button works for almost everyone. If it can’t find the game (a few Wi-Fi networks block it), try one of these:</string>
     <string name="guide_way_scan_t">A · Scan the QR live</string>
-    <string name="guide_way_scan_b">Tap SCAN QR CODE and point your phone’s camera at the QR on your PC screen. Hold the phone steady and fairly close — it connects on its own.</string>
+    <string name="guide_way_scan_b">Tap Scan QR and point your phone’s camera at the QR on your PC screen. Hold the phone steady and fairly close — it connects on its own.</string>
     <string name="guide_way_photo_t">B · Read the QR from a photo</string>
-    <string name="guide_way_photo_b">Take a clear, close photo of the QR on your PC screen. Then tap CAN’T SCAN? ENTER CODE → READ QR FROM A PHOTO and choose that photo. The app reads it and connects.</string>
+    <string name="guide_way_photo_b">Take a clear, close photo of the QR on your PC screen. Then tap Enter code → READ QR FROM A PHOTO and choose that photo. The app reads it and connects.</string>
     <string name="guide_way_code_t">C · Type the 5-digit code</string>
-    <string name="guide_way_code_b">Only if you already have the code. Where to find it: point ANY QR app — your normal phone camera or Google Lens — at the game’s QR. It opens a Google Play link that ends with “#12345”. Those last 5 digits ARE your code. Type them under CAN’T SCAN? ENTER CODE.</string>
+    <string name="guide_way_code_b">Only if you already have the code. Where to find it: point ANY QR app — your normal phone camera or Google Lens — at the game’s QR. It opens a Google Play link that ends with “#12345”. Those last 5 digits ARE your code. Type them under Enter code.</string>
 
     <string name="guide_dash_title">2 · LIVE DASHBOARD — OPTIONAL</string>
     <string name="guide_dash_what">Unlocks on the drive screen: live speed, RPM needle, gear, fuel, engine temperature, turbo boost, real warning lights (signals, high beam, handbrake, ABS, TC, oil, battery) and crash vibration.</string>
     <string name="guide_dash_s1">In game (v0.39+): Options → Advanced → Protocols</string>
-    <string name="guide_dash_s2">Tick “OutGauge support” and fill in the values below</string>
+    <string name="guide_dash_s2">Tick “OutGauge UDP protocol” and fill in the values below</string>
     <string name="guide_dash_s3">Reload the vehicle once (Ctrl+R) — the game reads this when the car spawns</string>
 
     <string name="guide_drift_title">3 · DRIFT METER — OPTIONAL</string>
     <string name="guide_drift_what">Shows a live drift angle above the speedometer while you slide, plus your session record. Great with the 0-100 timer (enable it in the app\'s Settings).</string>
     <string name="guide_drift_s1">In game: Options → Advanced → Protocols (same place)</string>
-    <string name="guide_drift_s2">Tick “MotionSim enabled” and fill in the values below</string>
+    <string name="guide_drift_s2">Tick “MotionSim UDP protocol” and fill in the values below</string>
     <string name="guide_drift_s3">Reload the vehicle once (Ctrl+R)</string>
 
     <string name="guide_trouble_title">TROUBLESHOOTING</string>
@@ -124,7 +124,7 @@
     <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
     <string name="status_connected">Connected</string>
     <string name="status_no_telemetry">No dashboard data</string>
-    <string name="toast_no_connection">No connection — please scan the QR code first</string>
+    <string name="toast_no_connection">No connection — connect from the main menu first</string>
     <string name="toast_invalid_qr">Invalid QR code</string>
     <string name="toast_invalid_qr_format">Invalid QR code format</string>
     <string name="toast_wifi_required">Phone and PC must be on the same Wi-Fi — or the PC on the phone\'s hotspot</string>

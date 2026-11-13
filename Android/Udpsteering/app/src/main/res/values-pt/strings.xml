@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BeamNG.drive — controle remoto</string>
+
+    <!-- Drive screen -->
+    <string name="drive_brake">FREIO</string>
+    <string name="drive_gas">ACEL.</string>
+    <string name="drive_gear">MARCHA</string>
+    <string name="drive_rpm_x1000">×1000 RPM</string>
+    <string name="drive_fuel">COMBUSTÍVEL</string>
+    <string name="drive_temp">TEMP.</string>
+    <string name="drive_boost">TURBO</string>
+    <string name="speed_kmh">KM/H</string>
+    <string name="speed_mph">MPH</string>
+    <string name="drive_timer_label">0-100</string>
+    <string name="drive_timer_ready">PRONTO</string>
+    <string name="drive_drift">DRIFT</string>
+    <string name="drive_thr">ACEL</string>
+    <string name="drive_brk">FRE</string>
+    <string name="drive_clt">EMB</string>
+    <string name="drive_rpm">RPM</string>
+    <string name="warn_highbeam">ALTO</string>
+    <string name="warn_handbrake">P</string>
+    <string name="warn_abs">ABS</string>
+    <string name="warn_tc">TC</string>
+    <string name="warn_oil">ÓLEO</string>
+    <string name="warn_battery">BAT</string>
+    <string name="drive_timer_value">%1$.2f s</string>
+    <string name="drive_timer_best_value">melhor %1$.2f</string>
+    <string name="drive_drift_value">%1$d°</string>
+    <string name="drive_drift_best">recorde %1$d°</string>
+
+    <!-- Brand -->
+
+    <!-- Welcome: connect card -->
+    <string name="menu_computer">COMPUTADOR</string>
+    <string name="menu_not_connected">Ainda não conectado</string>
+    <string name="menu_first_note">A primeira busca pode levar de 2 a 3 minutos em Wi-Fi 2,4 GHz. Depois disso, leva segundos.</string>
+    <string name="menu_saved_note">Último PC usado</string>
+    <string name="menu_connect">CONECTAR</string>
+    <string name="menu_find">ENCONTRAR PC E CONECTAR</string>
+    <string name="menu_other_ways">Outras formas:</string>
+    <string name="menu_qr">Ler QR</string>
+    <string name="menu_code">Digitar código</string>
+    <string name="menu_new_pc">Novo PC</string>
+    <string name="menu_control">Controle</string>
+    <string name="menu_phase_saved">Tentando o seu PC…</string>
+    <string name="menu_phase_full">Procurando na rede… isso pode levar de 2 a 3 minutos</string>
+    <string name="menu_steps_title">Pronto em 3 passos</string>
+    <string name="menu_step_3">Toque no botão à direita</string>
+    <string name="menu_same_wifi">O celular e o PC precisam estar no mesmo Wi-Fi</string>
+    <string name="connect_step_1">Abra o BeamNG.drive no seu PC</string>
+    <string name="connect_step_2">Opções → Controles → Hardware → ative o celular</string>
+
+    <!-- Welcome: extras card -->
+
+    <!-- Welcome: actions -->
+
+    <!-- Auto-connect (camera-free, sweeps the game\'s code space over Wi-Fi) -->
+    <string name="toast_auto_connect_failed">Não foi possível encontrar o BeamNG.drive. No jogo, ative Opções → Controles → Hardware → uso do celular ou tablet e mantenha o celular no mesmo Wi-Fi.</string>
+
+    <!-- Manual connect (camera-free fallback) -->
+    <string name="manual_title">Conectar sem escanear</string>
+    <string name="manual_hint">O mais fácil é o botão Conectar — sem código. Se não, tire uma foto nítida do QR do jogo e leia aqui, ou cole o link / digite o código de 5 dígitos se já o tiver.</string>
+    <string name="manual_field">Link ou código</string>
+    <string name="manual_connect">CONECTAR</string>
+    <string name="manual_cancel">CANCELAR</string>
+    <string name="manual_or">— ou —</string>
+    <string name="photo_button">LER QR DE UMA FOTO</string>
+    <string name="toast_no_qr_in_photo">Nenhum QR encontrado nessa foto — tire uma foto mais próxima e nítida só do QR.</string>
+
+    <!-- Setup guide screen -->
+    <string name="guide_eyebrow">COMO FAZER</string>
+    <string name="guide_title">Guia de configuração</string>
+    <string name="guide_intro">Esta página mostra os SEUS valores reais. Digite-os no jogo exatamente como estão — sem adivinhar nem copiar de capturas de tela.</string>
+    <string name="guide_ip_label">IP DO SEU CELULAR</string>
+    <string name="guide_ip_missing">— conecte o celular ao Wi-Fi (ou ligue o roteador do celular) e o endereço aparecerá aqui —</string>
+    <string name="guide_value_address">Endereço</string>
+    <string name="guide_value_port">Porta</string>
+    <string name="guide_value_rate">Taxa máx. de atualização</string>
+
+    <string name="guide_connect_title">1 · CONEXÃO — OBRIGATÓRIO</string>
+    <string name="guide_connect_what">Transforme o celular no volante, acelerador e freio do carro no jogo.</string>
+    <string name="guide_connect_s1">Conecte o celular ao MESMO Wi-Fi do PC — a mesma rede de casa / roteador. Esta é a única coisa que precisa estar certa.</string>
+    <string name="guide_connect_s2">No PC, dentro do BeamNG.drive: abra Opções → Controles → Hardware, encontre a opção de usar o celular ou tablet e ative-a. Um código QR aparece — pode ignorá-lo.</string>
+    <string name="guide_connect_s3">Volte ao aplicativo e toque no botão grande CONECTAR. A primeira busca pode levar de 2 a 3 minutos em Wi-Fi 2,4 GHz; depois disso conecta em segundos. Sem QR, sem digitar.</string>
+    <string name="guide_connect_s_note">Por que não o QR: desde a v0.39 o QR do jogo ficou denso demais para a maioria das câmeras. O botão Conectar dispensa a câmera e encontra o jogo pelo Wi-Fi, por isso funciona em qualquer celular.</string>
+
+    <!-- Setup guide: alternative connection methods + where the code comes from -->
+    <string name="guide_ways_title">OUTRAS FORMAS DE CONECTAR</string>
+    <string name="guide_ways_intro">O botão Conectar funciona para quase todo mundo. Se ele não encontrar o jogo (algumas redes Wi-Fi bloqueiam), tente uma destas:</string>
+    <string name="guide_way_scan_t">A · Ler o QR ao vivo</string>
+    <string name="guide_way_scan_b">Toque em Ler QR e aponte a câmera do celular para o QR na tela do PC. Segure firme e relativamente perto — a conexão acontece sozinha.</string>
+    <string name="guide_way_photo_t">B · Ler o QR de uma foto</string>
+    <string name="guide_way_photo_b">Tire uma foto nítida e próxima do QR na tela do PC. Depois toque em Digitar código → LER QR DE UMA FOTO e escolha essa foto. O aplicativo lê e conecta.</string>
+    <string name="guide_way_code_t">C · Digitar o código de 5 dígitos</string>
+    <string name="guide_way_code_b">Só se você já tiver o código. Onde encontrá-lo: aponte QUALQUER aplicativo de QR — a câmera normal ou o Google Lens — para o QR do jogo. Ele abre um link do Google Play que termina em “#12345”. Esses 5 últimos dígitos SÃO o seu código. Digite-os em Digitar código.</string>
+
+    <string name="guide_dash_title">2 · PAINEL AO VIVO — OPCIONAL</string>
+    <string name="guide_dash_what">Libera na tela de direção: velocidade, conta-giros, marcha, combustível, temperatura do motor, pressão do turbo, luzes de aviso reais (setas, farol alto, freio de mão, ABS, TC, óleo, bateria) e vibração em batidas.</string>
+    <string name="guide_dash_s1">No jogo (v0.39+): Opções → Avançado → Protocolos</string>
+    <string name="guide_dash_s2">Marque “Protocolo UDP de OutGage” e preencha os valores abaixo</string>
+    <string name="guide_dash_s3">Recarregue o veículo uma vez (Ctrl+R) — o jogo lê isso quando o carro aparece</string>
+
+    <string name="guide_drift_title">3 · MEDIDOR DE DRIFT — OPCIONAL</string>
+    <string name="guide_drift_what">Mostra o ângulo de derrapagem acima do velocímetro enquanto você desliza, além do recorde da sessão. Ótimo com o cronômetro 0–100 (ative nas configurações do aplicativo).</string>
+    <string name="guide_drift_s1">No jogo: Opções → Avançado → Protocolos (mesmo lugar)</string>
+    <string name="guide_drift_s2">Marque “Protocolo UDP de simulador de movimento” e preencha os valores abaixo</string>
+    <string name="guide_drift_s3">Recarregue o veículo uma vez (Ctrl+R)</string>
+
+    <string name="guide_trouble_title">SOLUÇÃO DE PROBLEMAS</string>
+    <string name="guide_trouble_1">Nada chega? Permita o BeamNG.drive no Firewall do Windows.</string>
+    <string name="guide_trouble_2">Wi-Fi de convidados ou de hotel costuma impedir o celular de falar com o PC — use a sua própria rede ou o roteador do celular.</string>
+    <string name="guide_trouble_3">O roteador deu um novo IP ao celular? Confira esta página, atualize o jogo e depois Ctrl+R.</string>
+    <string name="guide_trouble_4">Mostradores travados após uma atualização do jogo? Marque as opções de novo — as configurações às vezes são redefinidas.</string>
+    <string name="guide_trouble_5">Sem roteador? Ligue o roteador do celular, conecte o PC a ele e use o endereço mostrado no topo desta página.</string>
+    <string name="guide_trouble_6">Mostradores vazios em tela dividida? O jogo desliga o envio de dados enquanto o modo de vários jogadores está ativo.</string>
+
+    <!-- Scanner -->
+    <string name="scan_hint">Alinhe o código mostrado no jogo — conecta automaticamente</string>
+
+    <!-- Connection / status -->
+    <string name="connecting_dialog_title">Conectando ao BeamNG.drive</string>
+    <string name="status_connected">Conectado</string>
+    <string name="status_no_telemetry">Sem dados do painel</string>
+    <string name="toast_no_connection">Sem conexão — conecte primeiro pelo menu principal</string>
+    <string name="toast_invalid_qr">Código QR inválido</string>
+    <string name="toast_invalid_qr_format">Formato de código QR inválido</string>
+    <string name="toast_wifi_required">O celular e o PC precisam estar no mesmo Wi-Fi — ou o PC no roteador do celular</string>
+
+    <!-- Settings -->
+    <string name="settings_language">IDIOMA</string>
+    <string name="percent_value">%1$d%%</string>
+    <string name="settings_theme">TEMA</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_system">Sistema</string>
+    <string name="settings_guide_sub">Passo a passo, com os seus valores</string>
+    <string name="settings_about_sub">Versão da comunidade do aplicativo Remote Control da BeamNG. Sem vínculo com a BeamNG GmbH.</string>
+    <string name="settings_haptics_when">VIBRA EM</string>
+    <string name="haptic_gear">Troca de marcha</string>
+    <string name="haptic_gear_sub">Um toque curto a cada troca</string>
+    <string name="haptic_impact">Batida</string>
+    <string name="haptic_impact_sub">Quanto mais forte a batida, mais forte a vibração</string>
+    <string name="haptic_abs">ABS</string>
+    <string name="haptic_abs_sub">Pulsa enquanto o ABS atua</string>
+    <string name="settings_heading">Configurações</string>
+    <string name="settings_sec_driving">Direção</string>
+    <string name="settings_sec_dashboard">Painel</string>
+    <string name="settings_sec_feedback">Vibração</string>
+    <string name="settings_sec_general">Geral</string>
+    <string name="control_gyro_sub">Incline o celular como um volante</string>
+    <string name="control_slider_sub">Gire o volante na tela com o dedo</string>
+    <string name="control_buttons_sub">Segure ◀ e ▶ na tela</string>
+    <string name="settings_dash_layout">ESTILO DO PAINEL</string>
+    <string name="dash_modern">Moderno</string>
+    <string name="dash_classic">Clássico</string>
+    <string name="dash_race">Corrida</string>
+    <string name="dash_minimal">Mínimo</string>
+    <string name="settings_mirrored">Layout espelhado</string>
+    <string name="settings_mirrored_sub">Volante à direita, pedais à esquerda</string>
+    <string name="settings_control_type">TIPO DE CONTROLE</string>
+    <string name="control_buttons">Setas</string>
+    <string name="control_slider">Volante</string>
+    <string name="control_gyro">Inclinar celular</string>
+    <string name="settings_lock_angle">Inclinação total</string>
+    <string name="settings_lock_angle_sub">Incline o celular até aqui para virar o volante todo</string>
+    <string name="settings_dead_zone">Zona morta</string>
+    <string name="settings_dead_zone_sub">Tolerância no centro</string>
+    <string name="settings_units">Unidades</string>
+    <string name="settings_units_sub">Velocímetro</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_mph">mph</string>
+    <string name="settings_dashboard_only">Somente painel</string>
+    <string name="settings_dashboard_only_sub">Controles desligados, só mostradores</string>
+    <string name="settings_haptics">Vibração</string>
+    <string name="settings_haptics_sub">Resposta a marchas e batidas</string>
+    <string name="settings_perf_timer">Cronômetro 0–100</string>
+    <string name="settings_perf_timer_sub">Tempos de arrancada no painel, melhor da sessão</string>
+    <string name="settings_analog_pedals">Pedais analógicos</string>
+    <string name="settings_analog_pedals_sub">O pedal segue a posição do dedo — requer o mod RemoteControlPro</string>
+
+</resources>
