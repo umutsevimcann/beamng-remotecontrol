@@ -37,6 +37,7 @@ import com.beamng.remotecontrol.protocol.MotionPacket
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
+import com.beamng.remotecontrol.protocol.SteeringCurve
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.DriveScreen
 import com.beamng.remotecontrol.ui.TelemetryUiState
@@ -311,7 +312,7 @@ class MainActivity : AppCompatActivity() {
                         val handler = steeringInputHandler
                         if (handler != null) {
                             // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
-                            steeringValue = ((1f - handler.getSteeringValue()) / 2f).coerceIn(0f, 1f)
+                            steeringValue = ((1f - SteeringCurve.compensate(handler.getSteeringValue())) / 2f).coerceIn(0f, 1f)
                         }
                         sendpacket.setSteeringAngle(steeringValue)
                         sendpacket.setThrottle(thrpushed)
