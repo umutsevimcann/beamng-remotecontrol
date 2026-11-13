@@ -41,7 +41,7 @@ import com.beamng.remotecontrol.protocol.SteeringCurve
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.DriveScreen
 import com.beamng.remotecontrol.ui.TelemetryUiState
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 import java.io.IOException
 import java.net.DatagramPacket
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         setContent {
-            NightGarageTheme {
+            RemoteTheme {
                 DriveScreen(
                     telemetry = telemetry,
                     metricUnits = metricUnits,

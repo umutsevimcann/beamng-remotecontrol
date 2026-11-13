@@ -38,8 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.settings.SettingsManager
-import com.beamng.remotecontrol.ui.theme.NightGarage
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.Graphite
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 @Composable
 fun SettingsScreen(settings: SettingsManager) {
@@ -63,12 +63,12 @@ fun SettingsScreen(settings: SettingsManager) {
         Text(
             stringResource(R.string.settings_eyebrow),
             style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Text(
             stringResource(R.string.settings_title),
             style = MaterialTheme.typography.titleLarge,
-            color = NightGarage.TextBright,
+            color = Graphite.Text,
         )
         Spacer(Modifier.height(18.dp))
 
@@ -198,7 +198,7 @@ fun SettingsScreen(settings: SettingsManager) {
         Text(
             stringResource(R.string.settings_instant_save),
             style = MaterialTheme.typography.bodyMedium,
-            color = NightGarage.TextFaint,
+            color = Graphite.Muted,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
     }
@@ -222,10 +222,10 @@ private fun LanguageRow(language: AppLanguage, selected: Boolean, onSelect: () -
                 .width(16.dp)
                 .background(
                     if (selected) {
-                        Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00)))
+                        Brush.verticalGradient(listOf(Color(0xFFFF8A33), Graphite.Orange))
                     } else {
                         Brush.verticalGradient(
-                            listOf(Color(0xFF100C08), Color(0xFF100C08)),
+                            listOf(Graphite.Bg2, Graphite.Bg2),
                         )
                     },
                     androidx.compose.foundation.shape.CircleShape,
@@ -234,7 +234,7 @@ private fun LanguageRow(language: AppLanguage, selected: Boolean, onSelect: () -
         Text(
             language.nativeName,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) NightGarage.TextBright else NightGarage.TextDim,
+            color = if (selected) Graphite.Text else Graphite.Muted,
         )
     }
 }
@@ -249,11 +249,11 @@ private fun SettingRow(
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = NightGarage.Text)
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = NightGarage.TextFaint)
+                Text(title, style = MaterialTheme.typography.bodyLarge, color = Graphite.Text)
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Graphite.Muted)
             }
             if (value.isNotEmpty()) {
-                Text(value, style = MaterialTheme.typography.bodyLarge, color = NightGarage.Amber)
+                Text(value, style = MaterialTheme.typography.bodyLarge, color = Graphite.Orange)
             }
         }
         control()
@@ -274,18 +274,18 @@ private fun ToggleRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = NightGarage.Text)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = NightGarage.TextFaint)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = Graphite.Text)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Graphite.Muted)
         }
         Switch(
             checked = checked,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = NightGarage.AmberHot,
-                checkedThumbColor = NightGarage.TextBright,
-                uncheckedTrackColor = Color(0xFF100C08),
-                uncheckedThumbColor = NightGarage.TextDim,
-                uncheckedBorderColor = NightGarage.PanelEdge,
+                checkedTrackColor = Graphite.Orange,
+                checkedThumbColor = Graphite.Text,
+                uncheckedTrackColor = Graphite.Bg2,
+                uncheckedThumbColor = Graphite.Muted,
+                uncheckedBorderColor = Graphite.Edge,
             ),
         )
     }
@@ -302,9 +302,9 @@ private fun GarageSlider(
         onValueChange = onChange,
         valueRange = range,
         colors = SliderDefaults.colors(
-            thumbColor = Color(0xFFFFD9A0),
-            activeTrackColor = NightGarage.AmberHot,
-            inactiveTrackColor = Color(0xFF100C08),
+            thumbColor = Graphite.Text,
+            activeTrackColor = Graphite.Orange,
+            inactiveTrackColor = Graphite.Bg2,
         ),
     )
 }
@@ -317,7 +317,7 @@ fun SegmentedRow(
 ) {
     Row(
         modifier = Modifier
-            .background(Color(0xFF100C08), RoundedCornerShape(9.dp))
+            .background(Graphite.Bg2, RoundedCornerShape(9.dp))
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
@@ -328,7 +328,7 @@ fun SegmentedRow(
                     .height(32.dp)
                     .background(
                         if (selected) {
-                            Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00)))
+                            Brush.verticalGradient(listOf(Color(0xFFFF8A33), Graphite.Orange))
                         } else {
                             Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
                         },
@@ -341,7 +341,7 @@ fun SegmentedRow(
                 Text(
                     label,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (selected) NightGarage.OnAmber else NightGarage.TextDim,
+                    color = if (selected) Graphite.OnOrange else Graphite.Muted,
                 )
             }
         }
@@ -352,7 +352,7 @@ fun SegmentedRow(
 @Composable
 private fun SettingsScreenPreview() {
     // Preview note: uses a real SettingsManager only at runtime; preview shows layout.
-    NightGarageTheme {
+    RemoteTheme {
         Column(
             Modifier
                 .fillMaxSize()

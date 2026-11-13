@@ -5,7 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.SettingsScreen
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 /**
  * Settings screen: control type and preferences. Changes save instantly
@@ -16,7 +16,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NightGarageTheme {
+            RemoteTheme {
                 SettingsScreen(SettingsManager.getInstance(this))
             }
         }

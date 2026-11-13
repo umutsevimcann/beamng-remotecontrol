@@ -33,15 +33,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.beamng.remotecontrol.R
-import com.beamng.remotecontrol.ui.theme.NightGarage
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.Graphite
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 /** Warm cockpit backdrop shared by the portrait screens. */
 fun cockpitBackground() = Brush.radialGradient(
     colorStops = arrayOf(
-        0.0f to Color(0xFF2B241D),
-        0.55f to Color(0xFF16120E),
-        1.0f to NightGarage.Shell,
+        0.0f to Graphite.Bg0,
+        0.55f to Graphite.Bg1,
+        1.0f to Graphite.Bg2,
     ),
     radius = 1400f,
 )
@@ -74,7 +74,7 @@ fun WelcomeScreen(
         Text(
             stringResource(R.string.brand_subtitle),
             style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Spacer(Modifier.height(24.dp))
 
@@ -94,7 +94,7 @@ fun WelcomeScreen(
             Text(
                 stringResource(R.string.extras_guide_hint),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
             )
         }
         Spacer(Modifier.height(28.dp))
@@ -131,29 +131,29 @@ fun AutoConnectDialog(progress: Float, onCancel: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(NightGarage.Panel, RoundedCornerShape(16.dp))
-                .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(16.dp))
+                .background(Graphite.PanelTop, RoundedCornerShape(16.dp))
+                .border(1.dp, Graphite.Edge, RoundedCornerShape(16.dp))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 stringResource(R.string.auto_connect_title),
                 style = MaterialTheme.typography.titleLarge,
-                color = NightGarage.TextBright,
+                color = Graphite.Text,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(10.dp))
             Text(
                 stringResource(R.string.auto_connect_sub),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextDim,
+                color = Graphite.Muted,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(18.dp))
             androidx.compose.material3.LinearProgressIndicator(
                 progress = { progress },
-                color = NightGarage.Amber,
-                trackColor = NightGarage.PanelEdge,
+                color = Graphite.Orange,
+                trackColor = Graphite.Edge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp),
@@ -162,7 +162,7 @@ fun AutoConnectDialog(progress: Float, onCancel: () -> Unit) {
             Text(
                 stringResource(R.string.auto_connect_progress, (progress * 100).toInt()),
                 style = MaterialTheme.typography.labelLarge,
-                color = NightGarage.Amber,
+                color = Graphite.Orange,
             )
             Spacer(Modifier.height(18.dp))
             GhostButton(stringResource(R.string.manual_cancel), onClick = onCancel)
@@ -181,14 +181,14 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
                 Brush.verticalGradient(listOf(Color(0xDD241C12), Color(0xDD1A140E))),
                 RoundedCornerShape(14.dp),
             )
-            .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(14.dp))
+            .border(1.dp, Graphite.Edge, RoundedCornerShape(14.dp))
             .padding(16.dp),
     ) {
         if (title.isNotEmpty()) {
             Text(
                 title,
                 style = MaterialTheme.typography.labelSmall,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
             )
             Spacer(Modifier.height(10.dp))
         }
@@ -199,9 +199,9 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
 @Composable
 private fun FeatureLine(text: String) {
     Row(modifier = Modifier.padding(vertical = 3.dp)) {
-        Text("•", color = NightGarage.Amber, style = MaterialTheme.typography.bodyLarge)
+        Text("•", color = Graphite.Orange, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.size(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = NightGarage.Text)
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = Graphite.Text)
     }
 }
 
@@ -211,13 +211,13 @@ private fun NumberedStep(number: Int, text: String) {
         Text(
             "$number",
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Spacer(Modifier.size(10.dp))
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.Text,
+            color = Graphite.Text,
         )
     }
 }
@@ -229,7 +229,7 @@ fun AmberButton(label: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(54.dp)
             .background(
-                Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00))),
+                Brush.verticalGradient(listOf(Color(0xFFFF8A33), Graphite.Orange)),
                 RoundedCornerShape(14.dp),
             )
             .clickable(onClick = onClick),
@@ -238,7 +238,7 @@ fun AmberButton(label: String, onClick: () -> Unit) {
         Text(
             label,
             style = MaterialTheme.typography.labelLarge,
-            color = NightGarage.OnAmber,
+            color = Graphite.OnOrange,
             textAlign = TextAlign.Center,
         )
     }
@@ -252,20 +252,20 @@ fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit, onPickP
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(NightGarage.Panel, RoundedCornerShape(16.dp))
-                .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(16.dp))
+                .background(Graphite.PanelTop, RoundedCornerShape(16.dp))
+                .border(1.dp, Graphite.Edge, RoundedCornerShape(16.dp))
                 .padding(20.dp),
         ) {
             Text(
                 stringResource(R.string.manual_title),
                 style = MaterialTheme.typography.titleLarge,
-                color = NightGarage.TextBright,
+                color = Graphite.Text,
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(R.string.manual_hint),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextDim,
+                color = Graphite.Muted,
             )
             Spacer(Modifier.height(14.dp))
             AmberButton(stringResource(R.string.photo_button), onClick = onPickPhoto)
@@ -273,7 +273,7 @@ fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit, onPickP
             Text(
                 stringResource(R.string.manual_or),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
             Spacer(Modifier.height(6.dp))
@@ -283,13 +283,13 @@ fun ManualCodeDialog(onDismiss: () -> Unit, onConnect: (String) -> Unit, onPickP
                 singleLine = true,
                 label = { Text(stringResource(R.string.manual_field)) },
                 colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = NightGarage.Amber,
-                    unfocusedBorderColor = NightGarage.PanelEdge,
-                    focusedLabelColor = NightGarage.Amber,
-                    unfocusedLabelColor = NightGarage.TextFaint,
-                    focusedTextColor = NightGarage.TextBright,
-                    unfocusedTextColor = NightGarage.Text,
-                    cursorColor = NightGarage.Amber,
+                    focusedBorderColor = Graphite.Orange,
+                    unfocusedBorderColor = Graphite.Edge,
+                    focusedLabelColor = Graphite.Orange,
+                    unfocusedLabelColor = Graphite.Muted,
+                    focusedTextColor = Graphite.Text,
+                    unfocusedTextColor = Graphite.Text,
+                    cursorColor = Graphite.Orange,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -314,14 +314,14 @@ fun GhostButton(label: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(46.dp)
-            .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(14.dp))
+            .border(1.dp, Graphite.Edge, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             label,
             style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp),
-            color = NightGarage.TextDim,
+            color = Graphite.Muted,
             textAlign = TextAlign.Center,
         )
     }
@@ -330,7 +330,7 @@ fun GhostButton(label: String, onClick: () -> Unit) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 740)
 @Composable
 private fun WelcomeScreenPreview() {
-    NightGarageTheme {
+    RemoteTheme {
         WelcomeScreen(
             phoneIp = "192.168.0.23",
             onAutoConnectClick = {},
@@ -341,7 +341,7 @@ private fun WelcomeScreenPreview() {
 
 @Composable
 private fun manualDialogPreviewHost() {
-    NightGarageTheme {
+    RemoteTheme {
         ManualCodeDialog(onDismiss = {}, onConnect = {}, onPickPhoto = {})
     }
 }

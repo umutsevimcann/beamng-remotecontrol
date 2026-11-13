@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.ui.SetupGuideScreen
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
 /** Personalized in-app setup documentation (real IP, exact ports). */
 class SetupGuideActivity : AppCompatActivity() {
@@ -18,7 +18,7 @@ class SetupGuideActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NightGarageTheme {
+            RemoteTheme {
                 SetupGuideScreen(phoneIp = phoneIp)
             }
         }

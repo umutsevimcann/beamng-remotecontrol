@@ -22,7 +22,7 @@ import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.AutoConnectDialog
 import com.beamng.remotecontrol.ui.WelcomeScreen
-import com.beamng.remotecontrol.ui.theme.NightGarageTheme
+import com.beamng.remotecontrol.ui.theme.RemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -51,7 +51,7 @@ class WelcomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NightGarageTheme {
+            RemoteTheme {
                 var showManual by androidx.compose.runtime.remember { mutableStateOf(false) }
                 WelcomeScreen(
                     phoneIp = phoneIp,

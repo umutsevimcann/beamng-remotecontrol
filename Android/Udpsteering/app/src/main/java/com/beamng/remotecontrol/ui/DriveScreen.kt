@@ -56,7 +56,7 @@ import androidx.compose.foundation.clickable
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.settings.SettingsManager
-import com.beamng.remotecontrol.ui.theme.NightGarage
+import com.beamng.remotecontrol.ui.theme.Graphite
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -154,7 +154,7 @@ private fun StatusRow(
                 "● " + stringResource(R.string.status_no_telemetry)
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = if (telemetry.connected) NightGarage.Green else NightGarage.TextDim,
+            color = if (telemetry.connected) Graphite.Green else Graphite.Muted,
         )
         if (perfTimerEnabled) {
             Spacer(Modifier.width(14.dp))
@@ -166,7 +166,7 @@ private fun StatusRow(
         Text(
             "⚙",
             fontSize = 18.sp,
-            color = NightGarage.TextDim,
+            color = Graphite.Muted,
             modifier = Modifier.clickable(onClick = onOpenSettings),
         )
     }
@@ -179,13 +179,13 @@ private fun TimerChip(telemetry: TelemetryUiState) {
     val best = telemetry.timerBestSec
     Row(
         modifier = Modifier
-            .background(NightGarage.Panel, RoundedCornerShape(8.dp))
+            .background(Graphite.PanelTop, RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             stringResource(R.string.drive_timer_label),
-            fontSize = 9.sp, color = NightGarage.TextFaint,
+            fontSize = 9.sp, color = Graphite.Muted,
             style = MaterialTheme.typography.labelSmall,
         )
         Spacer(Modifier.width(5.dp))
@@ -196,20 +196,20 @@ private fun TimerChip(telemetry: TelemetryUiState) {
                 else -> stringResource(R.string.drive_timer_ready)
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = if (live != null) NightGarage.AmberHot else NightGarage.TextBright,
+            color = if (live != null) Graphite.Orange else Graphite.Text,
         )
         if (best != null) {
             Spacer(Modifier.width(8.dp))
             Text(
                 stringResource(R.string.drive_timer_best),
-                fontSize = 9.sp, color = NightGarage.TextFaint,
+                fontSize = 9.sp, color = Graphite.Muted,
                 style = MaterialTheme.typography.labelSmall,
             )
             Spacer(Modifier.width(4.dp))
             Text(
                 String.format("%.2fs", best),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.Green,
+                color = Graphite.Green,
             )
         }
     }
@@ -235,9 +235,9 @@ private fun WarningLights(lights: List<Boolean>) {
         SignalIcon(pointLeft = true, on = on(Receivepacket.INDEX_SIGNAL_L))
         HighBeamIcon(on = on(Receivepacket.INDEX_FULLBEAM))
         HandbrakeBadge(on = on(Receivepacket.INDEX_HANDBRAKE))
-        TextPill("ABS", NightGarage.Amber, on = on(Receivepacket.INDEX_ABS))
-        TextPill("TC", NightGarage.Amber, on = on(Receivepacket.INDEX_TC))
-        TextPill("OIL", NightGarage.Red, on = on(Receivepacket.INDEX_OILWARN))
+        TextPill("ABS", Graphite.Orange, on = on(Receivepacket.INDEX_ABS))
+        TextPill("TC", Graphite.Orange, on = on(Receivepacket.INDEX_TC))
+        TextPill("OIL", Graphite.Red, on = on(Receivepacket.INDEX_OILWARN))
         BatteryIcon(on = on(Receivepacket.INDEX_BATTERY))
         SignalIcon(pointLeft = false, on = on(Receivepacket.INDEX_SIGNAL_R))
     }
@@ -259,7 +259,7 @@ private fun SignalIcon(pointLeft: Boolean, on: Boolean) {
             }
             close()
         }
-        drawPath(path, NightGarage.Amber.copy(alpha = alpha))
+        drawPath(path, Graphite.Orange.copy(alpha = alpha))
     }
 }
 
@@ -267,7 +267,7 @@ private fun SignalIcon(pointLeft: Boolean, on: Boolean) {
 private fun HighBeamIcon(on: Boolean) {
     val alpha = lightAlpha(on)
     Canvas(Modifier.size(width = 20.dp, height = 13.dp)) {
-        val color = NightGarage.Blue.copy(alpha = alpha)
+        val color = Graphite.Blue.copy(alpha = alpha)
         // Lamp: filled half-disc on the right
         drawArc(
             color, startAngle = -90f, sweepAngle = 180f, useCenter = true,
@@ -286,7 +286,7 @@ private fun HighBeamIcon(on: Boolean) {
 @Composable
 private fun HandbrakeBadge(on: Boolean) {
     val alpha = lightAlpha(on)
-    val color = NightGarage.Red.copy(alpha = alpha)
+    val color = Graphite.Red.copy(alpha = alpha)
     Box(
         modifier = Modifier
             .size(17.dp)
@@ -319,7 +319,7 @@ private fun TextPill(label: String, color: Color, on: Boolean) {
 private fun BatteryIcon(on: Boolean) {
     val alpha = lightAlpha(on)
     Canvas(Modifier.size(width = 18.dp, height = 12.dp)) {
-        val color = NightGarage.Amber.copy(alpha = alpha)
+        val color = Graphite.Orange.copy(alpha = alpha)
         val stroke = 1.5.dp.toPx()
         drawRoundRect(
             color,
@@ -353,7 +353,7 @@ fun RpmGauge(rpm: Float, modifier: Modifier = Modifier) {
         label = "flash",
     )
     val redZoneAlpha = if (overRedline) flash else 0.35f
-    val needleColor = if (overRedline) NightGarage.Red else NightGarage.AmberHot
+    val needleColor = if (overRedline) Graphite.Red else Graphite.Orange
 
     Box(modifier, contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
@@ -366,7 +366,7 @@ fun RpmGauge(rpm: Float, modifier: Modifier = Modifier) {
 
             // Track
             drawArc(
-                color = NightGarage.Panel,
+                color = Graphite.PanelTop,
                 startAngle = GAUGE_START, sweepAngle = GAUGE_SWEEP, useCenter = false,
                 topLeft = topLeft, size = arcSize,
                 style = Stroke(stroke, cap = StrokeCap.Round),
@@ -374,7 +374,7 @@ fun RpmGauge(rpm: Float, modifier: Modifier = Modifier) {
             // Red zone (flashes while over the redline)
             val redStart = GAUGE_START + GAUGE_SWEEP * (REDLINE_RPM / MAX_RPM)
             drawArc(
-                color = NightGarage.Red.copy(alpha = redZoneAlpha),
+                color = Graphite.Red.copy(alpha = redZoneAlpha),
                 startAngle = redStart,
                 sweepAngle = GAUGE_START + GAUGE_SWEEP - redStart, useCenter = false,
                 topLeft = topLeft, size = arcSize,
@@ -385,7 +385,7 @@ fun RpmGauge(rpm: Float, modifier: Modifier = Modifier) {
             if (frac > 0f) {
                 drawArc(
                     brush = Brush.sweepGradient(
-                        0f to NightGarage.Amber, 1f to NightGarage.AmberHot,
+                        0f to Graphite.Orange, 1f to Graphite.Orange,
                     ),
                     startAngle = GAUGE_START, sweepAngle = GAUGE_SWEEP * frac, useCenter = false,
                     topLeft = topLeft, size = arcSize,
@@ -404,18 +404,18 @@ fun RpmGauge(rpm: Float, modifier: Modifier = Modifier) {
                 )
             }
             // Hub
-            drawCircle(NightGarage.PanelDeep, radius = size.minDimension * 0.13f, center = center)
+            drawCircle(Graphite.PanelBottom, radius = size.minDimension * 0.13f, center = center)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = String.format("%.1f", rpm / 1000f),
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color(0xFFFFD9A0),
+                color = Graphite.Text,
             )
             Text(
                 stringResource(R.string.drive_rpm_x1000),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 9.sp, letterSpacing = 1.5.sp),
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
             )
         }
     }
@@ -435,25 +435,25 @@ private fun SpeedCluster(telemetry: TelemetryUiState, metricUnits: Boolean, big:
             style = MaterialTheme.typography.displayLarge.copy(
                 fontSize = if (big) 88.sp else 64.sp,
             ),
-            color = NightGarage.TextBright,
+            color = Graphite.Text,
         )
         Text(
             text = stringResource(if (metricUnits) R.string.speed_kmh else R.string.speed_mph),
             style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.TextDim,
+            color = Graphite.Muted,
         )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 telemetry.gear,
                 style = MaterialTheme.typography.headlineMedium,
-                color = NightGarage.Amber,
+                color = Graphite.Orange,
             )
             Spacer(Modifier.width(6.dp))
             Text(
                 stringResource(R.string.drive_gear),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 9.sp, letterSpacing = 1.5.sp),
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
         }
@@ -476,7 +476,7 @@ private fun DriftBadge(telemetry: TelemetryUiState) {
     Row(
         modifier = Modifier
             .graphicsLayer { alpha = if (active) 1f else 0f }
-            .background(NightGarage.Panel, RoundedCornerShape(8.dp))
+            .background(Graphite.PanelTop, RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -484,13 +484,13 @@ private fun DriftBadge(telemetry: TelemetryUiState) {
             stringResource(R.string.drive_drift),
             fontSize = 10.sp,
             style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.AmberHot.copy(alpha = if (active) pulse else 1f),
+            color = Graphite.Orange.copy(alpha = if (active) pulse else 1f),
         )
         Spacer(Modifier.width(6.dp))
         Text(
             "${kotlin.math.abs(drift ?: 0f).roundToInt()}°",
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.TextBright,
+            color = Graphite.Text,
         )
         telemetry.driftMaxDeg?.let { max ->
             Spacer(Modifier.width(8.dp))
@@ -498,7 +498,7 @@ private fun DriftBadge(telemetry: TelemetryUiState) {
                 stringResource(R.string.drive_drift_max) + " ${max.roundToInt()}°",
                 fontSize = 9.sp,
                 style = MaterialTheme.typography.labelSmall,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
             )
         }
     }
@@ -510,28 +510,28 @@ private fun AuxColumn(telemetry: TelemetryUiState, dashboardOnly: Boolean) {
         AuxBar(
             label = stringResource(R.string.drive_fuel),
             fraction = telemetry.fuel,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
             flashing = telemetry.connected && telemetry.fuel < 0.1f,
         )
         AuxBar(
             label = stringResource(R.string.drive_temp) + " " + telemetry.engTemp.roundToInt() + "°",
             fraction = (telemetry.engTemp / 130f).coerceIn(0f, 1f),
-            color = if (telemetry.engTemp > 110f) NightGarage.Red else NightGarage.Green,
+            color = if (telemetry.engTemp > 110f) Graphite.Red else Graphite.Green,
             flashing = telemetry.engTemp > 110f,
         )
         if (telemetry.hasTurbo) {
             AuxBar(
                 label = stringResource(R.string.drive_boost) + " " + String.format("%.1f", telemetry.turbo),
                 fraction = (telemetry.turbo / 2f).coerceIn(0f, 1f),
-                color = NightGarage.Blue,
+                color = Graphite.Blue,
             )
         }
         if (dashboardOnly) {
             // Input echo: what the game is actually applying right now.
             Spacer(Modifier.height(2.dp))
-            AuxBar(stringResource(R.string.drive_thr), telemetry.throttleEcho, NightGarage.Green)
-            AuxBar(stringResource(R.string.drive_brk), telemetry.brakeEcho, NightGarage.Red)
-            AuxBar(stringResource(R.string.drive_clt), telemetry.clutchEcho, NightGarage.Blue)
+            AuxBar(stringResource(R.string.drive_thr), telemetry.throttleEcho, Graphite.Green)
+            AuxBar(stringResource(R.string.drive_brk), telemetry.brakeEcho, Graphite.Red)
+            AuxBar(stringResource(R.string.drive_clt), telemetry.clutchEcho, Graphite.Blue)
         }
     }
 }
@@ -552,14 +552,14 @@ private fun AuxBar(label: String, fraction: Float, color: Color, flashing: Boole
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 10.sp, letterSpacing = 1.sp),
-            color = if (flashing) color.copy(alpha = alpha) else NightGarage.TextDim,
+            color = if (flashing) color.copy(alpha = alpha) else Graphite.Muted,
         )
         Spacer(Modifier.height(3.dp))
         Box(
             Modifier
                 .width(96.dp)
                 .height(6.dp)
-                .background(NightGarage.Panel, RoundedCornerShape(3.dp)),
+                .background(Graphite.PanelTop, RoundedCornerShape(3.dp)),
         ) {
             Box(
                 Modifier
@@ -684,9 +684,9 @@ private fun SteeringArea(
                 },
                 valueRange = -1f..1f,
                 colors = SliderDefaults.colors(
-                    thumbColor = NightGarage.Amber,
-                    activeTrackColor = NightGarage.Panel,
-                    inactiveTrackColor = NightGarage.Panel,
+                    thumbColor = Graphite.Orange,
+                    activeTrackColor = Graphite.PanelTop,
+                    inactiveTrackColor = Graphite.PanelTop,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -698,7 +698,7 @@ private fun SteeringArea(
             Text(
                 stringResource(R.string.drive_gyro_hint),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -716,9 +716,9 @@ private fun HoldButton(glyph: String, modifier: Modifier, onPress: (Boolean) -> 
             .fillMaxHeight()
             .background(
                 if (pressed) {
-                    Brush.verticalGradient(listOf(Color(0xFFFF8A3A), Color(0xFFE05A00)))
+                    Brush.verticalGradient(listOf(Color(0xFFFF8A33), Graphite.Orange))
                 } else {
-                    Brush.verticalGradient(listOf(NightGarage.Panel, Color(0xFF161009)))
+                    Brush.verticalGradient(listOf(Graphite.PanelTop, Color(0xFF161009)))
                 },
                 RoundedCornerShape(14.dp),
             )
@@ -738,7 +738,7 @@ private fun HoldButton(glyph: String, modifier: Modifier, onPress: (Boolean) -> 
         Text(
             glyph,
             fontSize = 20.sp,
-            color = if (pressed) NightGarage.OnAmber else NightGarage.Amber,
+            color = if (pressed) Graphite.OnOrange else Graphite.Orange,
         )
     }
 }

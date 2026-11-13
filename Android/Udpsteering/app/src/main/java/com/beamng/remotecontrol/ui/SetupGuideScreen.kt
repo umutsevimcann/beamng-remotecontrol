@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.beamng.remotecontrol.R
 import com.beamng.remotecontrol.protocol.Ports
-import com.beamng.remotecontrol.ui.theme.NightGarage
+import com.beamng.remotecontrol.ui.theme.Graphite
 
 private const val RECOMMENDED_RATE = "60"
 
@@ -50,18 +50,18 @@ fun SetupGuideScreen(phoneIp: String?) {
         Text(
             stringResource(R.string.guide_eyebrow),
             style = MaterialTheme.typography.labelSmall,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Text(
             stringResource(R.string.guide_title),
             style = MaterialTheme.typography.titleLarge,
-            color = NightGarage.TextBright,
+            color = Graphite.Text,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             stringResource(R.string.guide_intro),
             style = MaterialTheme.typography.bodyMedium,
-            color = NightGarage.TextDim,
+            color = Graphite.Muted,
         )
         Spacer(Modifier.height(14.dp))
 
@@ -73,7 +73,7 @@ fun SetupGuideScreen(phoneIp: String?) {
                     fontFamily = FontFamily.Monospace,
                     fontSize = if (phoneIp != null) 26.sp else 13.sp,
                 ),
-                color = if (phoneIp != null) Color(0xFFFFD9A0) else NightGarage.Red,
+                color = if (phoneIp != null) Graphite.Text else Graphite.Red,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -89,7 +89,7 @@ fun SetupGuideScreen(phoneIp: String?) {
             Text(
                 stringResource(R.string.guide_connect_s_note),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextFaint,
+                color = Graphite.Muted,
             )
         }
         Spacer(Modifier.height(14.dp))
@@ -99,7 +99,7 @@ fun SetupGuideScreen(phoneIp: String?) {
             Text(
                 stringResource(R.string.guide_ways_intro),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NightGarage.TextDim,
+                color = Graphite.Muted,
                 modifier = Modifier.padding(bottom = 6.dp),
             )
             GuideWay(
@@ -153,7 +153,7 @@ private fun WhatYouGet(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.bodyMedium,
-        color = NightGarage.Green,
+        color = Graphite.Green,
         modifier = Modifier.padding(bottom = 8.dp),
     )
 }
@@ -164,13 +164,13 @@ private fun GuideStep(number: Int, text: String) {
         Text(
             "$number",
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Spacer(Modifier.width(10.dp))
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.Text,
+            color = Graphite.Text,
         )
     }
 }
@@ -182,12 +182,12 @@ private fun GuideWay(title: String, body: String) {
         Text(
             title,
             style = MaterialTheme.typography.bodyLarge,
-            color = NightGarage.Amber,
+            color = Graphite.Orange,
         )
         Text(
             body,
             style = MaterialTheme.typography.bodyMedium,
-            color = NightGarage.TextDim,
+            color = Graphite.Muted,
             modifier = Modifier.padding(top = 2.dp),
         )
     }
@@ -196,9 +196,9 @@ private fun GuideWay(title: String, body: String) {
 @Composable
 private fun Bullet(text: String) {
     Row(modifier = Modifier.padding(vertical = 3.dp)) {
-        Text("•", color = NightGarage.Amber, style = MaterialTheme.typography.bodyLarge)
+        Text("•", color = Graphite.Orange, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = NightGarage.Text)
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = Graphite.Text)
     }
 }
 
@@ -209,8 +209,8 @@ private fun ValueTable(phoneIp: String?, port: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .background(Color(0xFF100C08), RoundedCornerShape(9.dp))
-            .border(1.dp, NightGarage.PanelEdge, RoundedCornerShape(9.dp))
+            .background(Graphite.Bg2, RoundedCornerShape(9.dp))
+            .border(1.dp, Graphite.Edge, RoundedCornerShape(9.dp))
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -230,13 +230,13 @@ private fun ValueRow(label: String, value: String, highlight: Boolean) {
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
-            color = NightGarage.TextFaint,
+            color = Graphite.Muted,
             modifier = Modifier.width(120.dp),
         )
         Text(
             value,
             style = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-            color = if (highlight) Color(0xFFFFD9A0) else NightGarage.Red,
+            color = if (highlight) Graphite.Text else Graphite.Red,
         )
     }
 }
