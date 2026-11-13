@@ -39,6 +39,22 @@
     <string name="brand_subtitle">REMOTE CONTROL</string>
 
     <!-- Welcome: connect card -->
+    <string name="menu_computer">COMPUTER</string>
+    <string name="menu_not_connected">Not connected yet</string>
+    <string name="menu_first_note">The first search can take 2–3 minutes on 2.4 GHz Wi-Fi. After that it takes seconds.</string>
+    <string name="menu_saved_note">Last used PC</string>
+    <string name="menu_connect">CONNECT</string>
+    <string name="menu_find">FIND PC AND CONNECT</string>
+    <string name="menu_other_ways">Other ways:</string>
+    <string name="menu_qr">Scan QR</string>
+    <string name="menu_code">Enter code</string>
+    <string name="menu_new_pc">New PC</string>
+    <string name="menu_control">Control</string>
+    <string name="menu_phase_saved">Trying your PC…</string>
+    <string name="menu_phase_full">Searching the network… this can take 2–3 minutes</string>
+    <string name="menu_steps_title">Ready in 3 steps</string>
+    <string name="menu_step_3">Press the button on the right</string>
+    <string name="menu_same_wifi">Phone and PC must be on the same Wi-Fi</string>
     <string name="connect_card_title">CONNECT</string>
     <string name="connect_step_1">Open BeamNG.drive on your PC</string>
     <string name="connect_step_2">Options → Controls → Hardware → enable phone</string>

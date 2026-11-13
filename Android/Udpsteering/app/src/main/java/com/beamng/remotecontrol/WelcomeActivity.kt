@@ -12,16 +12,21 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.settings.SettingsManager
-import com.beamng.remotecontrol.ui.AutoConnectDialog
-import com.beamng.remotecontrol.ui.WelcomeScreen
+import com.beamng.remotecontrol.network.UdpDiscovery.SweepPhase
+import com.beamng.remotecontrol.ui.ManualCodeDialog
+import com.beamng.remotecontrol.ui.dash.DashLayout
+import com.beamng.remotecontrol.ui.menu.MainMenuScreen
+import com.beamng.remotecontrol.ui.menu.SearchUi
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,12 +36,16 @@ import java.net.InetAddress
 
 class WelcomeActivity : AppCompatActivity() {
 
-    private var phoneIp by mutableStateOf<String?>(null)
+    private lateinit var settings: SettingsManager
 
-    // Auto-connect sweep state: null job = idle; progress is 0f..1f for the dialog.
+    // Mirrors of the settings the menu shows; refreshed in onResume.
+    private var savedPcIp by mutableStateOf<String?>(null)
+    private var dashLayout by mutableStateOf(DashLayout.MODERN)
+    private var controlType by mutableIntStateOf(SettingsManager.CONTROL_GYROSCOPE)
+
+    // Search state: null = idle.
     private var sweepJob: Job? = null
-    private var sweepProgress by mutableFloatStateOf(0f)
-    private var sweeping by mutableStateOf(false)
+    private var search by mutableStateOf<SearchUi?>(null)
 
     private val cameraPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -50,22 +59,44 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        settings = SettingsManager.getInstance(this)
         setContent {
             RemoteTheme {
-                var showManual by androidx.compose.runtime.remember { mutableStateOf(false) }
-                WelcomeScreen(
-                    phoneIp = phoneIp,
-                    onAutoConnectClick = ::startAutoConnect,
-                    onScanClick = ::scanRequested,
-                    onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
-                    onGuideClick = { startActivity(Intent(this, SetupGuideActivity::class.java)) },
-                    onManualClick = { showManual = true },
+                var showManual by remember { mutableStateOf(false) }
+                MainMenuScreen(
+                    savedPcIp = savedPcIp,
+                    layout = dashLayout,
+                    controlTypeLabel = stringResource(
+                        when (controlType) {
+                            SettingsManager.CONTROL_BUTTONS -> R.string.control_buttons
+                            SettingsManager.CONTROL_SLIDER -> R.string.control_slider
+                            else -> R.string.control_gyro
+                        },
+                    ),
+                    search = search,
+                    onConnect = { startSearch(useSavedPc = true) },
+                    onNewPc = { startSearch(useSavedPc = false) },
+                    onCancel = ::cancelSearch,
+                    onScanQr = ::scanRequested,
+                    onEnterCode = { showManual = true },
+                    onLayout = { layout ->
+                        dashLayout = layout
+                        settings.dashLayout = layout
+                    },
+                    onControlType = {
+                        // Three options: tapping the row steps to the next one.
+                        controlType = when (controlType) {
+                            SettingsManager.CONTROL_GYROSCOPE -> SettingsManager.CONTROL_SLIDER
+                            SettingsManager.CONTROL_SLIDER -> SettingsManager.CONTROL_BUTTONS
+                            else -> SettingsManager.CONTROL_GYROSCOPE
+                        }
+                        settings.controlType = controlType
+                    },
+                    onSetupGuide = { startActivity(Intent(this, SetupGuideActivity::class.java)) },
+                    onSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
                 )
-                if (sweeping) {
-                    AutoConnectDialog(progress = sweepProgress, onCancel = ::cancelAutoConnect)
-                }
                 if (showManual) {
-                    com.beamng.remotecontrol.ui.ManualCodeDialog(
+                    ManualCodeDialog(
                         onDismiss = { showManual = false },
                         onConnect = { input ->
                             showManual = false
@@ -142,15 +173,24 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        phoneIp = NetworkUtils.phoneIpv4String(this)
+        savedPcIp = settings.lastIP.takeIf { it.isNotEmpty() }
+        dashLayout = settings.dashLayout
+        controlType = settings.controlType
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // A search that finishes while we're in the background can't open the drive
+        // screen (background activity starts are blocked), so don't leave one running.
+        cancelSearch()
     }
 
     /**
-     * Camera-free connect: sweep the game's 5-digit code space over Wi-Fi and let
-     * its reply reveal the code + host. Works on any phone regardless of camera.
+     * Camera-free connect: try codes until the game answers (see UdpDiscovery.sweep).
+     * [useSavedPc] = false skips the saved address and searches the whole network.
      */
-    private fun startAutoConnect() {
-        if (sweeping) return
+    private fun startSearch(useSavedPc: Boolean) {
+        if (search != null) return
         // Only the broadcast address is required. The Wi-Fi client IP is merely
         // preferred: it's absent when the phone is the hotspot the PC joined, and
         // aborting on it broke hotspot play in v3.0.0–3.0.2.
@@ -167,26 +207,32 @@ class WelcomeActivity : AppCompatActivity() {
         // Null on hotspot (no Wi-Fi client network) → sockets stay unbound and
         // route by subnet, which is the hotspot interface.
         val network = NetworkUtils.wifiNetwork(this)
+        // Literal IP, so no DNS lookup happens here.
+        val lastHost = if (useSavedPc) {
+            settings.lastIP.takeIf { it.isNotEmpty() }?.let { runCatching { InetAddress.getByName(it) }.getOrNull() }
+        } else {
+            null
+        }
+        val slow = !NetworkUtils.isWifi5Ghz(this)
 
-        sweepProgress = 0f
-        sweeping = true
+        search = SearchUi(if (lastHost != null) SweepPhase.SAVED_PC else SweepPhase.FULL_SEARCH, 0f)
         sweepJob = lifecycleScope.launch {
-            val settings = SettingsManager.getInstance(this@WelcomeActivity)
-            // Literal IP, so no DNS lookup happens here.
-            val lastHost = settings.lastIP.takeIf { it.isNotEmpty() }
-                ?.let { runCatching { InetAddress.getByName(it) }.getOrNull() }
-            val slow = !NetworkUtils.isWifi5Ghz(this@WelcomeActivity)
-            val result = UdpDiscovery.sweep(broadcast, lastHost, slow, network) { tried, total ->
-                runOnUiThread { sweepProgress = tried.toFloat() / total }
-            }
-            sweeping = false
+            val result = UdpDiscovery.sweep(
+                broadcast, lastHost, slow, network,
+                onPhase = { phase -> runOnUiThread { search = search?.copy(phase = phase, progress = 0f) } },
+                onProgress = { tried, total -> runOnUiThread { search = search?.copy(progress = tried.toFloat() / total) } },
+            )
+            search = null
             when (result) {
                 is UdpDiscovery.Result.Connected -> {
                     val app = application as RemoteControlApplication
                     app.hostAddress = result.host
                     app.securityCode = result.code
                     // Next time we sweep this PC by unicast first (fast, no flood).
-                    result.host.hostAddress?.let { settings.lastIP = it }
+                    result.host.hostAddress?.let {
+                        settings.lastIP = it
+                        savedPcIp = it
+                    }
                     startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
                 }
                 is UdpDiscovery.Result.Failed -> {
@@ -200,10 +246,10 @@ class WelcomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun cancelAutoConnect() {
+    private fun cancelSearch() {
         sweepJob?.cancel()
         sweepJob = null
-        sweeping = false
+        search = null
     }
 
     private fun scanRequested() {

@@ -39,6 +39,22 @@
     <string name="brand_subtitle">UZAKTAN KUMANDA</string>
 
     <!-- Welcome: connect card -->
+    <string name="menu_computer">BİLGİSAYAR</string>
+    <string name="menu_not_connected">Henüz bağlanmadın</string>
+    <string name="menu_first_note">İlk arama 2.4 GHz Wi-Fi\'de 2–3 dakika sürebilir. Sonrakiler birkaç saniye sürer.</string>
+    <string name="menu_saved_note">Son kullanılan PC</string>
+    <string name="menu_connect">BAĞLAN</string>
+    <string name="menu_find">PC\'Yİ BUL VE BAĞLAN</string>
+    <string name="menu_other_ways">Başka yolla:</string>
+    <string name="menu_qr">QR tara</string>
+    <string name="menu_code">Kod gir</string>
+    <string name="menu_new_pc">Yeni PC ara</string>
+    <string name="menu_control">Kontrol</string>
+    <string name="menu_phase_saved">PC\'n deneniyor…</string>
+    <string name="menu_phase_full">Ağ aranıyor… 2–3 dakika sürebilir</string>
+    <string name="menu_steps_title">3 adımda hazır</string>
+    <string name="menu_step_3">Sağdaki butona bas</string>
+    <string name="menu_same_wifi">Telefon ve PC aynı Wi-Fi\'de olmalı</string>
     <string name="connect_card_title">BAĞLANTI</string>
     <string name="connect_step_1">PC\'de BeamNG.drive\'ı aç</string>
     <string name="connect_step_2">Seçenekler → Kontroller → Donanım → telefonu etkinleştir</string>

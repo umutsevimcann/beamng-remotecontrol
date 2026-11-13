@@ -39,6 +39,22 @@
     <string name="brand_subtitle">FERNSTEUERUNG</string>
 
     <!-- Welcome: connect card -->
+    <string name="menu_computer">COMPUTER</string>
+    <string name="menu_not_connected">Noch nicht verbunden</string>
+    <string name="menu_first_note">Die erste Suche kann im 2,4-GHz-WLAN 2–3 Minuten dauern. Danach nur Sekunden.</string>
+    <string name="menu_saved_note">Zuletzt verwendeter PC</string>
+    <string name="menu_connect">VERBINDEN</string>
+    <string name="menu_find">PC FINDEN UND VERBINDEN</string>
+    <string name="menu_other_ways">Andere Wege:</string>
+    <string name="menu_qr">QR scannen</string>
+    <string name="menu_code">Code eingeben</string>
+    <string name="menu_new_pc">Neuer PC</string>
+    <string name="menu_control">Steuerung</string>
+    <string name="menu_phase_saved">Dein PC wird gesucht…</string>
+    <string name="menu_phase_full">Netzwerk wird durchsucht… das kann 2–3 Minuten dauern</string>
+    <string name="menu_steps_title">In 3 Schritten bereit</string>
+    <string name="menu_step_3">Rechts auf den Button tippen</string>
+    <string name="menu_same_wifi">Handy und PC müssen im selben WLAN sein</string>
     <string name="connect_card_title">VERBINDEN</string>
     <string name="connect_step_1">BeamNG.drive am PC starten</string>
     <string name="connect_step_2">Optionen → Steuerung → Hardware → Handy aktivieren</string>

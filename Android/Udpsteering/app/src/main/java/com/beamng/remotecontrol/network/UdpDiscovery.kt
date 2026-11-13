@@ -24,6 +24,15 @@ import java.nio.channels.DatagramChannel
  */
 object UdpDiscovery {
 
+    /** What the sweep is doing right now, for the UI. */
+    enum class SweepPhase {
+        /** Unicast to a known address: the saved PC, or the source of an OutGauge stream. */
+        SAVED_PC,
+
+        /** Broadcast to the whole network. */
+        FULL_SEARCH,
+    }
+
     sealed class Result {
         /** [code] is set when discovered by sweep; null when the caller already knew it. */
         data class Connected(val host: InetAddress, val code: String? = null) : Result()
@@ -144,18 +153,21 @@ object UdpDiscovery {
      * Unicast doesn't have this problem (verified: same sweep, same network,
      * connects first pass), but needs the PC's address. The game announces
      * nothing we could discover it by, so the passes are, in order:
-     *  1. unicast to [lastHost] — the PC we connected to last time, if any;
+     *  1. unicast to [lastHost] — the PC we connected to last time; pass null to
+     *     skip it ("search for a new PC");
      *  2. unicast to the source of an OutGauge stream, the moment one is seen
      *     (only flows while the game is unpaused);
      *  3. broadcast — paced under the measured limit when [slowBroadcast].
      *
-     * [onProgress] reports (codesTried, total) for the UI.
+     * [onPhase] reports which of those is running; [onProgress] reports
+     * (codesTried, total) within the current pass.
      */
     suspend fun sweep(
         broadcastAddress: InetAddress,
         lastHost: InetAddress?,
         slowBroadcast: Boolean,
         network: Network?,
+        onPhase: (SweepPhase) -> Unit,
         onProgress: (tried: Int, total: Int) -> Unit,
     ): Result = withContext(Dispatchers.IO) {
         val name = deviceName().replace(Regex("[|#\\n\\r]"), "_")
@@ -222,13 +234,15 @@ object UdpDiscovery {
                 usedOutGauge = true
                 repeat(2) { _ -> plans += it to FAST_BATCH }
             }
-            if (!usedOutGauge && lastHost != null) plans += lastHost to FAST_BATCH
+            // Two passes on the saved PC: UDP is lossy and this pass is cheap.
+            if (!usedOutGauge && lastHost != null) repeat(2) { plans += lastHost to FAST_BATCH }
             repeat(2) { plans += broadcastAddress to broadcastBatch }
             Log.i("UdpDiscovery", "Sweep plan: ${plans.map { "${it.first.hostAddress}/${it.second}" }}")
 
             var planIndex = 0
             while (planIndex < plans.size) {
                 val (target, batchSize) = plans[planIndex]
+                onPhase(if (target == broadcastAddress) SweepPhase.FULL_SEARCH else SweepPhase.SAVED_PC)
                 var restart = false
                 var tried = 0
                 for (code in CODE_RANGE) {

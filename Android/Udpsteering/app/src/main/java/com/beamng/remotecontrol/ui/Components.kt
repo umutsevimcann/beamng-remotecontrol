@@ -47,132 +47,6 @@ fun cockpitBackground() = Brush.radialGradient(
 )
 
 @Composable
-fun WelcomeScreen(
-    phoneIp: String?,
-    onAutoConnectClick: () -> Unit,
-    onScanClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onGuideClick: () -> Unit,
-    onManualClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(cockpitBackground())
-            .systemBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 28.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // ===== Brand =====
-        Image(
-            painter = painterResource(R.drawable.logo_beamng),
-            contentDescription = stringResource(R.string.app_name),
-            modifier = Modifier.size(88.dp),
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            stringResource(R.string.brand_subtitle),
-            style = MaterialTheme.typography.labelSmall,
-            color = Graphite.Orange,
-        )
-        Spacer(Modifier.height(24.dp))
-
-        // ===== Connect card =====
-        GarageCard(title = stringResource(R.string.connect_card_title)) {
-            NumberedStep(1, stringResource(R.string.connect_step_1))
-            NumberedStep(2, stringResource(R.string.connect_step_2))
-            NumberedStep(3, stringResource(R.string.connect_step_3))
-        }
-        Spacer(Modifier.height(14.dp))
-
-        // ===== Optional extras card (details live in the Setup Guide) =====
-        GarageCard(title = stringResource(R.string.extras_card_title)) {
-            FeatureLine(stringResource(R.string.extras_dashboard_line))
-            FeatureLine(stringResource(R.string.extras_drift_line))
-            Spacer(Modifier.height(6.dp))
-            Text(
-                stringResource(R.string.extras_guide_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Graphite.Muted,
-            )
-        }
-        Spacer(Modifier.height(28.dp))
-
-        // ===== Actions =====
-        // Auto-connect is the hero path: the game's QR is too dense for most phone
-        // cameras, so we discover its code over Wi-Fi instead. QR scan stays as an
-        // option for good cameras; manual code entry is the last resort.
-        AmberButton(stringResource(R.string.auto_connect_button), onClick = onAutoConnectClick)
-        Spacer(Modifier.height(12.dp))
-        GhostButton(stringResource(R.string.scan_qr_button), onClick = onScanClick)
-        Spacer(Modifier.height(12.dp))
-        GhostButton(stringResource(R.string.manual_button), onClick = onManualClick)
-        Spacer(Modifier.height(12.dp))
-        GhostButton(stringResource(R.string.guide_button), onClick = onGuideClick)
-        Spacer(Modifier.height(12.dp))
-        GhostButton(stringResource(R.string.settings_button), onClick = onSettingsClick)
-    }
-}
-
-/**
- * Modal shown while the auto-connect sweep runs. [progress] is 0f..1f; the dialog
- * is non-dismissable except via Cancel so the sweep can't be orphaned by a stray tap.
- */
-@Composable
-fun AutoConnectDialog(progress: Float, onCancel: () -> Unit) {
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = { /* only Cancel ends the sweep */ },
-        properties = androidx.compose.ui.window.DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-        ),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Graphite.PanelTop, RoundedCornerShape(16.dp))
-                .border(1.dp, Graphite.Edge, RoundedCornerShape(16.dp))
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                stringResource(R.string.auto_connect_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = Graphite.Text,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                stringResource(R.string.auto_connect_sub),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Graphite.Muted,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(18.dp))
-            androidx.compose.material3.LinearProgressIndicator(
-                progress = { progress },
-                color = Graphite.Orange,
-                trackColor = Graphite.Edge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp),
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                stringResource(R.string.auto_connect_progress, (progress * 100).toInt()),
-                style = MaterialTheme.typography.labelLarge,
-                color = Graphite.Orange,
-            )
-            Spacer(Modifier.height(18.dp))
-            GhostButton(stringResource(R.string.manual_cancel), onClick = onCancel)
-        }
-    }
-}
-
-// ==================== Night Garage building blocks ====================
-
-@Composable
 fun GarageCard(title: String, content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
@@ -193,32 +67,6 @@ fun GarageCard(title: String, content: @Composable () -> Unit) {
             Spacer(Modifier.height(10.dp))
         }
         content()
-    }
-}
-
-@Composable
-private fun FeatureLine(text: String) {
-    Row(modifier = Modifier.padding(vertical = 3.dp)) {
-        Text("•", color = Graphite.Orange, style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.size(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = Graphite.Text)
-    }
-}
-
-@Composable
-private fun NumberedStep(number: Int, text: String) {
-    Row(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(
-            "$number",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Graphite.Orange,
-        )
-        Spacer(Modifier.size(10.dp))
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Graphite.Text,
-        )
     }
 }
 
@@ -324,24 +172,5 @@ fun GhostButton(label: String, onClick: () -> Unit) {
             color = Graphite.Muted,
             textAlign = TextAlign.Center,
         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 740)
-@Composable
-private fun WelcomeScreenPreview() {
-    RemoteTheme {
-        WelcomeScreen(
-            phoneIp = "192.168.0.23",
-            onAutoConnectClick = {},
-            onScanClick = {}, onSettingsClick = {}, onGuideClick = {}, onManualClick = {},
-        )
-    }
-}
-
-@Composable
-private fun manualDialogPreviewHost() {
-    RemoteTheme {
-        ManualCodeDialog(onDismiss = {}, onConnect = {}, onPickPhoto = {})
     }
 }
