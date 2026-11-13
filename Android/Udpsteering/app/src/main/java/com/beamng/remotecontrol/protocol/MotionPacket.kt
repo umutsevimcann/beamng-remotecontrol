@@ -47,9 +47,11 @@ class MotionPacket(data: ByteArray, length: Int) {
 
         val travelDir = atan2(velX, velY)
         val heading = -yawPos // protocols.lua negates yaw ("standard for motion sims")
-        var deg = Math.toDegrees((travelDir - heading).toDouble()).toFloat()
-        while (deg > 180f) deg -= 360f
-        while (deg < -180f) deg += 360f
+        // Wrap into [-180, 180] in one bounded step. Never by repeated subtraction:
+        // for a huge angle, subtracting 360 changes nothing in float precision and
+        // such a loop would spin forever on the main thread.
+        val deg = Math.toDegrees(Math.IEEEremainder((travelDir - heading).toDouble(), 2 * Math.PI)).toFloat()
+        if (!deg.isFinite()) return null
 
         if (abs(deg) > 120f) return null // reversing, not drifting
         return deg

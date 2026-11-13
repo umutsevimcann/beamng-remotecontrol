@@ -209,4 +209,14 @@ class GoldenProtocolTest {
             assertNull(com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(5f, 8.6603f, bad), 88).slipAngleDeg())
         }
     }
+
+    @Test(timeout = 2000)
+    fun motion_hugeFiniteYaw_staysBoundedAndReturns() {
+        // Finite but enormous: subtracting 360 from 1e31 changes nothing in float
+        // precision, so a subtract-until-in-range loop never ends.
+        for (yaw in listOf(1.0e30f, -1.0e30f, 1.0e12f)) {
+            val slip = com.beamng.remotecontrol.protocol.MotionPacket(motionPacket(5f, 8.6603f, yaw), 88).slipAngleDeg()
+            if (slip != null) assertTrue(slip in -180f..180f)
+        }
+    }
 }
