@@ -66,7 +66,7 @@
     <string name="guide_title">Setup Guide</string>
     <string name="guide_intro">This page shows YOUR real values. Type them into the game exactly as written — no guessing, no copying from screenshots.</string>
     <string name="guide_ip_label">YOUR PHONE\'S IP</string>
-    <string name="guide_ip_missing">— connect the phone to Wi-Fi and this page will fill it in —</string>
+    <string name="guide_ip_missing">— connect the phone to Wi-Fi (or turn on its hotspot) and this page will fill it in —</string>
     <string name="guide_value_address">Address</string>
     <string name="guide_value_port">Port</string>
     <string name="guide_value_rate">Max update rate</string>
@@ -115,10 +115,11 @@
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Connecting to BeamNG.drive</string>
     <string name="status_connected">Connected</string>
+    <string name="status_no_telemetry">No dashboard data</string>
     <string name="toast_no_connection">No connection — please scan the QR code first</string>
     <string name="toast_invalid_qr">Invalid QR code</string>
     <string name="toast_invalid_qr_format">Invalid QR code format</string>
-    <string name="toast_wifi_required">You must be connected to the same Wi-Fi as your PC</string>
+    <string name="toast_wifi_required">Phone and PC must be on the same Wi-Fi — or the PC on the phone\'s hotspot</string>
 
     <!-- Settings -->
     <string name="settings_eyebrow">SETTINGS</string>
@@ -142,6 +143,8 @@
     <string name="settings_haptics_sub">Gear &amp; impact feedback</string>
     <string name="settings_perf_timer">0-100 timer</string>
     <string name="settings_perf_timer_sub">Launch times on the dash, session best</string>
+    <string name="settings_analog_pedals">Analog pedals</string>
+    <string name="settings_analog_pedals_sub">Pedal follows finger position — requires the RemoteControlPro mod</string>
     <string name="settings_instant_save">changes save instantly</string>
 
 </resources>

@@ -8,6 +8,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,8 +67,9 @@ fun DriveScreen(
     controlType: Int,
     dashboardOnly: Boolean,
     perfTimerEnabled: Boolean,
-    onThrottle: (Boolean) -> Unit,
-    onBrake: (Boolean) -> Unit,
+    analogPedals: Boolean,
+    onThrottle: (Float) -> Unit,
+    onBrake: (Float) -> Unit,
     onSteerLeft: (Boolean) -> Unit,
     onSteerRight: (Boolean) -> Unit,
     onSliderChange: (Float) -> Unit,
@@ -84,7 +87,8 @@ fun DriveScreen(
                 baseTop = Color(0xFF3A1410),
                 baseBottom = Color(0xFF200B08),
                 textColor = Color(0xFFFF9D8A),
-                onPress = onBrake,
+                analog = analogPedals,
+                onValue = onBrake,
             )
         }
 
@@ -122,7 +126,8 @@ fun DriveScreen(
                 baseTop = Color(0xFF12300F),
                 baseBottom = Color(0xFF0A1C08),
                 textColor = Color(0xFFB9F0A8),
-                onPress = onThrottle,
+                analog = analogPedals,
+                onValue = onThrottle,
             )
         }
     }
@@ -144,7 +149,9 @@ private fun StatusRow(
             text = if (telemetry.connected) {
                 "● " + stringResource(R.string.status_connected)
             } else {
-                "● " + stringResource(R.string.connecting_dialog_title)
+                // Controls work without telemetry (OutGauge off / game paused),
+                // so don't claim we're still "connecting".
+                "● " + stringResource(R.string.status_no_telemetry)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = if (telemetry.connected) NightGarage.Green else NightGarage.TextDim,
@@ -328,6 +335,9 @@ private fun BatteryIcon(on: Boolean) {
 }
 
 // ==================== gauges ====================
+
+/** Lightest analog pedal value while touched, so a touch never reads as "released". */
+private const val MIN_ANALOG_PEDAL = 0.05f
 
 private const val MAX_RPM = 8000f
 private const val REDLINE_RPM = 6500f
@@ -569,9 +579,12 @@ private fun Pedal(
     baseTop: Color,
     baseBottom: Color,
     textColor: Color,
-    onPress: (Boolean) -> Unit,
+    analog: Boolean,
+    onValue: (Float) -> Unit,
 ) {
-    var pressed by remember { androidx.compose.runtime.mutableStateOf(false) }
+    // 0 = released. Digital mode only ever reports 0 or 1.
+    var level by remember { mutableFloatStateOf(0f) }
+    val pressed = level > 0f
     Box(
         modifier = Modifier
             .width(88.dp)
@@ -586,19 +599,48 @@ private fun Pedal(
                 ),
                 RoundedCornerShape(14.dp),
             )
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        pressed = true
-                        onPress(true)
-                        tryAwaitRelease()
-                        pressed = false
-                        onPress(false)
-                    },
-                )
+            .pointerInput(analog) {
+                // Analog: top edge = full, bottom edge = light; sliding the finger
+                // modulates the value. Digital: any touch = 1.
+                fun valueAt(y: Float): Float =
+                    if (analog) (1f - y / size.height).coerceIn(MIN_ANALOG_PEDAL, 1f) else 1f
+
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    try {
+                        level = valueAt(down.position.y)
+                        onValue(level)
+                        while (true) {
+                            val change = awaitPointerEvent().changes
+                                .firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) break
+                            if (analog) {
+                                val v = valueAt(change.position.y)
+                                if (v != level) {
+                                    level = v
+                                    onValue(v)
+                                }
+                            }
+                        }
+                    } finally {
+                        // Also runs if the gesture is cancelled (screen leaves
+                        // composition) — never leave a pedal stuck down.
+                        level = 0f
+                        onValue(0f)
+                    }
+                }
             },
         contentAlignment = Alignment.Center,
     ) {
+        if (analog && pressed) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .fillMaxHeight(level)
+                    .background(textColor.copy(alpha = 0.25f), RoundedCornerShape(14.dp)),
+            )
+        }
         Text(
             label,
             style = MaterialTheme.typography.labelLarge,

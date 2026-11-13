@@ -63,6 +63,17 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_PERF_TIMER, DEFAULT_PERF_TIMER)
         set(enabled) = prefs.edit().putBoolean(KEY_PERF_TIMER, enabled).apply()
 
+    // ==================== ANALOG PEDALS ====================
+
+    /**
+     * Pedal value follows finger position instead of on/off. Only useful with
+     * the RemoteControlPro mod: the stock game reads each pedal as a button
+     * (value > 0.5), so off by default.
+     */
+    var isAnalogPedals: Boolean
+        get() = prefs.getBoolean(KEY_ANALOG_PEDALS, DEFAULT_ANALOG_PEDALS)
+        set(enabled) = prefs.edit().putBoolean(KEY_ANALOG_PEDALS, enabled).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -81,6 +92,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_DEAD_ZONE = "dead_zone"
         const val KEY_DASHBOARD_ONLY = "dashboard_only"
         const val KEY_PERF_TIMER = "perf_timer"
+        const val KEY_ANALOG_PEDALS = "analog_pedals"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0
@@ -92,6 +104,7 @@ class SettingsManager private constructor(context: Context) {
         private const val DEFAULT_SENSITIVITY = 0.5f
         private const val DEFAULT_USE_METRIC = true
         private const val DEFAULT_HAPTIC_ENABLED = true
+        private const val DEFAULT_ANALOG_PEDALS = false
         private const val DEFAULT_DEAD_ZONE = 3.0f
         private const val DEFAULT_DASHBOARD_ONLY = false
         private const val DEFAULT_PERF_TIMER = false

@@ -66,7 +66,7 @@
     <string name="guide_title">Einrichtung</string>
     <string name="guide_intro">Diese Seite zeigt DEINE echten Werte. Einfach exakt so ins Spiel eintragen — kein Raten, kein Abschreiben von Screenshots.</string>
     <string name="guide_ip_label">IP-ADRESSE DEINES HANDYS</string>
-    <string name="guide_ip_missing">— Handy mit dem WLAN verbinden, dann füllt sich dieses Feld —</string>
+    <string name="guide_ip_missing">— Handy mit dem WLAN verbinden (oder Hotspot einschalten), dann füllt sich dieses Feld —</string>
     <string name="guide_value_address">Adresse (Address)</string>
     <string name="guide_value_port">Port</string>
     <string name="guide_value_rate">Aktualisierungsrate</string>
@@ -115,10 +115,11 @@
     <!-- Connection / status -->
     <string name="connecting_dialog_title">Verbinde mit BeamNG.drive</string>
     <string name="status_connected">Verbunden</string>
+    <string name="status_no_telemetry">Keine Dashboard-Daten</string>
     <string name="toast_no_connection">Keine Verbindung — zuerst den QR-Code scannen</string>
     <string name="toast_invalid_qr">Ungültiger QR-Code</string>
     <string name="toast_invalid_qr_format">Ungültiges QR-Code-Format</string>
-    <string name="toast_wifi_required">Handy und PC müssen im selben WLAN sein</string>
+    <string name="toast_wifi_required">Handy und PC müssen im selben WLAN sein — oder der PC im Hotspot des Handys</string>
 
     <!-- Settings -->
     <string name="settings_eyebrow">EINSTELLUNGEN</string>
@@ -142,6 +143,8 @@
     <string name="settings_haptics_sub">Gang- und Aufprall-Feedback</string>
     <string name="settings_perf_timer">0-100-Timer</string>
     <string name="settings_perf_timer_sub">Startzeiten auf dem Display, Sitzungsrekord</string>
+    <string name="settings_analog_pedals">Analoge Pedale</string>
+    <string name="settings_analog_pedals_sub">Pedal folgt der Fingerposition — erfordert die RemoteControlPro-Mod</string>
     <string name="settings_instant_save">Änderungen werden sofort gespeichert</string>
 
 </resources>

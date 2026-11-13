@@ -82,6 +82,25 @@ class GoldenProtocolTest {
         return buf.array()
     }
 
+    /** outgauge.lua: o.gear = gearIndex + 1 (signed char) — reverse 0, neutral 1, first 2. */
+    private fun gearOf(gearByte: Int): String {
+        val data = outgaugePacket(96)
+        data[10] = gearByte.toByte()
+        return Receivepacket(data, 96).gear
+    }
+
+    @Test
+    fun outgauge_gearMapping_coversTrucksAndMultiReverse() {
+        assertEquals("R", gearOf(0))    // gearIndex -1
+        assertEquals("N", gearOf(1))    // gearIndex 0
+        assertEquals("1", gearOf(2))
+        assertEquals("10", gearOf(11))
+        assertEquals("12", gearOf(13))  // 12+ speed truck gearboxes
+        assertEquals("18", gearOf(19))
+        assertEquals("R2", gearOf(-1))  // gearIndex -2: second reverse gear
+        assertEquals("R3", gearOf(-2))
+    }
+
     @Test
     fun outgauge_turboFlag_and_pressure() {
         val withTurbo = Receivepacket(outgaugePacket(96, turbo = true), 96)

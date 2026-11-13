@@ -66,7 +66,7 @@
     <string name="guide_title">Kurulum Rehberi</string>
     <string name="guide_intro">Bu sayfa SENİN gerçek değerlerini gösterir. Oyuna aynen yazman yeterli — tahmin yok, ekran görüntüsünden kopya yok.</string>
     <string name="guide_ip_label">TELEFONUNUN IP ADRESİ</string>
-    <string name="guide_ip_missing">— telefonu Wi-Fi\'a bağla, bu alan kendiliğinden dolacak —</string>
+    <string name="guide_ip_missing">— telefonu Wi-Fi\'a bağla (ya da hotspot\'unu aç), bu alan kendiliğinden dolacak —</string>
     <string name="guide_value_address">Adres (Address)</string>
     <string name="guide_value_port">Port</string>
     <string name="guide_value_rate">Güncelleme hızı</string>
@@ -115,10 +115,11 @@
     <!-- Connection / status -->
     <string name="connecting_dialog_title">BeamNG.drive\'a bağlanılıyor</string>
     <string name="status_connected">Bağlı</string>
+    <string name="status_no_telemetry">Gösterge verisi yok</string>
     <string name="toast_no_connection">Bağlantı yok — önce QR kodu tarat</string>
     <string name="toast_invalid_qr">Geçersiz QR kodu</string>
     <string name="toast_invalid_qr_format">Geçersiz QR kod biçimi</string>
-    <string name="toast_wifi_required">Telefon, PC ile aynı Wi-Fi ağında olmalı</string>
+    <string name="toast_wifi_required">Telefon ve PC aynı Wi-Fi ağında olmalı — ya da PC telefonun hotspot\'una bağlı olmalı</string>
 
     <!-- Settings -->
     <string name="settings_eyebrow">AYARLAR</string>
@@ -142,6 +143,8 @@
     <string name="settings_haptics_sub">Vites ve çarpma geri bildirimi</string>
     <string name="settings_perf_timer">0-100 kronometresi</string>
     <string name="settings_perf_timer_sub">Kalkış süreleri ekranda, seans rekoru tutulur</string>
+    <string name="settings_analog_pedals">Analog pedallar</string>
+    <string name="settings_analog_pedals_sub">Pedal parmak konumunu izler — RemoteControlPro modu gerekir</string>
     <string name="settings_instant_save">değişiklikler anında kaydedilir</string>
 
 </resources>

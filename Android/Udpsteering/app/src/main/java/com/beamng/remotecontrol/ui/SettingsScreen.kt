@@ -50,6 +50,7 @@ fun SettingsScreen(settings: SettingsManager) {
     var dashboardOnly by remember { mutableStateOf(settings.isDashboardOnly) }
     var haptics by remember { mutableStateOf(settings.isHapticEnabled) }
     var perfTimer by remember { mutableStateOf(settings.isPerfTimerEnabled) }
+    var analogPedals by remember { mutableStateOf(settings.isAnalogPedals) }
 
     Column(
         modifier = Modifier
@@ -182,6 +183,14 @@ fun SettingsScreen(settings: SettingsManager) {
             ) {
                 perfTimer = it
                 settings.isPerfTimerEnabled = it
+            }
+            ToggleRow(
+                title = stringResource(R.string.settings_analog_pedals),
+                subtitle = stringResource(R.string.settings_analog_pedals_sub),
+                checked = analogPedals,
+            ) {
+                analogPedals = it
+                settings.isAnalogPedals = it
             }
         }
 

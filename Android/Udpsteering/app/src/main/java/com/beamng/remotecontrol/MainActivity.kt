@@ -31,6 +31,7 @@ import com.beamng.remotecontrol.input.ButtonInputHandler
 import com.beamng.remotecontrol.input.InputHandlerFactory
 import com.beamng.remotecontrol.input.SliderInputHandler
 import com.beamng.remotecontrol.input.SteeringInputHandler
+import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.protocol.MotionPacket
 import com.beamng.remotecontrol.protocol.Ports
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private var dashboardOnly by mutableStateOf(false)
     private var metricUnits by mutableStateOf(true)
     private var perfTimer by mutableStateOf(false)
+    private var analogPedals by mutableStateOf(false)
 
     // 0-100 timer state machine (UI thread only)
     private var timerArmed = false
@@ -72,7 +74,8 @@ class MainActivity : AppCompatActivity() {
     private val sendingTimeout = 10L // 100Hz for responsive controls
     private var senderJob: Job? = null
     private var receiverJob: Job? = null
-    private var receiverSocket: DatagramSocket? = null
+    // Written on IO (receiver coroutines), read on main (stopUdpTasks).
+    @Volatile private var receiverSocket: DatagramSocket? = null
     private var hostAddress: InetAddress? = null
 
     // Modular Input System
@@ -85,10 +88,11 @@ class MainActivity : AppCompatActivity() {
     private var impactWindowSpeed = 0
     private var impactWindowStartMs = 0L
     private var lastImpactVibrationTime = 0L
+    private var lastAbsVibrationTime = 0L
 
     // Drift indicator (MotionSim protocol, optional second stream)
     private var motionJob: Job? = null
-    private var motionSocket: DatagramSocket? = null
+    @Volatile private var motionSocket: DatagramSocket? = null
     private var lastMotionMs = 0L
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -124,8 +128,9 @@ class MainActivity : AppCompatActivity() {
                     controlType = controlType,
                     dashboardOnly = dashboardOnly,
                     perfTimerEnabled = perfTimer,
-                    onThrottle = { pressed -> thrpushed = if (pressed) 1f else 0f },
-                    onBrake = { pressed -> brpushed = if (pressed) 1f else 0f },
+                    analogPedals = analogPedals,
+                    onThrottle = { value -> thrpushed = value },
+                    onBrake = { value -> brpushed = value },
                     onSteerLeft = { pressed ->
                         (steeringInputHandler as? ButtonInputHandler)?.pressLeft(pressed)
                     },
@@ -155,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         dashboardOnly = settingsManager.isDashboardOnly
         controlType = settingsManager.controlType
         perfTimer = settingsManager.isPerfTimerEnabled
+        analogPedals = settingsManager.isAnalogPedals
 
         setupInputHandler()
         steeringInputHandler?.start()
@@ -238,9 +244,14 @@ class MainActivity : AppCompatActivity() {
             impactWindowSpeed = newSpeed
         }
 
-        // 3. ABS feel (hard braking)
-        if (p.brake > 0.85f && (now - lastImpactVibrationTime) > 100) {
+        // 3. ABS feel: pulse only while ABS is actually intervening. The game sets
+        // this showLights bit from electrics absActive (outgauge.lua), so a held
+        // brake at standstill — or on a car without ABS — stays silent.
+        if (p.activeLightsArr[Receivepacket.INDEX_ABS] && newSpeed > 5 &&
+            (now - lastAbsVibrationTime) > ABS_VIBRATION_COOLDOWN_MS
+        ) {
             doVibrate(40, 60)
+            lastAbsVibrationTime = now
         }
     }
 
@@ -274,6 +285,9 @@ class MainActivity : AppCompatActivity() {
     private suspend fun runSender(host: InetAddress) {
         try {
             DatagramSocket().use { socket ->
+                // Same Wi-Fi pinning as discovery: otherwise, with mobile data on
+                // and a LAN without internet, control packets leave via cellular.
+                NetworkUtils.bindToNetwork(NetworkUtils.wifiNetwork(this), socket)
                 val sendpacket = Sendpacket()
                 // Reconnect heartbeat: the game deletes idle devices after 10s
                 // (e.g. app backgrounded). Re-sending the discovery hello makes
@@ -281,31 +295,51 @@ class MainActivity : AppCompatActivity() {
                 val hello = (application as RemoteControlApplication).securityCode
                     ?.let { UdpDiscovery.buildHello(it) }
                 var tick = 0
+                var failing = false
                 while (true) {
                     delay(sendingTimeout) // also our cancellation point
 
-                    if (hello != null && tick++ % HEARTBEAT_EVERY_TICKS == 0) {
-                        socket.send(DatagramPacket(hello, hello.size, host, Ports.GAME))
-                    }
+                    // A send can fail transiently (Wi-Fi roam, band steering, AP
+                    // blip). Never let that end the loop — the dashboard would keep
+                    // updating while steering/pedals silently die.
+                    try {
+                        if (hello != null && tick++ % HEARTBEAT_EVERY_TICKS == 0) {
+                            socket.send(DatagramPacket(hello, hello.size, host, Ports.GAME))
+                        }
 
-                    var steeringValue = 0.5f
-                    val handler = steeringInputHandler
-                    if (handler != null) {
-                        // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
-                        steeringValue = ((1f - handler.getSteeringValue()) / 2f).coerceIn(0f, 1f)
-                    }
-                    sendpacket.setSteeringAngle(steeringValue)
-                    sendpacket.setThrottle(thrpushed)
-                    sendpacket.setBreaks(brpushed)
-                    // Stock game never echoes the id (outgauge.lua: o.id = 0) — constant.
-                    sendpacket.setID(0)
+                        var steeringValue = 0.5f
+                        val handler = steeringInputHandler
+                        if (handler != null) {
+                            // BeamNG protocol after byte-reverse: z maps to steering (0=right, 1=left)
+                            steeringValue = ((1f - handler.getSteeringValue()) / 2f).coerceIn(0f, 1f)
+                        }
+                        sendpacket.setSteeringAngle(steeringValue)
+                        sendpacket.setThrottle(thrpushed)
+                        sendpacket.setBreaks(brpushed)
+                        // Stock game never echoes the id (outgauge.lua: o.id = 0) — constant.
+                        sendpacket.setID(0)
 
-                    val buffer = sendpacket.sendingByteArray
-                    socket.send(DatagramPacket(buffer, buffer.size, host, Ports.GAME))
+                        val buffer = sendpacket.sendingByteArray
+                        socket.send(DatagramPacket(buffer, buffer.size, host, Ports.GAME))
+                        if (failing) {
+                            failing = false
+                            Log.i(TAG, "UDP send recovered")
+                        }
+                    } catch (e: IOException) {
+                        if (!failing) {
+                            failing = true
+                            Log.w(TAG, "UDP send failed, retrying", e)
+                        }
+                        // Re-send the hello first on recovery: the game may have
+                        // dropped us (10s idle timeout) while the link was down.
+                        tick = 0
+                        delay(SEND_RETRY_DELAY_MS)
+                    }
                 }
             }
         } catch (e: IOException) {
-            if (coroutineContext.isActive) Log.e(TAG, "UDP send error", e)
+            // Only socket creation can land here now.
+            if (coroutineContext.isActive) Log.e(TAG, "UDP sender could not start", e)
         }
     }
 
@@ -314,26 +348,34 @@ class MainActivity : AppCompatActivity() {
      * sent by the game's built-in OutGauge protocol (Options > Other).
      */
     private suspend fun runReceiver() {
+        var sock: DatagramSocket? = null
         try {
-            val sock = DatagramSocket(null)
-            receiverSocket = sock
-            sock.reuseAddress = true
-            sock.bind(InetSocketAddress(Ports.APP))
-            sock.soTimeout = 2000
+            val s = DatagramSocket(null)
+            sock = s
+            receiverSocket = s
+            s.reuseAddress = true
+            s.bind(InetSocketAddress(Ports.APP))
+            s.soTimeout = 1000
 
             val buf = ByteArray(128)
+            // Staleness tracking stays local to this coroutine: "Connected" must
+            // clear when the game closes / Wi-Fi drops, instead of latching green
+            // over frozen gauges. Heartbeat replies also land on this port, so a
+            // receive timeout alone isn't a reliable silence signal.
+            var lastTelemetryMs = 0L
+            var live = false
             while (coroutineContext.isActive) {
                 try {
                     val dp = DatagramPacket(buf, buf.size)
-                    sock.receive(dp)
+                    s.receive(dp)
 
-                    if (dp.length < Receivepacket.MIN_PACKET_LENGTH) {
-                        continue
-                    }
-
-                    val p = Receivepacket(buf, dp.length)
-                    if (p.isValid) {
-                        withContext(Dispatchers.Main) { onTelemetry(p) }
+                    if (dp.length >= Receivepacket.MIN_PACKET_LENGTH) {
+                        val p = Receivepacket(buf, dp.length)
+                        if (p.isValid) {
+                            lastTelemetryMs = System.currentTimeMillis()
+                            live = true
+                            withContext(Dispatchers.Main) { onTelemetry(p) }
+                        }
                     }
                 } catch (e: SocketTimeoutException) {
                     // Normal, loop continues
@@ -341,12 +383,18 @@ class MainActivity : AppCompatActivity() {
                     if (coroutineContext.isActive) Log.e(TAG, "Receive error: " + e.message)
                     break
                 }
+                if (live && System.currentTimeMillis() - lastTelemetryMs > TELEMETRY_STALE_MS) {
+                    live = false
+                    withContext(Dispatchers.Main) { telemetry.connected = false }
+                }
             }
         } catch (e: IOException) {
             Log.e(TAG, "Cannot bind to port ${Ports.APP}", e)
         } finally {
-            receiverSocket?.let { if (!it.isClosed) it.close() }
-            receiverSocket = null
+            // Close our own socket, and clear the field only if a newer job
+            // (fast pause/resume) hasn't already replaced it.
+            sock?.let { if (!it.isClosed) it.close() }
+            if (receiverSocket === sock) receiverSocket = null
         }
     }
 
@@ -356,18 +404,20 @@ class MainActivity : AppCompatActivity() {
      * hasn't enabled it, nothing arrives and the drift badge stays hidden.
      */
     private suspend fun runMotionReceiver() {
+        var sock: DatagramSocket? = null
         try {
-            val sock = DatagramSocket(null)
-            motionSocket = sock
-            sock.reuseAddress = true
-            sock.bind(InetSocketAddress(Ports.MOTION))
-            sock.soTimeout = 2000
+            val s = DatagramSocket(null)
+            sock = s
+            motionSocket = s
+            s.reuseAddress = true
+            s.bind(InetSocketAddress(Ports.MOTION))
+            s.soTimeout = 2000
 
             val buf = ByteArray(160)
             while (coroutineContext.isActive) {
                 try {
                     val dp = DatagramPacket(buf, buf.size)
-                    sock.receive(dp)
+                    s.receive(dp)
                     val p = MotionPacket(buf, dp.length)
                     if (p.isValid) {
                         withContext(Dispatchers.Main) { onMotion(p) }
@@ -382,8 +432,8 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IOException) {
             Log.e(TAG, "Cannot bind to port ${Ports.MOTION}", e)
         } finally {
-            motionSocket?.let { if (!it.isClosed) it.close() }
-            motionSocket = null
+            sock?.let { if (!it.isClosed) it.close() }
+            if (motionSocket === sock) motionSocket = null
         }
     }
 
@@ -469,6 +519,9 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "BeamNG"
         private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
+        private const val SEND_RETRY_DELAY_MS = 250L
+        private const val ABS_VIBRATION_COOLDOWN_MS = 150L
+        private const val TELEMETRY_STALE_MS = 2000L
         private const val IMPACT_WINDOW_MS = 300L
     }
 }

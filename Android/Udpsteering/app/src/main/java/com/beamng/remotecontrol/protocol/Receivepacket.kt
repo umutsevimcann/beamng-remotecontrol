@@ -102,12 +102,20 @@ class Receivepacket(data: ByteArray, length: Int) {
             return lightsArray
         }
 
+    /**
+     * The game sends gearIndex + 1 as a signed char: 0 = R, 1 = N, 2 = 1st…
+     * Trucks go past 10 forward gears; gearboxes with several reverse gears
+     * send negative values (gearIndex -2 → -1 → "R2").
+     */
     val gear: String
-        get() = when (gearByte.toInt()) {
-            0 -> "R"
-            1 -> "N"
-            in 2..11 -> (gearByte - 1).toString()
-            else -> "?"
+        get() {
+            val g = gearByte.toInt()
+            return when {
+                g == 0 -> "R"
+                g < 0 -> "R${1 - g}"
+                g == 1 -> "N"
+                else -> (g - 1).toString()
+            }
         }
 
     companion object {
