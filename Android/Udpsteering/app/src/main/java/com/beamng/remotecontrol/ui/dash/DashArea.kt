@@ -18,8 +18,9 @@ data class DashState(
 fun DashArea(layout: DashLayout, state: DashState, u: Dp, modifier: Modifier = Modifier) {
     when (layout) {
         DashLayout.MODERN -> ModernDash(state, u, modifier)
-        // Classic, Race and Minimal arrive with their own commit.
-        DashLayout.CLASSIC, DashLayout.RACE, DashLayout.MINIMAL -> ModernDash(state, u, modifier)
+        DashLayout.CLASSIC -> ClassicDash(state, u, modifier)
+        DashLayout.RACE -> RaceDash(state, u, modifier)
+        DashLayout.MINIMAL -> MinimalDash(state, u, modifier)
     }
 }
 
