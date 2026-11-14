@@ -6,10 +6,11 @@ the PC game [BeamNG.drive](http://beamng.com/), over your local Wi-Fi.
 
 A modernized, actively maintained fork of the (archived) official Remote Control
 app. **v3.0** is a complete rewrite — 100% Kotlin, a new Jetpack Compose UI, and a
-live dashboard that works again on current game versions with no mods. The latest
-release adds **Auto-Connect**: since BeamNG v0.39 the in-game QR is too dense for
-most phone cameras to read, so the app now finds the game over Wi-Fi and pairs
-with no QR and no camera.
+live dashboard that works again on current game versions with no mods.
+**v3.0.3** redraws the whole app (a steering wheel you can actually turn, four
+dashboard designs, light and dark themes, nine languages) and adds an optional
+game mod, **RemoteControlPro**, for code-free pairing, gear shifting, handbrake,
+horn and lights.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
@@ -19,7 +20,15 @@ with no QR and no camera.
 
 * **Auto-Connect** — camera-free pairing over Wi-Fi; no QR needed, works on any
   phone (scanning the QR or entering the code by hand are still available).
-* **Steering, throttle & brake** from the phone — button, slider or gyroscope (tilt) modes.
+* **Steering, throttle & brake** from the phone — tilt the phone, turn an on-screen
+  wheel, or use arrow keys. Steering is linear: the app cancels the game's own
+  steering curve, so a small turn is a small turn.
+* **Four dashboard designs** — Modern, Classic, Race and Minimal — plus light,
+  dark and follow-the-system themes, and a mirrored layout for left-handers.
+* **RemoteControlPro mod (optional)** — pairs in about a second with no code, and
+  adds shift up/down, handbrake, horn, headlights, fog lights, turn signals,
+  hazards and recover, analog pedals, and a rev counter and steering wheel that
+  match the car you are driving. See [The optional mod](#the-optional-mod-remotecontrolpro).
 * **Live dashboard** using the game's built-in OutGauge stream (no mod required):
   speedometer, animated RPM gauge with redline, gear, fuel, engine temperature,
   turbo boost (auto-shown on turbo cars), and real dashboard warning lights
@@ -34,7 +43,9 @@ with no QR and no camera.
   being backgrounded.
 * **In-app Setup Guide** — a personalized how-to that shows *your* phone's IP and
   the exact ports, so nothing gets mistyped into the game.
-* **Languages** — English, Türkçe, Deutsch, with an in-app switcher.
+* **Languages** — English, Türkçe, Deutsch, Русский, Українська, Polski, Français,
+  Português (BR) and Español, switched in the app. (The six newest are unreviewed
+  by native speakers — corrections are welcome.)
 
 ## Setup Guide (for players)
 
@@ -47,7 +58,12 @@ with no QR and no camera.
 2. Make sure the phone and the PC are on the **same Wi-Fi network**.
 3. In BeamNG.drive open **Options → Controls → Hardware** and set **"Use your
    phone or tablet"** to **Yes**.
-4. In the app tap **AUTO-CONNECT** — no QR needed. Drive!
+4. In the app tap **CONNECT** — no QR needed. Drive!
+
+> On **2.4 GHz Wi-Fi** the very first search can take 2–3 minutes: the app has to
+> try the game's 5-digit code space slowly, or the router drops the game's answer.
+> After that it remembers the PC and reconnects in seconds. On 5 GHz, or with the
+> mod installed, it is near-instant.
 
 > Prefer scanning? **SCAN QR CODE** and **READ QR FROM A PHOTO** are still there,
 > and you can type the 5-digit code by hand. The in-app Setup Guide explains each
@@ -70,14 +86,41 @@ Uses BeamNG's built-in **OutGauge** stream, no mod required:
 Same place as OutGauge — in **Options → Advanced → Protocols**, tick **MotionSim
 enabled** and set the same IP with **Port `4446`**, then Ctrl+R.
 
+### The optional mod: RemoteControlPro
+
+The app works without it. Add it and the phone can do what the game's own phone
+remote cannot:
+
+| Without the mod | With the mod |
+|---|---|
+| Steering, gas, brake | + shift up/down, handbrake, horn, lights, fog lights, signals, hazards, recover |
+| Pairing searches for the game's code (first time: up to 2–3 min on 2.4 GHz) | Pairs in about a second, no code, no QR |
+| Pedals are on/off | Analog pedals |
+| Rev counter guesses the redline; on-screen wheel always turns 450° | Both match the car you are driving |
+
+Install:
+
+1. Download `remotecontrolpro_umutsevimcann.zip` from the
+   [latest release](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest).
+2. Move the zip, **without extracting it**, into the game's mods folder:
+   `%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods`
+3. Start the game and tap **CONNECT** in the app. A **MOD** label on the drive
+   screen shows the link is active.
+
+The mod follows BeamNG's modding rules: it replaces no game file, runs next to the
+stock phone remote on its own UDP port (4450) with its own input device, and is
+removed by deleting the zip. The gauges still come from OutGauge (step 2 above) —
+the mod adds controls, not gauges. Source: [`BeamNG-Mod/`](BeamNG-Mod/).
+
 ### Troubleshooting
 
 * **Gauges frozen?** Re-check the IP in the app (routers reassign it), then Ctrl+R.
 * **Nothing arrives?** Allow BeamNG.drive through the Windows Firewall, and confirm
   phone + PC share the same network (guest Wi-Fi often isolates devices).
 * **Throttle/brake feel on/off rather than gradual?** That's stock game behavior —
-  it treats them as buttons. True analog pedals need a companion PC mod (planned,
-  separate download).
+  it treats them as buttons. Install the optional mod (above) for analog pedals.
+* **Using the phone's hotspot instead of a router?** Supported: connect the PC to
+  the hotspot and tap CONNECT.
 * **Auto-Connect stuck on "Searching"?** Update to the latest version — older
   builds could route over mobile data instead of Wi-Fi. Also confirm the phone
   and PC share the same network (guest/hotel Wi-Fi often isolates devices).
@@ -122,8 +165,15 @@ All communication is UDP on the local network.
   10s idle timeout.
 * **Control (app → game, port 4444):** 16 bytes, four Big-Endian floats —
   steering (0 = right … 1 = left), throttle 0..1, brake 0..1, packet id.
-  The stock game thresholds throttle/brake at 0.5 (on/off); true analog needs the
-  companion mod.
+  The stock game thresholds throttle/brake at 0.5 (on/off) and applies a steering
+  curve of `input^2.5`, which the app cancels by sending `input^(1/2.5)`.
+* **RemoteControlPro mod (port 4450, protocol 1):** hello `RCP?|1|<device>` →
+  reply `RCP!|1|<pc-name>|<mod-version>`; control is 28 bytes Little-Endian —
+  `"RCP"`, version byte, floats steering (-1..1), throttle, brake, clutch,
+  handbrake (0..1), then a uint32 button mask (bit 0 shift up, 1 shift down,
+  2 horn, 3 headlights, 4 fog, 5 left signal, 6 right signal, 7 hazards,
+  8 recover). The mod sends back `RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>`
+  about twice a second.
 * **Telemetry (game → app, port 4445):** the standard 96-byte OutGauge struct,
   sent by BeamNG's built-in `protocols_outgauge` (Options → Advanced → Protocols).
   A companion mod may append a 4-byte odometer (100 bytes).

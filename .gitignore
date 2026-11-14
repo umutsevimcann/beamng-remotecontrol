@@ -36,6 +36,11 @@
 *.p12
 local.properties
 
+# Release artefacts and local scratch (public repo)
+BeamNG-Mod/*.zip
+/QR.png
+/dist/
+
 # IDE
 .idea/
 *.iml

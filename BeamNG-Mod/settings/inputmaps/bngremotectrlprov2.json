@@ -1,0 +1,21 @@
+{
+  "name":"BeamNG Remote (RemoteControlPro mod)",
+  "notes":"Phone controller provided by the RemoteControlPro mod: analog pedals, handbrake, shifting and lights.",
+  "bindings":[
+    {"control":"xaxis",  "action":"steering",     "filterType":2, "linearity":1, "isInverted":false},
+    {"control":"yaxis",  "action":"accelerate",   "filterType":2, "linearity":1},
+    {"control":"zaxis",  "action":"brake",        "filterType":2, "linearity":1},
+    {"control":"rxaxis", "action":"clutch",       "filterType":2, "linearity":1},
+    {"control":"ryaxis", "action":"parkingbrake", "filterType":2, "linearity":1},
+    {"control":"button0", "action":"shiftUp"},
+    {"control":"button1", "action":"shiftDown"},
+    {"control":"button2", "action":"horn"},
+    {"control":"button3", "action":"toggle_headlights"},
+    {"control":"button4", "action":"toggle_foglights"},
+    {"control":"button5", "action":"toggle_left_signal"},
+    {"control":"button6", "action":"toggle_right_signal"},
+    {"control":"button7", "action":"toggle_hazard_signal"},
+    {"control":"button8", "action":"recover_vehicle"},
+    {"control":"button9", "action":"reset_physics"}
+  ]
+}
