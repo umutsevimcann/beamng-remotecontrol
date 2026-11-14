@@ -3,6 +3,7 @@ package com.beamng.remotecontrol.network
 import android.net.Network
 import android.os.Build
 import android.util.Log
+import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.protocol.Ports
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -42,6 +43,7 @@ object UdpDiscovery {
     private const val RECEIVE_TIMEOUT_MS = 250
     private const val DISCOVERY_TIMEOUT_MS = 12_000L
     private const val DRAIN_MAX_MS = 30L
+    private const val MOD_PROBE_MS = 1_500L
     private const val PRELISTEN_MS = 600L
     private const val FAST_BATCH = 300
     private const val SLOW_BATCH = 28
@@ -294,13 +296,70 @@ object UdpDiscovery {
         }
     }
 
+    /** The RemoteControlPro mod, if one answered. */
+    data class ModFound(val host: InetAddress, val info: ModProtocol.ModInfo)
+
+    /**
+     * Asks for the RemoteControlPro mod: a hello to the broadcast address (and to
+     * [lastHost] directly), a few times within [timeoutMs]. One small packet every
+     * 300 ms — nothing like the code sweep — so it is safe on any network, and when
+     * the mod is installed pairing takes a fraction of a second, with no code.
+     */
+    suspend fun findMod(
+        broadcastAddress: InetAddress,
+        lastHost: InetAddress?,
+        network: Network?,
+        timeoutMs: Long = MOD_PROBE_MS,
+    ): ModFound? = withContext(Dispatchers.IO) {
+        var socket: DatagramSocket? = null
+        try {
+            socket = DatagramSocket().apply { broadcast = true }
+            bindToNetwork(network, socket)
+            socket.soTimeout = 150
+            val hello = ModProtocol.hello(deviceName())
+            val buf = ByteArray(128)
+            val packet = DatagramPacket(buf, buf.size)
+            val deadline = System.nanoTime() + timeoutMs * 1_000_000L
+            var nextSend = 0L
+            while (System.nanoTime() < deadline) {
+                ensureActive()
+                val now = System.nanoTime()
+                if (now >= nextSend) {
+                    for (target in listOfNotNull(broadcastAddress, lastHost)) {
+                        try {
+                            socket.send(DatagramPacket(hello, hello.size, target, Ports.MOD))
+                        } catch (e: IOException) {
+                            // retried on the next tick
+                        }
+                    }
+                    nextSend = now + 300_000_000L
+                }
+                packet.length = buf.size
+                try {
+                    socket.receive(packet)
+                } catch (e: SocketTimeoutException) {
+                    continue
+                }
+                val info = ModProtocol.parseHelloReply(String(buf, 0, packet.length))
+                if (info != null) return@withContext ModFound(packet.address, info)
+            }
+            null
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.w("UdpDiscovery", "Mod probe failed", e)
+            null
+        } finally {
+            socket?.close()
+        }
+    }
+
     /** OutGauge from BeamNG: ≥96 bytes with car = "beam" at offset 4 (outgauge.lua). */
     internal fun isOutGauge(data: ByteArray, length: Int): Boolean =
         length >= OUTGAUGE_MIN_LENGTH &&
             data[4] == 'b'.code.toByte() && data[5] == 'e'.code.toByte() &&
             data[6] == 'a'.code.toByte() && data[7] == 'm'.code.toByte()
 
-    private fun deviceName(): String {
+    internal fun deviceName(): String {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         val name = if (model.startsWith(manufacturer)) model else "$manufacturer $model"

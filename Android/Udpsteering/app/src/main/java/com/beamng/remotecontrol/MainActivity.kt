@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -34,6 +36,7 @@ import com.beamng.remotecontrol.input.SliderInputHandler
 import com.beamng.remotecontrol.input.SteeringInputHandler
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
+import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.protocol.MotionPacket
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
@@ -41,8 +44,11 @@ import com.beamng.remotecontrol.protocol.Sendpacket
 import com.beamng.remotecontrol.protocol.SteeringCurve
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.dash.DashLayout
+import com.beamng.remotecontrol.ui.dash.RpmScale
 import com.beamng.remotecontrol.ui.dash.RpmScaleTracker
 import com.beamng.remotecontrol.ui.drive.DriveScreen
+import com.beamng.remotecontrol.ui.drive.ModControls
+import com.beamng.remotecontrol.ui.drive.WHEEL_LOCK_DEG
 import com.beamng.remotecontrol.ui.TelemetryUiState
 import com.beamng.remotecontrol.ui.theme.RemoteTheme
 
@@ -54,6 +60,7 @@ import java.net.InetSocketAddress
 import java.net.SocketTimeoutException
 import kotlin.coroutines.coroutineContext
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -68,6 +75,19 @@ class MainActivity : AppCompatActivity() {
     private var dashLayout by mutableStateOf(DashLayout.MODERN)
     private var mirrored by mutableStateOf(false)
     private val rpmScaleTracker = RpmScaleTracker() // UI thread only
+
+    // RemoteControlPro mod link (null modInfo = stock game, none of this is used)
+    private var modLinked by mutableStateOf(false)
+    private var modShowShift by mutableStateOf(true)
+    private var modShowHandbrake by mutableStateOf(true)
+    private var modShowHorn by mutableStateOf(true)
+    private var modShowLights by mutableStateOf(true)
+    private var handbrakeOn by mutableStateOf(false)
+    private var wheelLockDeg by mutableFloatStateOf(WHEEL_LOCK_DEG)
+    private var modRpmScale: RpmScale? = null // UI thread only
+    // Written on the UI thread, read by the sender coroutine.
+    @Volatile private var handbrakeValue = 0f
+    @Volatile private var modButtons = 0
 
     // 0-100 timer state machine (UI thread only)
     private var timerArmed = false
@@ -123,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         settingsManager = SettingsManager.getInstance(this)
+        modLinked = (application as RemoteControlApplication).modInfo != null
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -138,6 +159,23 @@ class MainActivity : AppCompatActivity() {
                     analogPedals = analogPedals,
                     layout = dashLayout,
                     mirrored = mirrored,
+                    mod = if (modLinked) {
+                        ModControls(
+                            showShift = modShowShift, showHandbrake = modShowHandbrake,
+                            showHorn = modShowHorn, showLights = modShowLights,
+                            handbrakeOn = handbrakeOn,
+                            onButton = { bit, pressed ->
+                                modButtons = if (pressed) modButtons or bit else modButtons and bit.inv()
+                            },
+                            onHandbrake = { on ->
+                                handbrakeOn = on
+                                handbrakeValue = if (on) 1f else 0f
+                            },
+                        )
+                    } else {
+                        null
+                    },
+                    wheelLockDeg = wheelLockDeg,
                     steering = { steeringInputHandler?.getSteeringValue() ?: 0f },
                     onThrottle = { value -> thrpushed = value },
                     onBrake = { value -> brpushed = value },
@@ -173,6 +211,15 @@ class MainActivity : AppCompatActivity() {
         analogPedals = settingsManager.isAnalogPedals
         dashLayout = settingsManager.dashLayout
         mirrored = settingsManager.isMirrored
+        modShowShift = settingsManager.modShowShift
+        modShowHandbrake = settingsManager.modShowHandbrake
+        modShowHorn = settingsManager.modShowHorn
+        modShowLights = settingsManager.modShowLights
+        // A key hidden in settings must not stay applied with no way to release it.
+        if (!modShowHandbrake) {
+            handbrakeOn = false
+            handbrakeValue = 0f
+        }
 
         setupInputHandler()
         steeringInputHandler?.start()
@@ -187,6 +234,7 @@ class MainActivity : AppCompatActivity() {
         // finally block then transmits the neutral state.
         thrpushed = 0f
         brpushed = 0f
+        modButtons = 0
         stopUdpTasks()
         steeringInputHandler?.stop()
     }
@@ -277,7 +325,9 @@ class MainActivity : AppCompatActivity() {
     private fun startUdpTasks() {
         stopUdpTasks()
         val host = hostAddress ?: return
-        senderJob = lifecycleScope.launch(Dispatchers.IO) { runSender(host) }
+        senderJob = lifecycleScope.launch(Dispatchers.IO) {
+            if (modLinked) runModLink(host) else runSender(host)
+        }
         receiverJob = lifecycleScope.launch(Dispatchers.IO) { runReceiver() }
         motionJob = lifecycleScope.launch(Dispatchers.IO) { runMotionReceiver() }
     }
@@ -375,6 +425,95 @@ class MainActivity : AppCompatActivity() {
             // Only socket creation can land here now.
             if (coroutineContext.isActive) Log.e(TAG, "UDP sender could not start", e)
         }
+    }
+
+    /**
+     * The RemoteControlPro link: one socket to the mod's port. Sends a hello every
+     * ~3 s (the mod unplugs a silent phone after 10 s, and a restarted game has
+     * forgotten us) and the control state at ~100 Hz; a child coroutine reads the
+     * per-vehicle data the mod sends back on the same socket.
+     */
+    private suspend fun runModLink(host: InetAddress) {
+        try {
+            DatagramSocket().use { socket ->
+                NetworkUtils.bindToNetwork(NetworkUtils.wifiNetwork(this), socket)
+                socket.soTimeout = 500
+                val hello = ModProtocol.hello(UdpDiscovery.deviceName())
+                coroutineScope {
+                    val reader = launch { readModReplies(socket) }
+                    var tick = 0
+                    var failing = false
+                    try {
+                        while (true) {
+                            delay(sendingTimeout) // also our cancellation point
+                            try {
+                                if (tick++ % HEARTBEAT_EVERY_TICKS == 0) {
+                                    socket.send(DatagramPacket(hello, hello.size, host, Ports.MOD))
+                                }
+                                // The mod's inputmap is linear (linearity 1): no SteeringCurve here.
+                                val steering = steeringInputHandler?.getSteeringValue() ?: 0f
+                                val buffer = ModProtocol.control(
+                                    steering = steering, throttle = thrpushed, brake = brpushed,
+                                    clutch = 0f, handbrake = handbrakeValue, buttons = modButtons,
+                                )
+                                socket.send(DatagramPacket(buffer, buffer.size, host, Ports.MOD))
+                                if (failing) {
+                                    failing = false
+                                    Log.i(TAG, "Mod link recovered")
+                                }
+                            } catch (e: IOException) {
+                                if (!failing) {
+                                    failing = true
+                                    Log.w(TAG, "Mod send failed, retrying", e)
+                                }
+                                tick = 0 // hello first on recovery
+                                delay(SEND_RETRY_DELAY_MS)
+                            }
+                        }
+                    } finally {
+                        reader.cancel()
+                        withContext(NonCancellable) {
+                            val neutral = ModProtocol.neutral()
+                            repeat(NEUTRAL_PACKETS) {
+                                try {
+                                    socket.send(DatagramPacket(neutral, neutral.size, host, Ports.MOD))
+                                } catch (e: IOException) {
+                                    // Link is down; the mod's 10 s timeout is the fallback.
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            if (coroutineContext.isActive) Log.e(TAG, "Mod link could not start", e)
+        }
+    }
+
+    private suspend fun readModReplies(socket: DatagramSocket) {
+        val buf = ByteArray(256)
+        val packet = DatagramPacket(buf, buf.size)
+        while (coroutineContext.isActive) {
+            try {
+                packet.length = buf.size
+                socket.receive(packet)
+            } catch (e: SocketTimeoutException) {
+                continue
+            } catch (e: IOException) {
+                return // socket closed: the link is ending
+            }
+            val info = ModProtocol.parseVehicleInfo(String(buf, 0, packet.length)) ?: continue
+            withContext(Dispatchers.Main) { onVehicleInfo(info) }
+        }
+    }
+
+    /** UI thread: the car the player sits in told us its rev limit and steering lock. */
+    private fun onVehicleInfo(info: ModProtocol.VehicleInfo) {
+        if (isFinishing || isDestroyed) return
+        modRpmScale = info.maxRpm?.let { limit ->
+            RpmScale(max = ceil(limit * 1.08f / 500f) * 500f, redline = limit)
+        }
+        wheelLockDeg = info.steeringLockDeg ?: WHEEL_LOCK_DEG
     }
 
     /**
@@ -489,7 +628,9 @@ class MainActivity : AppCompatActivity() {
         telemetry.connected = true
         telemetry.speedMs = p.speed
         telemetry.rpm = p.rpm
-        telemetry.rpmScale = rpmScaleTracker.observe(p.rpm)
+        // The tracker keeps observing so a later stock session starts from a learned scale.
+        val learned = rpmScaleTracker.observe(p.rpm)
+        telemetry.rpmScale = modRpmScale ?: learned
         telemetry.gear = p.gear
         telemetry.fuel = p.fuel
         telemetry.engTemp = p.engineTemp

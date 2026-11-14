@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Pedały analogowe</string>
     <string name="settings_analog_pedals_sub">Pedał podąża za palcem — wymaga moda RemoteControlPro</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">ŚWIATŁA</string>
+    <string name="mod_key_fog">PRZECIWM.</string>
+    <string name="mod_key_recover">PRZYWRÓĆ</string>
+    <string name="mod_key_horn">KLAKSON</string>
+    <string name="mod_key_handbrake">RĘCZNY</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">Mod RemoteControlPro</string>
+    <string name="mod_status_never">Jeszcze nie wykryto. Mod jest opcjonalny: bez niego wszystko inne działa jak dotąd.</string>
+    <string name="mod_status_seen">Ostatnie połączenie: %1$s · mod %2$s</string>
+    <string name="mod_what_title">Co dodaje mod</string>
+    <string name="mod_what_1">Łączy w około sekundę, bez kodu i bez QR</string>
+    <string name="mod_what_2">Zmiana biegów, hamulec ręczny i klakson na ekranie jazdy</string>
+    <string name="mod_what_3">Światła, światła przeciwmgielne, kierunkowskazy i światła awaryjne</string>
+    <string name="mod_what_4">Przywróć: stawia auto z powrotem na drodze po wypadku</string>
+    <string name="mod_what_5">Obrotomierz i kierownica dopasowują się do prowadzonego auta</string>
+    <string name="mod_install_title">Jak zainstalować</string>
+    <string name="mod_install_1">Na komputerze pobierz remotecontrolpro_umutsevimcann.zip ze strony Releases tej aplikacji na GitHubie.</string>
+    <string name="mod_install_2">Przenieś plik zip, bez rozpakowywania, do folderu modów gry: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Uruchom grę i dotknij Połącz w tej aplikacji. Etykieta MOD na ekranie jazdy oznacza, że połączenie jest aktywne.</string>
+    <string name="mod_install_note">W grze nic nie jest podmieniane. Aby usunąć mod, usuń plik zip. Jeśli mod nie zostanie znaleziony, aplikacja łączy się zwykłą drogą.</string>
+    <string name="mod_keys_title">Przyciski na ekranie jazdy</string>
+    <string name="mod_show_shift">Zmiana biegów</string>
+    <string name="mod_show_shift_sub">− i + obok pedałów</string>
+    <string name="mod_show_handbrake">Hamulec ręczny</string>
+    <string name="mod_show_handbrake_sub">Nad pedałami: dotknij, aby zaciągnąć, dotknij ponownie, aby zwolnić</string>
+    <string name="mod_show_horn">Klakson</string>
+    <string name="mod_show_horn_sub">Pod kierownicą</string>
+    <string name="mod_show_lights">Światła i kierunkowskazy</string>
+    <string name="mod_show_lights_sub">Rząd pod wskaźnikami: światła, przeciwmgielne, kierunkowskazy, awaryjne, przywróć</string>
+
 </resources>

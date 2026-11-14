@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Pedais analógicos</string>
     <string name="settings_analog_pedals_sub">O pedal segue a posição do dedo — requer o mod RemoteControlPro</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">FARÓIS</string>
+    <string name="mod_key_fog">NEBLINA</string>
+    <string name="mod_key_recover">RECUPERAR</string>
+    <string name="mod_key_horn">BUZINA</string>
+    <string name="mod_key_handbrake">FREIO DE MÃO</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">Mod RemoteControlPro</string>
+    <string name="mod_status_never">Ainda não detectado. O mod é opcional: sem ele, todo o resto funciona como antes.</string>
+    <string name="mod_status_seen">Última conexão: %1$s · mod %2$s</string>
+    <string name="mod_what_title">O que o mod adiciona</string>
+    <string name="mod_what_1">Conecta em cerca de um segundo, sem código e sem QR</string>
+    <string name="mod_what_2">Troca de marcha, freio de mão e buzina na tela de direção</string>
+    <string name="mod_what_3">Faróis, faróis de neblina, setas e pisca-alerta</string>
+    <string name="mod_what_4">Recuperar: coloca o carro de volta na pista após um acidente</string>
+    <string name="mod_what_5">O conta-giros e o volante se ajustam ao carro que você dirige</string>
+    <string name="mod_install_title">Como instalar</string>
+    <string name="mod_install_1">No PC, baixe remotecontrolpro_umutsevimcann.zip na página Releases deste app no GitHub.</string>
+    <string name="mod_install_2">Mova o zip, sem extrair, para a pasta de mods do jogo: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Inicie o jogo e toque em Conectar neste app. A etiqueta MOD na tela de direção mostra que a ligação está ativa.</string>
+    <string name="mod_install_note">Nada é substituído no jogo. Para remover o mod, apague o zip. Se o mod não for encontrado, o app conecta do modo habitual.</string>
+    <string name="mod_keys_title">Teclas na tela de direção</string>
+    <string name="mod_show_shift">Troca de marcha</string>
+    <string name="mod_show_shift_sub">− e + ao lado dos pedais</string>
+    <string name="mod_show_handbrake">Freio de mão</string>
+    <string name="mod_show_handbrake_sub">Acima dos pedais: toque para puxar, toque de novo para soltar</string>
+    <string name="mod_show_horn">Buzina</string>
+    <string name="mod_show_horn_sub">Abaixo do volante</string>
+    <string name="mod_show_lights">Luzes e setas</string>
+    <string name="mod_show_lights_sub">Uma fileira abaixo dos mostradores: faróis, neblina, setas, pisca-alerta, recuperar</string>
+
 </resources>

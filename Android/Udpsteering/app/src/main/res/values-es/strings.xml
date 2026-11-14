@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Pedales analógicos</string>
     <string name="settings_analog_pedals_sub">El pedal sigue la posición del dedo; requiere el mod RemoteControlPro</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">LUCES</string>
+    <string name="mod_key_fog">NIEBLA</string>
+    <string name="mod_key_recover">RECUPERAR</string>
+    <string name="mod_key_horn">CLAXON</string>
+    <string name="mod_key_handbrake">FRENO DE MANO</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">Mod RemoteControlPro</string>
+    <string name="mod_status_never">Aún no detectado. El mod es opcional: sin él, todo lo demás funciona como antes.</string>
+    <string name="mod_status_seen">Última conexión: %1$s · mod %2$s</string>
+    <string name="mod_what_title">Qué añade el mod</string>
+    <string name="mod_what_1">Conecta en un segundo aproximadamente, sin código ni QR</string>
+    <string name="mod_what_2">Cambio de marchas, freno de mano y claxon en la pantalla de conducción</string>
+    <string name="mod_what_3">Faros, antinieblas, intermitentes y luces de emergencia</string>
+    <string name="mod_what_4">Recuperar: devuelve el coche a la carretera tras un accidente</string>
+    <string name="mod_what_5">El cuentarrevoluciones y el volante se ajustan al coche que conduces</string>
+    <string name="mod_install_title">Cómo instalarlo</string>
+    <string name="mod_install_1">En tu PC, descarga remotecontrolpro_umutsevimcann.zip desde la página Releases de esta app en GitHub.</string>
+    <string name="mod_install_2">Mueve el zip, sin extraerlo, a la carpeta de mods del juego: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Inicia el juego y toca Conectar en esta app. La etiqueta MOD en la pantalla de conducción indica que el enlace está activo.</string>
+    <string name="mod_install_note">No se reemplaza nada en el juego. Para quitar el mod, borra el zip. Si no se encuentra el mod, la app se conecta de la forma habitual.</string>
+    <string name="mod_keys_title">Teclas en la pantalla de conducción</string>
+    <string name="mod_show_shift">Cambio de marchas</string>
+    <string name="mod_show_shift_sub">− y + junto a los pedales</string>
+    <string name="mod_show_handbrake">Freno de mano</string>
+    <string name="mod_show_handbrake_sub">Sobre los pedales: toca para echarlo, toca otra vez para soltarlo</string>
+    <string name="mod_show_horn">Claxon</string>
+    <string name="mod_show_horn_sub">Bajo el volante</string>
+    <string name="mod_show_lights">Luces e intermitentes</string>
+    <string name="mod_show_lights_sub">Una fila bajo los indicadores: luces, niebla, intermitentes, emergencia, recuperar</string>
+
 </resources>

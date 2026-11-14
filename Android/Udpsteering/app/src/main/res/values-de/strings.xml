@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Analoge Pedale</string>
     <string name="settings_analog_pedals_sub">Pedal folgt der Fingerposition — erfordert die RemoteControlPro-Mod</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">LICHT</string>
+    <string name="mod_key_fog">NEBEL</string>
+    <string name="mod_key_recover">BERGEN</string>
+    <string name="mod_key_horn">HUPE</string>
+    <string name="mod_key_handbrake">HANDBREMSE</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">RemoteControlPro-Mod</string>
+    <string name="mod_status_never">Noch nicht erkannt. Die Mod ist optional: Ohne sie funktioniert alles andere wie bisher.</string>
+    <string name="mod_status_seen">Zuletzt verbunden: %1$s · Mod %2$s</string>
+    <string name="mod_what_title">Was die Mod bringt</string>
+    <string name="mod_what_1">Verbindet in etwa einer Sekunde, ohne Code und ohne QR</string>
+    <string name="mod_what_2">Gangwechsel, Handbremse und Hupe auf dem Fahrbildschirm</string>
+    <string name="mod_what_3">Scheinwerfer, Nebelscheinwerfer, Blinker und Warnblinker</string>
+    <string name="mod_what_4">Bergen: stellt das Auto nach einem Unfall zurück auf die Straße</string>
+    <string name="mod_what_5">Drehzahlmesser und Lenkrad passen sich dem gefahrenen Auto an</string>
+    <string name="mod_install_title">Installation</string>
+    <string name="mod_install_1">Lade am PC remotecontrolpro_umutsevimcann.zip von der Releases-Seite dieser App auf GitHub herunter.</string>
+    <string name="mod_install_2">Verschiebe die Zip-Datei, ohne sie zu entpacken, in den Mods-Ordner des Spiels: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Starte das Spiel und tippe in dieser App auf Verbinden. Das Etikett MOD auf dem Fahrbildschirm zeigt, dass die Verbindung aktiv ist.</string>
+    <string name="mod_install_note">Im Spiel wird nichts ersetzt. Zum Entfernen die Zip-Datei löschen. Wird die Mod nicht gefunden, verbindet sich die App auf dem üblichen Weg.</string>
+    <string name="mod_keys_title">Tasten auf dem Fahrbildschirm</string>
+    <string name="mod_show_shift">Gangwechsel</string>
+    <string name="mod_show_shift_sub">− und + neben den Pedalen</string>
+    <string name="mod_show_handbrake">Handbremse</string>
+    <string name="mod_show_handbrake_sub">Über den Pedalen: tippen zum Anziehen, erneut tippen zum Lösen</string>
+    <string name="mod_show_horn">Hupe</string>
+    <string name="mod_show_horn_sub">Unter dem Lenkrad</string>
+    <string name="mod_show_lights">Licht und Blinker</string>
+    <string name="mod_show_lights_sub">Eine Reihe unter den Anzeigen: Licht, Nebel, Blinker, Warnblinker, Bergen</string>
+
 </resources>

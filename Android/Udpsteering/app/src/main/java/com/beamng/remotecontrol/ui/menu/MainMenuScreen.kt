@@ -48,6 +48,7 @@ data class SearchUi(val phase: SweepPhase, val progress: Float)
 @Composable
 fun MainMenuScreen(
     savedPcIp: String?,
+    savedPcName: String?,
     layout: DashLayout,
     controlTypeLabel: String,
     search: SearchUi?,
@@ -102,7 +103,7 @@ fun MainMenuScreen(
 
                 // ---- right: the computer card and the small stuff ----
                 Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(u * 2.5f)) {
-                    ComputerCard(savedPcIp, search, onConnect, onCancel, u)
+                    ComputerCard(savedPcIp, savedPcName, search, onConnect, onCancel, u)
                     if (search == null) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.menu_other_ways), color = Graphite.Muted, fontSize = (u * 3).asSp())
@@ -121,7 +122,7 @@ fun MainMenuScreen(
 }
 
 @Composable
-private fun ComputerCard(savedPcIp: String?, search: SearchUi?, onConnect: () -> Unit, onCancel: () -> Unit, u: Dp) {
+private fun ComputerCard(savedPcIp: String?, savedPcName: String?, search: SearchUi?, onConnect: () -> Unit, onCancel: () -> Unit, u: Dp) {
     Panel(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(u * 4)) {
             Text(
@@ -130,7 +131,7 @@ private fun ComputerCard(savedPcIp: String?, search: SearchUi?, onConnect: () ->
             )
             Spacer(Modifier.height(u * 1.2f))
             Text(
-                savedPcIp ?: stringResource(R.string.menu_not_connected),
+                savedPcName ?: savedPcIp ?: stringResource(R.string.menu_not_connected),
                 color = Graphite.Text, fontSize = (u * 4.6f).asSp(), fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(u * 0.8f))
@@ -138,6 +139,7 @@ private fun ComputerCard(savedPcIp: String?, search: SearchUi?, onConnect: () ->
                 search?.phase == SweepPhase.SAVED_PC -> stringResource(R.string.menu_phase_saved)
                 search?.phase == SweepPhase.FULL_SEARCH -> stringResource(R.string.menu_phase_full)
                 savedPcIp == null -> stringResource(R.string.menu_first_note)
+                savedPcName != null -> stringResource(R.string.menu_saved_note) + " · " + savedPcIp
                 else -> stringResource(R.string.menu_saved_note)
             }
             Text(note, color = Graphite.Muted, fontSize = (u * 2.9f).asSp(), lineHeight = (u * 4).asSp())

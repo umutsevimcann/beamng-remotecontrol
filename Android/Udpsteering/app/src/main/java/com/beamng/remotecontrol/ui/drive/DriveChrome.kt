@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +36,7 @@ import kotlin.math.abs
 
 /** Top-left: green dot + "Connected" while telemetry flows, grey otherwise. */
 @Composable
-fun StatusChip(connected: Boolean, u: Dp, modifier: Modifier = Modifier) {
+fun StatusChip(connected: Boolean, modLinked: Boolean, u: Dp, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(u * 2).background(if (connected) Graphite.Green else Graphite.Muted, RoundedCornerShape(50)))
         Spacer(Modifier.width(u * 1.6f))
@@ -44,6 +45,13 @@ fun StatusChip(connected: Boolean, u: Dp, modifier: Modifier = Modifier) {
             color = if (connected) Graphite.Text else Graphite.Muted,
             fontSize = (u * 3.2f).asSp(), fontWeight = FontWeight.SemiBold,
         )
+        if (modLinked) {
+            Spacer(Modifier.width(u * 1.6f))
+            Text(
+                "MOD", color = Graphite.OnOrange, fontSize = (u * 2.3f).asSp(), fontWeight = FontWeight.Bold,
+                modifier = Modifier.background(Graphite.Orange, RoundedCornerShape(u * 1)).padding(horizontal = u * 1.2f, vertical = u * 0.3f),
+            )
+        }
     }
 }
 

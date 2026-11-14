@@ -82,6 +82,7 @@ fun SteeringWheel(
     size: Dp,
     draggable: Boolean,
     displayValue: () -> Float,
+    lockDeg: Float = WHEEL_LOCK_DEG,
     onValue: (Float) -> Unit,
     onRelease: () -> Unit,
     modifier: Modifier = Modifier,
@@ -90,6 +91,8 @@ fun SteeringWheel(
     val drag = remember { Animatable(0f) } // degrees, touch modes only
     val currentOnValue by rememberUpdatedState(onValue)
     val currentOnRelease by rememberUpdatedState(onRelease)
+    // The mod reports each car's real steering lock; without it, 450° each way.
+    val currentLock by rememberUpdatedState(lockDeg)
 
     // The gesture coroutine outlives recompositions, hence currentOnValue/currentOnRelease:
     // with stale lambdas the wheel kept driving the previous control type's handler.
@@ -104,7 +107,7 @@ fun SteeringWheel(
             // otherwise the first move would jump from 0 to that angle.
             var current = drag.value
             scope.launch { drag.stop() }
-            currentOnValue(current / WHEEL_LOCK_DEG)
+            currentOnValue(current / currentLock)
             val deadRadius = minOf(cx, cy) * HUB_DEAD_RADIUS
             try {
                 while (true) {
@@ -120,9 +123,9 @@ fun SteeringWheel(
                     if (delta > 180f) delta -= 360f
                     if (delta < -180f) delta += 360f
                     last = a
-                    current = (current + delta).coerceIn(-WHEEL_LOCK_DEG, WHEEL_LOCK_DEG)
+                    current = (current + delta).coerceIn(-currentLock, currentLock)
                     scope.launch { drag.snapTo(current) }
-                    currentOnValue(current / WHEEL_LOCK_DEG)
+                    currentOnValue(current / currentLock)
                 }
             } finally {
                 // Self-centring, like a real wheel let go at speed.
@@ -142,7 +145,7 @@ fun SteeringWheel(
         }
         Canvas(
             Modifier.fillMaxSize().graphicsLayer {
-                rotationZ = if (draggable) drag.value else displayValue() * WHEEL_LOCK_DEG
+                rotationZ = if (draggable) drag.value else displayValue() * currentLock
             },
         ) { drawWheel() }
     }

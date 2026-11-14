@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Analog pedals</string>
     <string name="settings_analog_pedals_sub">Pedal follows finger position — requires the RemoteControlPro mod</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">LIGHTS</string>
+    <string name="mod_key_fog">FOG</string>
+    <string name="mod_key_recover">RECOVER</string>
+    <string name="mod_key_horn">HORN</string>
+    <string name="mod_key_handbrake">HANDBRAKE</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">RemoteControlPro mod</string>
+    <string name="mod_status_never">Not detected yet. The mod is optional: without it everything else works as before.</string>
+    <string name="mod_status_seen">Last connected: %1$s · mod %2$s</string>
+    <string name="mod_what_title">What the mod adds</string>
+    <string name="mod_what_1">Connects in about a second, with no code and no QR</string>
+    <string name="mod_what_2">Gear shift, handbrake and horn on the drive screen</string>
+    <string name="mod_what_3">Headlights, fog lights, turn signals and hazard lights</string>
+    <string name="mod_what_4">Recover: puts the car back on the road after a crash</string>
+    <string name="mod_what_5">Rev counter and steering wheel match the car you are driving</string>
+    <string name="mod_install_title">How to install</string>
+    <string name="mod_install_1">On your PC, download remotecontrolpro_umutsevimcann.zip from the Releases page of this app on GitHub.</string>
+    <string name="mod_install_2">Move the zip, without extracting it, into the game\'s mods folder: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Start the game and tap Connect in this app. A MOD label on the drive screen shows the link is active.</string>
+    <string name="mod_install_note">Nothing in the game is replaced. To remove the mod, delete the zip. If the mod is not found, the app connects the usual way.</string>
+    <string name="mod_keys_title">Keys on the drive screen</string>
+    <string name="mod_show_shift">Gear shift</string>
+    <string name="mod_show_shift_sub">− and + beside the pedals</string>
+    <string name="mod_show_handbrake">Handbrake</string>
+    <string name="mod_show_handbrake_sub">Above the pedals: tap to apply, tap again to release</string>
+    <string name="mod_show_horn">Horn</string>
+    <string name="mod_show_horn_sub">Under the steering wheel</string>
+    <string name="mod_show_lights">Lights and signals</string>
+    <string name="mod_show_lights_sub">A row under the gauges: lights, fog, signals, hazards, recover</string>
+
 </resources>

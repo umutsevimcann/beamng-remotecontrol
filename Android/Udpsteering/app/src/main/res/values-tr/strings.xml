@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Analog pedallar</string>
     <string name="settings_analog_pedals_sub">Pedal parmak konumunu izler — RemoteControlPro modu gerekir</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">FAR</string>
+    <string name="mod_key_fog">SİS</string>
+    <string name="mod_key_recover">KURTAR</string>
+    <string name="mod_key_horn">KORNA</string>
+    <string name="mod_key_handbrake">EL FRENİ</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">RemoteControlPro modu</string>
+    <string name="mod_status_never">Henüz algılanmadı. Mod isteğe bağlıdır: mod olmadan diğer her şey eskisi gibi çalışır.</string>
+    <string name="mod_status_seen">Son bağlantı: %1$s · mod %2$s</string>
+    <string name="mod_what_title">Mod neler ekler</string>
+    <string name="mod_what_1">Kod ve QR olmadan, yaklaşık bir saniyede bağlanır</string>
+    <string name="mod_what_2">Sürüş ekranında vites, el freni ve korna</string>
+    <string name="mod_what_3">Farlar, sis farları, sinyaller ve dörtlüler</string>
+    <string name="mod_what_4">Kurtar: kazadan sonra aracı yola geri koyar</string>
+    <string name="mod_what_5">Devir saati ve direksiyon, sürdüğün araca göre ayarlanır</string>
+    <string name="mod_install_title">Nasıl kurulur</string>
+    <string name="mod_install_1">Bilgisayarında, bu uygulamanın GitHub sayfasındaki Releases bölümünden remotecontrolpro_umutsevimcann.zip dosyasını indir.</string>
+    <string name="mod_install_2">Zip dosyasını açmadan oyunun mods klasörüne taşı: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Oyunu başlat ve bu uygulamada Bağlan\'a dokun. Sürüş ekranındaki MOD etiketi bağlantının etkin olduğunu gösterir.</string>
+    <string name="mod_install_note">Oyunda hiçbir dosya değiştirilmez. Modu kaldırmak için zip dosyasını sil. Mod bulunamazsa uygulama her zamanki yoldan bağlanır.</string>
+    <string name="mod_keys_title">Sürüş ekranındaki tuşlar</string>
+    <string name="mod_show_shift">Vites</string>
+    <string name="mod_show_shift_sub">Pedalların yanında − ve +</string>
+    <string name="mod_show_handbrake">El freni</string>
+    <string name="mod_show_handbrake_sub">Pedalların üstünde: çekmek için dokun, bırakmak için tekrar dokun</string>
+    <string name="mod_show_horn">Korna</string>
+    <string name="mod_show_horn_sub">Direksiyonun altında</string>
+    <string name="mod_show_lights">Farlar ve sinyaller</string>
+    <string name="mod_show_lights_sub">Göstergelerin altında bir sıra: far, sis, sinyaller, dörtlü, kurtar</string>
+
 </resources>

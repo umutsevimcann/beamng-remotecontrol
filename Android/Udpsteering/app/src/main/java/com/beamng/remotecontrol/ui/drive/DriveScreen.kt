@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import com.beamng.remotecontrol.R
+import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.TelemetryUiState
 import com.beamng.remotecontrol.ui.dash.DashArea
@@ -55,6 +57,9 @@ import com.beamng.remotecontrol.ui.theme.screenBackground
  *    Arrow buttons replaces it with two hold buttons.
  *  - [mirrored] swaps the two sides (left-handed players). Brake stays left of gas.
  *  - [dashboardOnly] removes both sides; the phone is then a pure display.
+ *  - [mod] non-null = linked to the RemoteControlPro mod: shift paddles beside the
+ *    pedals, a handbrake above them, a horn under the wheel and a row of light keys
+ *    under the gauges. [wheelLockDeg] is the car's steering lock when the mod knows it.
  */
 @Composable
 fun DriveScreen(
@@ -66,6 +71,8 @@ fun DriveScreen(
     analogPedals: Boolean,
     layout: DashLayout,
     mirrored: Boolean,
+    mod: ModControls?,
+    wheelLockDeg: Float,
     steering: () -> Float,
     onThrottle: (Float) -> Unit,
     onBrake: (Float) -> Unit,
@@ -112,6 +119,9 @@ fun DriveScreen(
                     u,
                     Modifier.fillMaxWidth().weight(1f),
                 )
+                if (!dashboardOnly && mod != null && mod.showLights) {
+                    ModLightsRow(mod, u, Modifier.fillMaxWidth().height(u * 9))
+                }
                 if (!dashboardOnly) SteerBar(steerValue, Modifier.fillMaxWidth().height(u * 5))
             }
         }
@@ -125,8 +135,13 @@ fun DriveScreen(
             }
         } else {
             val steerSide: @Composable RowScope.() -> Unit = {
-                val wheelSize = minOf(h * 0.74f, cu * 60)
-                Box(Modifier.fillMaxHeight().padding(top = u * 8), contentAlignment = Alignment.Center) {
+                val horn = mod != null && mod.showHorn
+                val wheelSize = minOf(h * (if (horn) 0.64f else 0.74f), cu * 60)
+                Column(
+                    Modifier.fillMaxHeight().padding(top = u * 8, bottom = u * 2),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
                     if (controlType == SettingsManager.CONTROL_BUTTONS) {
                         ArrowButtons(
                             size = wheelSize, u = u,
@@ -146,6 +161,7 @@ fun DriveScreen(
                             size = wheelSize,
                             draggable = !isTilt,
                             displayValue = { tiltState.value },
+                            lockDeg = wheelLockDeg,
                             onValue = { v ->
                                 touchValue = v
                                 onWheel(v)
@@ -156,15 +172,36 @@ fun DriveScreen(
                             },
                         )
                     }
+                    if (mod != null && horn) {
+                        Spacer(Modifier.height(u * 2))
+                        HoldKey(stringResource(R.string.mod_key_horn), u, Modifier.width(wheelSize * 0.6f).height(u * 9)) { pressed ->
+                            mod.onButton(ModProtocol.BUTTON_HORN, pressed)
+                        }
+                    }
                 }
             }
             val pedalSide: @Composable RowScope.() -> Unit = {
                 // Brake left of gas, like a real pedal box — also when mirrored.
-                Row(
+                Column(
                     modifier = Modifier.align(Alignment.Bottom).padding(bottom = u * 2),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                if (mod != null && mod.showHandbrake) {
+                    LatchKey(
+                        stringResource(R.string.mod_key_handbrake), mod.handbrakeOn, u,
+                        Modifier.width(cu * 24).height(u * 10), onChange = mod.onHandbrake,
+                    )
+                    Spacer(Modifier.height(u * 3))
+                }
+                Row(
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.spacedBy(cu * 3),
                 ) {
+                    if (mod != null && mod.showShift) {
+                        HoldKey("−", u, Modifier.width(cu * 11).height(u * 34), Graphite.Blue) { pressed ->
+                            mod.onButton(ModProtocol.BUTTON_SHIFT_DOWN, pressed)
+                        }
+                    }
                     Pedal(
                         stringResource(R.string.drive_brake), Graphite.Red, cu * 21, u * 46,
                         plateFraction = 0.52f, analog = analogPedals, u = cu, onValue = onBrake,
@@ -173,6 +210,12 @@ fun DriveScreen(
                         stringResource(R.string.drive_gas), Graphite.Orange, cu * 16, u * 72,
                         plateFraction = 0.78f, analog = analogPedals, u = cu, onValue = onThrottle,
                     )
+                    if (mod != null && mod.showShift) {
+                        HoldKey("+", u, Modifier.width(cu * 11).height(u * 34), Graphite.Blue) { pressed ->
+                            mod.onButton(ModProtocol.BUTTON_SHIFT_UP, pressed)
+                        }
+                    }
+                }
                 }
             }
             Row(
@@ -186,7 +229,7 @@ fun DriveScreen(
         }
 
         // Drawn last so they stay tappable above everything.
-        StatusChip(telemetry.connected, u, Modifier.padding(start = u * 4, top = u * 4))
+        StatusChip(telemetry.connected, mod != null, u, Modifier.padding(start = u * 4, top = u * 4))
         SettingsGear(u, onOpenSettings, Modifier.align(Alignment.TopEnd))
     }
 }

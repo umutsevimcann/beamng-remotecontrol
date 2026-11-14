@@ -41,6 +41,7 @@ class WelcomeActivity : AppCompatActivity() {
 
     // Mirrors of the settings the menu shows; refreshed in onResume.
     private var savedPcIp by mutableStateOf<String?>(null)
+    private var savedPcName by mutableStateOf<String?>(null)
     private var dashLayout by mutableStateOf(DashLayout.MODERN)
     private var controlType by mutableIntStateOf(SettingsManager.CONTROL_GYROSCOPE)
 
@@ -71,6 +72,7 @@ class WelcomeActivity : AppCompatActivity() {
                 var showManual by remember { mutableStateOf(false) }
                 MainMenuScreen(
                     savedPcIp = savedPcIp,
+                    savedPcName = savedPcName,
                     layout = dashLayout,
                     controlTypeLabel = stringResource(
                         when (controlType) {
@@ -180,6 +182,7 @@ class WelcomeActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         savedPcIp = settings.lastIP.takeIf { it.isNotEmpty() }
+        savedPcName = settings.lastPcName.takeIf { it.isNotEmpty() }
         dashLayout = settings.dashLayout
         controlType = settings.controlType
     }
@@ -224,6 +227,25 @@ class WelcomeActivity : AppCompatActivity() {
         val generation = ++searchGeneration
         search = SearchUi(if (lastHost != null) SweepPhase.SAVED_PC else SweepPhase.FULL_SEARCH, 0f)
         sweepJob = lifecycleScope.launch {
+            val app = application as RemoteControlApplication
+            // The mod pairs without a code and answers at once: ask it first.
+            val mod = UdpDiscovery.findMod(broadcast, lastHost, network)
+            if (mod != null) {
+                search = null
+                app.hostAddress = mod.host
+                app.securityCode = null
+                app.modInfo = mod.info
+                mod.host.hostAddress?.let {
+                    settings.lastIP = it
+                    savedPcIp = it
+                }
+                settings.lastPcName = mod.info.pcName
+                settings.lastModVersion = mod.info.modVersion
+                savedPcName = mod.info.pcName
+                startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
+                return@launch
+            }
+            app.modInfo = null
             val result = UdpDiscovery.sweep(
                 broadcast, lastHost, slow, network,
                 onPhase = { phase ->
@@ -236,7 +258,6 @@ class WelcomeActivity : AppCompatActivity() {
             search = null
             when (result) {
                 is UdpDiscovery.Result.Connected -> {
-                    val app = application as RemoteControlApplication
                     app.hostAddress = result.host
                     app.securityCode = result.code
                     // Next time we sweep this PC by unicast first (fast, no flood).

@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Pédales analogiques</string>
     <string name="settings_analog_pedals_sub">La pédale suit la position du doigt — nécessite le mod RemoteControlPro</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">PHARES</string>
+    <string name="mod_key_fog">ANTIBR.</string>
+    <string name="mod_key_recover">REPLACER</string>
+    <string name="mod_key_horn">KLAXON</string>
+    <string name="mod_key_handbrake">FREIN À MAIN</string>
+    <string name="settings_sec_mod">Mod</string>
+    <string name="mod_status_title">Mod RemoteControlPro</string>
+    <string name="mod_status_never">Pas encore détecté. Le mod est facultatif : sans lui, tout le reste fonctionne comme avant.</string>
+    <string name="mod_status_seen">Dernière connexion : %1$s · mod %2$s</string>
+    <string name="mod_what_title">Ce que le mod ajoute</string>
+    <string name="mod_what_1">Connexion en une seconde environ, sans code ni QR</string>
+    <string name="mod_what_2">Changement de rapport, frein à main et klaxon sur l\'écran de conduite</string>
+    <string name="mod_what_3">Phares, antibrouillards, clignotants et feux de détresse</string>
+    <string name="mod_what_4">Replacer : remet la voiture sur la route après un accident</string>
+    <string name="mod_what_5">Le compte-tours et le volant s\'adaptent à la voiture conduite</string>
+    <string name="mod_install_title">Installation</string>
+    <string name="mod_install_1">Sur votre PC, téléchargez remotecontrolpro_umutsevimcann.zip depuis la page Releases de cette application sur GitHub.</string>
+    <string name="mod_install_2">Déplacez le zip, sans l\'extraire, dans le dossier mods du jeu : AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Lancez le jeu et touchez Connecter dans cette application. L\'étiquette MOD sur l\'écran de conduite indique que la liaison est active.</string>
+    <string name="mod_install_note">Rien n\'est remplacé dans le jeu. Pour retirer le mod, supprimez le zip. Si le mod est introuvable, l\'application se connecte de la façon habituelle.</string>
+    <string name="mod_keys_title">Touches de l\'écran de conduite</string>
+    <string name="mod_show_shift">Rapports</string>
+    <string name="mod_show_shift_sub">− et + à côté des pédales</string>
+    <string name="mod_show_handbrake">Frein à main</string>
+    <string name="mod_show_handbrake_sub">Au-dessus des pédales : touchez pour serrer, touchez à nouveau pour desserrer</string>
+    <string name="mod_show_horn">Klaxon</string>
+    <string name="mod_show_horn_sub">Sous le volant</string>
+    <string name="mod_show_lights">Feux et clignotants</string>
+    <string name="mod_show_lights_sub">Une rangée sous les compteurs : phares, antibrouillards, clignotants, détresse, replacer</string>
+
 </resources>

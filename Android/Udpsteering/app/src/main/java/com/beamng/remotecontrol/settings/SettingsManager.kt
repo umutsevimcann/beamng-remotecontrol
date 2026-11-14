@@ -88,6 +88,32 @@ class SettingsManager private constructor(context: Context) {
         get() = ThemeMode.fromKey(prefs.getString(KEY_THEME, null))
         set(mode) = prefs.edit().putString(KEY_THEME, mode.key).apply()
 
+    // ==================== MOD KEYS ====================
+
+    /** Which RemoteControlPro keys the drive screen shows (they exist only with the mod). */
+    var modShowShift: Boolean
+        get() = prefs.getBoolean(KEY_MOD_SHIFT, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_SHIFT, v).apply()
+    var modShowHandbrake: Boolean
+        get() = prefs.getBoolean(KEY_MOD_HANDBRAKE, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_HANDBRAKE, v).apply()
+    var modShowHorn: Boolean
+        get() = prefs.getBoolean(KEY_MOD_HORN, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_HORN, v).apply()
+    var modShowLights: Boolean
+        get() = prefs.getBoolean(KEY_MOD_LIGHTS, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_LIGHTS, v).apply()
+
+    /** Name of the PC the mod reported last time (empty when we only know its IP). */
+    var lastPcName: String
+        get() = prefs.getString(KEY_LAST_PC_NAME, "") ?: ""
+        set(name) = prefs.edit().putString(KEY_LAST_PC_NAME, name).apply()
+
+    /** Version of the mod we last connected to; empty = never seen. */
+    var lastModVersion: String
+        get() = prefs.getString(KEY_LAST_MOD_VERSION, "") ?: ""
+        set(v) = prefs.edit().putString(KEY_LAST_MOD_VERSION, v).apply()
+
     // ==================== NETWORK ====================
 
     var lastIP: String
@@ -110,6 +136,12 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_DASH_LAYOUT = "dash_layout"
         const val KEY_MIRRORED = "mirrored_layout"
         const val KEY_THEME = "theme_mode"
+        const val KEY_MOD_SHIFT = "mod_show_shift"
+        const val KEY_MOD_HANDBRAKE = "mod_show_handbrake"
+        const val KEY_MOD_HORN = "mod_show_horn"
+        const val KEY_MOD_LIGHTS = "mod_show_lights"
+        const val KEY_LAST_PC_NAME = "last_pc_name"
+        const val KEY_LAST_MOD_VERSION = "last_mod_version"
 
         // Control types
         const val CONTROL_GYROSCOPE = 0

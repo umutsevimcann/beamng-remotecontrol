@@ -72,7 +72,7 @@ import com.beamng.remotecontrol.ui.theme.asSp
 import com.beamng.remotecontrol.ui.theme.screenBackground
 import kotlin.math.roundToInt
 
-enum class SettingsSection { DRIVING, DASHBOARD, FEEDBACK, GENERAL }
+enum class SettingsSection { DRIVING, DASHBOARD, FEEDBACK, MOD, GENERAL }
 
 /**
  * Two-pane settings: sections on the left, only the selected section's settings on
@@ -99,6 +99,7 @@ fun SettingsScreen(settings: SettingsManager, onBack: () -> Unit, onSetupGuide: 
                     SectionTab(stringResource(R.string.settings_sec_driving), section == SettingsSection.DRIVING, u) { section = SettingsSection.DRIVING }
                     SectionTab(stringResource(R.string.settings_sec_dashboard), section == SettingsSection.DASHBOARD, u) { section = SettingsSection.DASHBOARD }
                     SectionTab(stringResource(R.string.settings_sec_feedback), section == SettingsSection.FEEDBACK, u) { section = SettingsSection.FEEDBACK }
+                    SectionTab(stringResource(R.string.settings_sec_mod), section == SettingsSection.MOD, u) { section = SettingsSection.MOD }
                     SectionTab(stringResource(R.string.settings_sec_general), section == SettingsSection.GENERAL, u) { section = SettingsSection.GENERAL }
                 }
                 // ---- the selected section ----
@@ -111,6 +112,7 @@ fun SettingsScreen(settings: SettingsManager, onBack: () -> Unit, onSetupGuide: 
                             SettingsSection.DRIVING -> DrivingSection(settings, u)
                             SettingsSection.DASHBOARD -> DashboardSection(settings, u)
                             SettingsSection.FEEDBACK -> FeedbackSection(settings, u)
+                            SettingsSection.MOD -> ModSection(settings, u)
                             SettingsSection.GENERAL -> GeneralSection(u, onSetupGuide)
                         }
                     }
@@ -285,6 +287,94 @@ private fun FeedbackSection(settings: SettingsManager, u: Dp) {
                 Spacer(Modifier.height(u * 0.8f))
                 Text(stringResource(sub), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
             }
+        }
+    }
+}
+
+/**
+ * The optional RemoteControlPro game mod: whether we have ever met it, what it adds,
+ * how to install it, and which of its keys the drive screen shows.
+ */
+@Composable
+private fun ModSection(settings: SettingsManager, u: Dp) {
+    var shift by remember { mutableStateOf(settings.modShowShift) }
+    var handbrake by remember { mutableStateOf(settings.modShowHandbrake) }
+    var horn by remember { mutableStateOf(settings.modShowHorn) }
+    var lights by remember { mutableStateOf(settings.modShowLights) }
+    val modVersion = settings.lastModVersion
+    val seen = modVersion.isNotEmpty()
+
+    CardBox(u, selected = seen) {
+        Text(stringResource(R.string.mod_status_title), color = Graphite.Text, fontSize = (u * 3.6f).asSp(), fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(u * 0.8f))
+        Text(
+            if (seen) stringResource(R.string.mod_status_seen, settings.lastPcName.ifEmpty { "PC" }, modVersion)
+            else stringResource(R.string.mod_status_never),
+            color = if (seen) Graphite.Orange else Graphite.Muted, fontSize = (u * 2.9f).asSp(), lineHeight = (u * 4f).asSp(),
+        )
+    }
+
+    Heading(stringResource(R.string.mod_what_title), u)
+    CardBox(u) {
+        val points = listOf(
+            R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_5,
+        )
+        for ((i, point) in points.withIndex()) {
+            if (i > 0) Spacer(Modifier.height(u * 1.2f))
+            Row {
+                Text("•", color = Graphite.Orange, fontSize = (u * 3f).asSp(), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(u * 1.6f))
+                Text(stringResource(point), color = Graphite.Text, fontSize = (u * 2.9f).asSp(), lineHeight = (u * 4f).asSp())
+            }
+        }
+    }
+
+    Heading(stringResource(R.string.mod_install_title), u)
+    CardBox(u) {
+        val steps = listOf(R.string.mod_install_1, R.string.mod_install_2, R.string.mod_install_3)
+        for ((i, step) in steps.withIndex()) {
+            if (i > 0) Spacer(Modifier.height(u * 1.6f))
+            Row {
+                Text("${i + 1}", color = Graphite.Orange, fontSize = (u * 3.4f).asSp(), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(u * 2f))
+                Text(stringResource(step), color = Graphite.Text, fontSize = (u * 2.9f).asSp(), lineHeight = (u * 4f).asSp())
+            }
+        }
+        Spacer(Modifier.height(u * 1.6f))
+        Text(stringResource(R.string.mod_install_note), color = Graphite.Muted, fontSize = (u * 2.6f).asSp(), lineHeight = (u * 3.7f).asSp())
+    }
+
+    Heading(stringResource(R.string.mod_keys_title), u)
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_shift), stringResource(R.string.mod_show_shift_sub),
+            shift, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            shift = it
+            settings.modShowShift = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_handbrake), stringResource(R.string.mod_show_handbrake_sub),
+            handbrake, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            handbrake = it
+            settings.modShowHandbrake = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_horn), stringResource(R.string.mod_show_horn_sub),
+            horn, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            horn = it
+            settings.modShowHorn = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_lights), stringResource(R.string.mod_show_lights_sub),
+            lights, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            lights = it
+            settings.modShowLights = it
         }
     }
 }

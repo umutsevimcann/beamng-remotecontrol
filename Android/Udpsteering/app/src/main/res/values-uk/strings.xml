@@ -181,4 +181,35 @@
     <string name="settings_analog_pedals">Аналогові педалі</string>
     <string name="settings_analog_pedals_sub">Педаль слідує за пальцем — потрібен мод RemoteControlPro</string>
 
+    <!-- RemoteControlPro mod -->
+    <string name="mod_key_lights">ФАРИ</string>
+    <string name="mod_key_fog">ПТФ</string>
+    <string name="mod_key_recover">ПОВЕРН.</string>
+    <string name="mod_key_horn">СИГНАЛ</string>
+    <string name="mod_key_handbrake">РУЧНИК</string>
+    <string name="settings_sec_mod">Мод</string>
+    <string name="mod_status_title">Мод RemoteControlPro</string>
+    <string name="mod_status_never">Поки не виявлено. Мод необов\'язковий: без нього все інше працює як раніше.</string>
+    <string name="mod_status_seen">Останнє підключення: %1$s · мод %2$s</string>
+    <string name="mod_what_title">Що додає мод</string>
+    <string name="mod_what_1">Підключення приблизно за секунду, без коду та QR</string>
+    <string name="mod_what_2">Перемикання передач, ручник і сигнал на екрані керування</string>
+    <string name="mod_what_3">Фари, протитуманні фари, покажчики повороту й аварійка</string>
+    <string name="mod_what_4">Повернути: ставить авто назад на дорогу після аварії</string>
+    <string name="mod_what_5">Тахометр і кермо підлаштовуються під авто, яким ви керуєте</string>
+    <string name="mod_install_title">Як встановити</string>
+    <string name="mod_install_1">На комп\'ютері завантажте remotecontrolpro_umutsevimcann.zip зі сторінки Releases цього застосунку на GitHub.</string>
+    <string name="mod_install_2">Перемістіть zip-файл, не розпаковуючи, до теки модів гри: AppData › Local › BeamNG › BeamNG.drive › current › mods</string>
+    <string name="mod_install_3">Запустіть гру й натисніть «Підключити» в застосунку. Позначка MOD на екрані керування показує, що зв\'язок активний.</string>
+    <string name="mod_install_note">У грі нічого не замінюється. Щоб видалити мод, видаліть zip-файл. Якщо мод не знайдено, застосунок підключається звичайним способом.</string>
+    <string name="mod_keys_title">Кнопки на екрані керування</string>
+    <string name="mod_show_shift">Передачі</string>
+    <string name="mod_show_shift_sub">− і + біля педалей</string>
+    <string name="mod_show_handbrake">Ручник</string>
+    <string name="mod_show_handbrake_sub">Над педалями: торкніться, щоб затягнути, ще раз — щоб відпустити</string>
+    <string name="mod_show_horn">Сигнал</string>
+    <string name="mod_show_horn_sub">Під кермом</string>
+    <string name="mod_show_lights">Світло й повороти</string>
+    <string name="mod_show_lights_sub">Ряд під приладами: фари, ПТФ, повороти, аварійка, повернути</string>
+
 </resources>
