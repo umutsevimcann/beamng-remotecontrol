@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Feux et clignotants</string>
     <string name="mod_show_lights_sub">Une rangée sous les compteurs : phares, antibrouillards, clignotants, détresse, replacer</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Connexion</string>
+    <string name="guide_tab_dash">Tableau de bord</string>
+    <string name="guide_tab_drift">Mesure du drift</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Dépannage</string>
+    <string name="guide_mod_title">4 · MOD REMOTECONTROLPRO — FACULTATIF</string>
+    <string name="guide_mod_what">Un petit ajout pour le jeu. L\'application fonctionne sans lui ; avec le mod, le téléphone fait ce que la télécommande intégrée au jeu ne sait pas faire.</string>
+    <string name="guide_mod_without_title">SANS LE MOD</string>
+    <string name="guide_mod_with_title">SI VOUS AJOUTEZ LE MOD</string>
+    <string name="guide_mod_without_1">Volant, accélérateur et frein</string>
+    <string name="guide_mod_without_2">La connexion recherche le code du jeu : la première fois peut prendre 2 à 3 minutes</string>
+    <string name="guide_mod_without_3">Le compte-tours estime la zone rouge ; le volant à l\'écran tourne toujours de la même amplitude</string>
+    <string name="guide_mod_gauges_note">Les compteurs viennent toujours du chapitre 2 (Tableau de bord). Le mod ajoute des commandes, pas des compteurs.</string>
+
 </resources>

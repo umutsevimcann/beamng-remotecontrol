@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Свет и поворотники</string>
     <string name="mod_show_lights_sub">Ряд под приборами: фары, ПТФ, поворотники, аварийка, вернуть</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Подключение</string>
+    <string name="guide_tab_dash">Приборы</string>
+    <string name="guide_tab_drift">Дрифт-метр</string>
+    <string name="guide_tab_mod">Мод</string>
+    <string name="guide_tab_trouble">Решение проблем</string>
+    <string name="guide_mod_title">4 · МОД REMOTECONTROLPRO — ПО ЖЕЛАНИЮ</string>
+    <string name="guide_mod_what">Небольшое дополнение к игре. Приложение работает и без него; с модом телефон умеет то, чего не умеет встроенный в игру пульт.</string>
+    <string name="guide_mod_without_title">БЕЗ МОДА</string>
+    <string name="guide_mod_with_title">ЕСЛИ ДОБАВИТЬ МОД</string>
+    <string name="guide_mod_without_1">Руль, газ и тормоз</string>
+    <string name="guide_mod_without_2">При подключении ищется код игры: в первый раз это может занять 2–3 минуты</string>
+    <string name="guide_mod_without_3">Тахометр угадывает красную зону; руль на экране всегда поворачивается одинаково</string>
+    <string name="guide_mod_gauges_note">Приборы по-прежнему настраиваются в разделе 2 (Приборы). Мод добавляет управление, а не приборы.</string>
+
 </resources>

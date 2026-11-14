@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Luces e intermitentes</string>
     <string name="mod_show_lights_sub">Una fila bajo los indicadores: luces, niebla, intermitentes, emergencia, recuperar</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Conexión</string>
+    <string name="guide_tab_dash">Tablero en vivo</string>
+    <string name="guide_tab_drift">Medidor de drift</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Solución de problemas</string>
+    <string name="guide_mod_title">4 · MOD REMOTECONTROLPRO — OPCIONAL</string>
+    <string name="guide_mod_what">Un pequeño añadido para el juego. La app funciona sin él; con el mod, el teléfono hace lo que el mando del propio juego no puede.</string>
+    <string name="guide_mod_without_title">SIN EL MOD</string>
+    <string name="guide_mod_with_title">SI AÑADES EL MOD</string>
+    <string name="guide_mod_without_1">Volante, acelerador y freno</string>
+    <string name="guide_mod_without_2">Al conectar se busca el código del juego: la primera vez puede tardar 2–3 minutos</string>
+    <string name="guide_mod_without_3">El cuentarrevoluciones estima la zona roja; el volante en pantalla gira siempre lo mismo</string>
+    <string name="guide_mod_gauges_note">Los indicadores siguen viniendo del capítulo 2 (Tablero en vivo). El mod añade controles, no indicadores.</string>
+
 </resources>

@@ -23,7 +23,7 @@ class SetupGuideActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             RemoteTheme {
-                SetupGuideScreen(phoneIp = phoneIp)
+                SetupGuideScreen(phoneIp = phoneIp, onBack = { finish() })
             }
         }
     }

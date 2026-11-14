@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Luzes e setas</string>
     <string name="mod_show_lights_sub">Uma fileira abaixo dos mostradores: faróis, neblina, setas, pisca-alerta, recuperar</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Conexão</string>
+    <string name="guide_tab_dash">Painel ao vivo</string>
+    <string name="guide_tab_drift">Medidor de drift</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Solução de problemas</string>
+    <string name="guide_mod_title">4 · MOD REMOTECONTROLPRO — OPCIONAL</string>
+    <string name="guide_mod_what">Um pequeno complemento para o jogo. O app funciona sem ele; com o mod, o celular faz o que o controle remoto do próprio jogo não faz.</string>
+    <string name="guide_mod_without_title">SEM O MOD</string>
+    <string name="guide_mod_with_title">SE VOCÊ ADICIONAR O MOD</string>
+    <string name="guide_mod_without_1">Volante, acelerador e freio</string>
+    <string name="guide_mod_without_2">A conexão procura o código do jogo: na primeira vez pode levar de 2 a 3 minutos</string>
+    <string name="guide_mod_without_3">O conta-giros estima a faixa vermelha; o volante na tela gira sempre a mesma quantidade</string>
+    <string name="guide_mod_gauges_note">Os mostradores continuam vindo do capítulo 2 (Painel ao vivo). O mod adiciona controles, não mostradores.</string>
+
 </resources>

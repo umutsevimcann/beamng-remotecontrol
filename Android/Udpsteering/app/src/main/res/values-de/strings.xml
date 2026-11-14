@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Licht und Blinker</string>
     <string name="mod_show_lights_sub">Eine Reihe unter den Anzeigen: Licht, Nebel, Blinker, Warnblinker, Bergen</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Verbinden</string>
+    <string name="guide_tab_dash">Live-Anzeigen</string>
+    <string name="guide_tab_drift">Driftmesser</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Fehlerbehebung</string>
+    <string name="guide_mod_title">4 · REMOTECONTROLPRO-MOD — OPTIONAL</string>
+    <string name="guide_mod_what">Eine kleine Erweiterung für das Spiel. Die App funktioniert auch ohne; mit der Mod kann das Handy, was die spieleigene Handy-Fernbedienung nicht kann.</string>
+    <string name="guide_mod_without_title">OHNE DIE MOD</string>
+    <string name="guide_mod_with_title">MIT DER MOD</string>
+    <string name="guide_mod_without_1">Lenkung, Gas und Bremse</string>
+    <string name="guide_mod_without_2">Beim Verbinden wird der Code des Spiels gesucht: beim ersten Mal kann das 2–3 Minuten dauern</string>
+    <string name="guide_mod_without_3">Der Drehzahlmesser schätzt den roten Bereich; das Lenkrad auf dem Bildschirm dreht immer gleich weit</string>
+    <string name="guide_mod_gauges_note">Die Anzeigen kommen weiterhin aus Kapitel 2 (Live-Anzeigen). Die Mod bringt Bedienelemente, keine Anzeigen.</string>
+
 </resources>

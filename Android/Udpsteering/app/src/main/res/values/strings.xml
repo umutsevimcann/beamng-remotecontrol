@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Lights and signals</string>
     <string name="mod_show_lights_sub">A row under the gauges: lights, fog, signals, hazards, recover</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Connect</string>
+    <string name="guide_tab_dash">Live dashboard</string>
+    <string name="guide_tab_drift">Drift meter</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Troubleshooting</string>
+    <string name="guide_mod_title">4 · REMOTECONTROLPRO MOD — OPTIONAL</string>
+    <string name="guide_mod_what">A small add-on for the game. The app works without it; add it and the phone can do what the game\'s own phone remote cannot.</string>
+    <string name="guide_mod_without_title">WITHOUT THE MOD</string>
+    <string name="guide_mod_with_title">IF YOU ADD THE MOD</string>
+    <string name="guide_mod_without_1">Steering, gas and brake</string>
+    <string name="guide_mod_without_2">Connecting searches for the game\'s code: the first time can take 2–3 minutes</string>
+    <string name="guide_mod_without_3">The rev counter guesses the redline; the on-screen wheel always turns the same amount</string>
+    <string name="guide_mod_gauges_note">The gauges still come from chapter 2 (Live dashboard). The mod adds controls, not gauges.</string>
+
 </resources>

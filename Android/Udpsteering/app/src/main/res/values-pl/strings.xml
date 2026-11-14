@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Światła i kierunkowskazy</string>
     <string name="mod_show_lights_sub">Rząd pod wskaźnikami: światła, przeciwmgielne, kierunkowskazy, awaryjne, przywróć</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Połączenie</string>
+    <string name="guide_tab_dash">Wskaźniki</string>
+    <string name="guide_tab_drift">Miernik driftu</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Rozwiązywanie problemów</string>
+    <string name="guide_mod_title">4 · MOD REMOTECONTROLPRO — OPCJONALNY</string>
+    <string name="guide_mod_what">Mały dodatek do gry. Aplikacja działa bez niego; z modem telefon potrafi to, czego nie potrafi wbudowany w grę pilot.</string>
+    <string name="guide_mod_without_title">BEZ MODA</string>
+    <string name="guide_mod_with_title">JEŚLI DODASZ MOD</string>
+    <string name="guide_mod_without_1">Kierownica, gaz i hamulec</string>
+    <string name="guide_mod_without_2">Łączenie wyszukuje kod gry: za pierwszym razem może to potrwać 2–3 minuty</string>
+    <string name="guide_mod_without_3">Obrotomierz zgaduje czerwone pole; kierownica na ekranie zawsze obraca się tak samo</string>
+    <string name="guide_mod_gauges_note">Wskaźniki nadal pochodzą z rozdziału 2 (Wskaźniki). Mod dodaje sterowanie, nie wskaźniki.</string>
+
 </resources>

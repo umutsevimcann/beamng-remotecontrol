@@ -212,4 +212,19 @@
     <string name="mod_show_lights">Farlar ve sinyaller</string>
     <string name="mod_show_lights_sub">Göstergelerin altında bir sıra: far, sis, sinyaller, dörtlü, kurtar</string>
 
+    <!-- Setup guide: chapters and the mod chapter -->
+    <string name="guide_tab_connect">Bağlantı</string>
+    <string name="guide_tab_dash">Canlı gösterge</string>
+    <string name="guide_tab_drift">Drift metre</string>
+    <string name="guide_tab_mod">Mod</string>
+    <string name="guide_tab_trouble">Sorun giderme</string>
+    <string name="guide_mod_title">4 · REMOTECONTROLPRO MODU — İSTEĞE BAĞLI</string>
+    <string name="guide_mod_what">Oyun için küçük bir eklenti. Uygulama mod olmadan da çalışır; eklersen telefon, oyunun kendi telefon kumandasının yapamadıklarını yapar.</string>
+    <string name="guide_mod_without_title">MOD OLMADAN</string>
+    <string name="guide_mod_with_title">MODU EKLERSEN</string>
+    <string name="guide_mod_without_1">Direksiyon, gaz ve fren</string>
+    <string name="guide_mod_without_2">Bağlanırken oyunun kodu aranır: ilk seferde 2–3 dakika sürebilir</string>
+    <string name="guide_mod_without_3">Devir saati kırmızı çizgiyi tahmin eder; ekrandaki direksiyon hep aynı miktarda döner</string>
+    <string name="guide_mod_gauges_note">Göstergeler yine 2. bölümden (Canlı gösterge) gelir. Mod gösterge değil, kontrol ekler.</string>
+
 </resources>
