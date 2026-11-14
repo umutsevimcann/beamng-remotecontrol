@@ -199,8 +199,16 @@ fun ModWheelKeys(mod: ModControls, u: Dp, modifier: Modifier) {
 @Composable
 fun ShiftKey(up: Boolean, mod: ModControls, u: Dp, modifier: Modifier) {
     val bit = if (up) ModProtocol.BUTTON_SHIFT_UP else ModProtocol.BUTTON_SHIFT_DOWN
-    HoldKey(u, modifier, Graphite.Blue, onPress = { pressed -> mod.onButton(bit, pressed) }) { tint ->
-        KeyLabel(if (up) KeyGlyph.SHIFT_UP else KeyGlyph.SHIFT_DOWN, tint, u, u * 9f)
+    HoldKey(u, modifier, Graphite.Blue, onPress = { pressed -> mod.onButton(bit, pressed) }) { _ ->
+        // Always blue, pressed or not: the two keys you hit most, findable at a glance.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.size(u * 10f)) { drawGlyph(if (up) KeyGlyph.SHIFT_UP else KeyGlyph.SHIFT_DOWN, Graphite.Blue) }
+            Spacer(Modifier.width(u * 1.5f))
+            Text(
+                if (up) "+" else "−", color = Graphite.Text, fontSize = (u * 6.5f).asSp(),
+                fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
+            )
+        }
     }
 }
 
@@ -311,10 +319,18 @@ private fun DrawScope.drawGlyph(glyph: KeyGlyph, color: Color) {
             drawArc(color, -40f, 80f, false, Offset(c.x - r * 0.55f, c.y - r * 0.95f), Size(r * 1.9f, r * 1.9f), style = line)
         }
         KeyGlyph.SHIFT_UP, KeyGlyph.SHIFT_DOWN -> {
-            val up = glyph == KeyGlyph.SHIFT_UP
-            val bar = Stroke(width = s * 0.13f, cap = StrokeCap.Round)
-            drawLine(color, Offset(c.x - r * 0.75f, c.y), Offset(c.x + r * 0.75f, c.y), bar.width, StrokeCap.Round)
-            if (up) drawLine(color, Offset(c.x, c.y - r * 0.75f), Offset(c.x, c.y + r * 0.75f), bar.width, StrokeCap.Round)
+            // Two stacked chevrons, like the arrows on a sequential shifter.
+            val dir = if (glyph == KeyGlyph.SHIFT_UP) -1f else 1f
+            val stroke = Stroke(width = s * 0.13f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+            for (row in listOf(-0.42f, 0.42f)) {
+                val y = c.y + row * r
+                val chevron = Path().apply {
+                    moveTo(c.x - r * 0.85f, y - dir * r * 0.32f)
+                    lineTo(c.x, y + dir * r * 0.38f)
+                    lineTo(c.x + r * 0.85f, y - dir * r * 0.32f)
+                }
+                drawPath(chevron, color, style = stroke)
+            }
         }
     }
 }

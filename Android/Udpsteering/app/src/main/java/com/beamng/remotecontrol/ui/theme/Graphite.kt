@@ -1,6 +1,7 @@
 package com.beamng.remotecontrol.ui.theme
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -31,7 +35,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.beamng.remotecontrol.settings.SettingsManager
 
 /** Which palette the app uses. [key] is what gets persisted. */
@@ -147,6 +155,45 @@ private val GraphiteTypography = Typography(
 
 @Composable
 fun RemoteTheme(content: @Composable () -> Unit) {
+    FreshLocale { ThemedContent(content) }
+}
+
+/**
+ * Activities handle a language change themselves (no restart, no blink). AppCompat
+ * then updates the resources of an activity that is in the background without
+ * telling its view tree, so Compose keeps showing the strings it already drew next
+ * to newly drawn ones in the new language. Coming back to the foreground, compare
+ * the language Compose believes in with the one the resources carry and, when they
+ * differ, hand the tree the real configuration: every stringResource() then re-reads.
+ */
+@Composable
+private fun FreshLocale(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val seen = LocalConfiguration.current
+    var actual by remember { mutableStateOf(seen) }
+    if (languageOf(seen) != languageOf(actual) && languageOf(seen) == languageOf(context.resources.configuration)) {
+        actual = seen // the view tree was told after all
+    }
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
+                val now = context.resources.configuration
+                if (languageOf(now) != languageOf(actual)) actual = Configuration(now)
+            }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+    val provided = if (languageOf(actual) == languageOf(seen)) seen else actual
+    CompositionLocalProvider(LocalConfiguration provides provided, content = content)
+}
+
+private fun languageOf(configuration: Configuration): String =
+    ConfigurationCompat.getLocales(configuration).toLanguageTags()
+
+@Composable
+private fun ThemedContent(content: @Composable () -> Unit) {
     val context = LocalContext.current
     // First composition of the process: adopt the saved choice.
     if (!ThemeState.loaded) {
