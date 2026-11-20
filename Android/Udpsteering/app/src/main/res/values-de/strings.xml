@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">TÜREN</string>
-    <string name="mod_show_vehicle">Fahrzeugtasten</string>
-    <string name="mod_show_vehicle_sub">Eine zweite Seite der Tastenreihe: Fahrmodus / ESC, Allrad, Untersetzung, Differenzialsperre, Lachgas und Türen. Gezeigt wird nur, was das Auto hat. Benötigt Mod 2.1 oder neuer.</string>
     <string name="mod_what_6">Fahrmodus / ESC, Allrad, Untersetzung, Differenzialsperre, Lachgas und Türen</string>
+    <string name="mod_vehicle_title">Fahrzeugtasten (zweite Seite)</string>
+    <string name="mod_vehicle_note">Mit der Taste ⋯ am Ende der Tastenreihe erreichbar. Eine Taste erscheint nur bei Autos, die das System haben. Benötigt Mod 2.1 oder neuer.</string>
+    <string name="mod_show_drive_mode">Fahrmodus / ESC</string>
+    <string name="mod_show_drive_mode_sub">ESC-Taste: nächster Fahrmodus oder nächster ESC- / Traktionskontroll-Modus</string>
+    <string name="mod_show_4wd">Allradantrieb</string>
+    <string name="mod_show_4wd_sub">Tasten 4WD, LO (Untersetzung) und DIFF (Differenzialsperre)</string>
+    <string name="mod_show_nitrous">Lachgas</string>
+    <string name="mod_show_nitrous_sub">N₂O-Taste: schaltet die Lachgasanlage scharf oder aus</string>
+    <string name="mod_show_doors">Türen</string>
+    <string name="mod_show_doors_sub">Eine Taste: öffnet Türen, Motorhaube und Kofferraum, dann schließt sie sie</string>
 
 </resources>

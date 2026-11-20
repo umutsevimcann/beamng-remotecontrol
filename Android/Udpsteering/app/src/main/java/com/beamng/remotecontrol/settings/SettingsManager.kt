@@ -104,9 +104,18 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_MOD_LIGHTS, true)
         set(v) = prefs.edit().putBoolean(KEY_MOD_LIGHTS, v).apply()
 
-    var modShowVehicle: Boolean
-        get() = prefs.getBoolean(KEY_MOD_VEHICLE, true)
-        set(v) = prefs.edit().putBoolean(KEY_MOD_VEHICLE, v).apply()
+    var modShowDriveMode: Boolean
+        get() = prefs.getBoolean(KEY_MOD_DRIVE_MODE, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_DRIVE_MODE, v).apply()
+    var modShow4wd: Boolean
+        get() = prefs.getBoolean(KEY_MOD_4WD, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_4WD, v).apply()
+    var modShowNitrous: Boolean
+        get() = prefs.getBoolean(KEY_MOD_NITROUS, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_NITROUS, v).apply()
+    var modShowDoors: Boolean
+        get() = prefs.getBoolean(KEY_MOD_DOORS, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_DOORS, v).apply()
 
     /** Name of the PC the mod reported last time (empty when we only know its IP). */
     var lastPcName: String
@@ -144,7 +153,10 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_MOD_HANDBRAKE = "mod_show_handbrake"
         const val KEY_MOD_HORN = "mod_show_horn"
         const val KEY_MOD_LIGHTS = "mod_show_lights"
-        const val KEY_MOD_VEHICLE = "mod_show_vehicle"
+        const val KEY_MOD_DRIVE_MODE = "mod_show_drive_mode"
+        const val KEY_MOD_4WD = "mod_show_4wd"
+        const val KEY_MOD_NITROUS = "mod_show_nitrous"
+        const val KEY_MOD_DOORS = "mod_show_doors"
         const val KEY_LAST_PC_NAME = "last_pc_name"
         const val KEY_LAST_MOD_VERSION = "last_mod_version"
 

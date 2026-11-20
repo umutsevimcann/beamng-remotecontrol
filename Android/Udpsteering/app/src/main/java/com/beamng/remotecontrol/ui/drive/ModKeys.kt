@@ -56,15 +56,28 @@ data class ModControls(
     val showHandbrake: Boolean,
     val showHorn: Boolean,
     val showLights: Boolean,
-    /** Drive mode, 4WD, nitrous, doors: a second page of the key row (mod 2.1+). */
-    val showVehicle: Boolean,
+    // The second page of the key row (mod 2.1+), one switch per group.
+    val showDriveMode: Boolean,
+    val show4wd: Boolean,
+    val showNitrous: Boolean,
+    val showDoors: Boolean,
     /** ModProtocol.FEATURE_* the car has; null = the mod did not say, assume all. */
     val features: Int?,
     val handbrakeOn: Boolean,
     /** One of the ModProtocol.BUTTON_* bits went down or up. */
     val onButton: (bit: Int, pressed: Boolean) -> Unit,
     val onHandbrake: (Boolean) -> Unit,
-)
+) {
+    private fun has(feature: Int) = features == null || features and feature != 0
+
+    // Wanted in settings AND present on this car.
+    val driveModeKey get() = showDriveMode && has(ModProtocol.FEATURE_DRIVE_MODE)
+    val fourWdKeys get() = show4wd && has(ModProtocol.FEATURE_4WD)
+    val nitrousKey get() = showNitrous && has(ModProtocol.FEATURE_NITROUS)
+
+    /** Is there anything to put on the vehicle page for this car? */
+    val showVehicle get() = driveModeKey || fourWdKeys || nitrousKey || showDoors
+}
 
 /** The symbols on the keys: the ones a car's own switches carry, so no language is needed. */
 enum class KeyGlyph { HEADLIGHTS, FOG, SIGNAL_LEFT, SIGNAL_RIGHT, HAZARD, RECOVER, HANDBRAKE, HORN, SHIFT_UP, SHIFT_DOWN, MORE }
@@ -206,15 +219,14 @@ private fun RowScope.LightKeys(mod: ModControls, telemetry: TelemetryUiState, u:
  */
 @Composable
 private fun RowScope.VehicleKeys(mod: ModControls, u: Dp) {
-    fun has(feature: Int) = mod.features == null || mod.features and feature != 0
     val keys = buildList {
-        if (has(ModProtocol.FEATURE_DRIVE_MODE)) add("ESC" to ModProtocol.BUTTON_DRIVE_MODE)
-        if (has(ModProtocol.FEATURE_4WD)) {
+        if (mod.driveModeKey) add("ESC" to ModProtocol.BUTTON_DRIVE_MODE)
+        if (mod.fourWdKeys) {
             add("4WD" to ModProtocol.BUTTON_4WD)
             add("LO" to ModProtocol.BUTTON_LOW_RANGE)
             add("DIFF" to ModProtocol.BUTTON_DIFF)
         }
-        if (has(ModProtocol.FEATURE_NITROUS)) add("N₂O" to ModProtocol.BUTTON_NITROUS)
+        if (mod.nitrousKey) add("N₂O" to ModProtocol.BUTTON_NITROUS)
     }
     for ((label, bit) in keys) {
         val accent = if (bit == ModProtocol.BUTTON_NITROUS) Graphite.Red else Graphite.Orange
@@ -222,6 +234,7 @@ private fun RowScope.VehicleKeys(mod: ModControls, u: Dp) {
             KeyText(label, tint, u)
         }
     }
+    if (!mod.showDoors) return
     // Doors: the game has separate "open" and "close" actions; one key alternates.
     var doorsOpen by remember { mutableStateOf(false) }
     HoldKey(u, Modifier.weight(1.5f).fillMaxHeight(), Graphite.Blue, lit = doorsOpen, onPress = { pressed ->

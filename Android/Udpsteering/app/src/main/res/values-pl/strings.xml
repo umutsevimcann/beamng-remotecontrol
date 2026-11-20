@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">DRZWI</string>
-    <string name="mod_show_vehicle">Przyciski pojazdu</string>
-    <string name="mod_show_vehicle_sub">Druga strona rzędu przycisków: tryb jazdy / ESC, napęd 4x4, reduktor, blokada dyferencjału, nitro i drzwi. Widać tylko to, co ma auto. Wymaga moda 2.1 lub nowszego.</string>
     <string name="mod_what_6">Tryb jazdy / ESC, napęd 4x4, reduktor, blokada dyferencjału, nitro i drzwi</string>
+    <string name="mod_vehicle_title">Przyciski pojazdu (druga strona)</string>
+    <string name="mod_vehicle_note">Dostępne po dotknięciu ⋯ na końcu rzędu przycisków. Przycisk pojawia się tylko w autach, które mają dany układ. Wymaga moda 2.1 lub nowszego.</string>
+    <string name="mod_show_drive_mode">Tryb jazdy / ESC</string>
+    <string name="mod_show_drive_mode_sub">Przycisk ESC: następny tryb jazdy albo następny tryb ESC / kontroli trakcji</string>
+    <string name="mod_show_4wd">Napęd na cztery koła</string>
+    <string name="mod_show_4wd_sub">Przyciski 4WD, LO (reduktor) i DIFF (blokada dyferencjału)</string>
+    <string name="mod_show_nitrous">Nitro</string>
+    <string name="mod_show_nitrous_sub">Przycisk N₂O: uzbraja lub wyłącza układ nitro</string>
+    <string name="mod_show_doors">Drzwi</string>
+    <string name="mod_show_doors_sub">Jeden przycisk: otwiera drzwi, maskę i bagażnik, potem je zamyka</string>
 
 </resources>

@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">KAPILAR</string>
-    <string name="mod_show_vehicle">Araç tuşları</string>
-    <string name="mod_show_vehicle_sub">Tuş sırasının ikinci sayfası: sürüş modu / ESC, 4WD, düşük vites, diferansiyel kilidi, nitro ve kapılar. Yalnızca araçta olanlar görünür. Mod 2.1 veya üstü gerekir.</string>
     <string name="mod_what_6">Sürüş modu / ESC, 4WD, düşük vites, diferansiyel kilidi, nitro ve kapılar</string>
+    <string name="mod_vehicle_title">Araç tuşları (ikinci sayfa)</string>
+    <string name="mod_vehicle_note">Bunlara tuş sırasının sonundaki ⋯ tuşuyla ulaşılır. Bir tuş yalnızca o sistemi olan araçlarda görünür. Mod 2.1 veya üstü gerekir.</string>
+    <string name="mod_show_drive_mode">Sürüş modu / ESC</string>
+    <string name="mod_show_drive_mode_sub">ESC tuşu: sonraki sürüş modu ya da sonraki ESC / çekiş kontrolü modu</string>
+    <string name="mod_show_4wd">Dört çeker</string>
+    <string name="mod_show_4wd_sub">4WD, LO (düşük vites) ve DIFF (diferansiyel kilidi) tuşları</string>
+    <string name="mod_show_nitrous">Nitro</string>
+    <string name="mod_show_nitrous_sub">N₂O tuşu: nitro sistemini hazırlar ya da kapatır</string>
+    <string name="mod_show_doors">Kapılar</string>
+    <string name="mod_show_doors_sub">Tek tuş: kapıları, kaputu ve bagajı açar, sonra kapatır</string>
 
 </resources>

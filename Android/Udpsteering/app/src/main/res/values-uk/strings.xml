@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">ДВЕРІ</string>
-    <string name="mod_show_vehicle">Кнопки автомобіля</string>
-    <string name="mod_show_vehicle_sub">Друга сторінка ряду кнопок: режим їзди / ESC, повний привід, понижена передача, блокування диференціала, закис азоту та двері. Показано лише те, що є в авто. Потрібен мод 2.1 або новіший.</string>
     <string name="mod_what_6">Режим їзди / ESC, повний привід, понижена передача, блокування диференціала, закис азоту та двері</string>
+    <string name="mod_vehicle_title">Кнопки автомобіля (друга сторінка)</string>
+    <string name="mod_vehicle_note">Відкриваються кнопкою ⋯ у кінці ряду. Кнопка з\'являється лише на авто, де є ця система. Потрібен мод 2.1 або новіший.</string>
+    <string name="mod_show_drive_mode">Режим їзди / ESC</string>
+    <string name="mod_show_drive_mode_sub">Кнопка ESC: наступний режим їзди або наступний режим ESC / антипробуксовки</string>
+    <string name="mod_show_4wd">Повний привід</string>
+    <string name="mod_show_4wd_sub">Кнопки 4WD, LO (понижена) та DIFF (блокування диференціала)</string>
+    <string name="mod_show_nitrous">Закис азоту</string>
+    <string name="mod_show_nitrous_sub">Кнопка N₂O: вмикає або вимикає систему закису азоту</string>
+    <string name="mod_show_doors">Двері</string>
+    <string name="mod_show_doors_sub">Одна кнопка: відчиняє двері, капот і багажник, потім зачиняє</string>
 
 </resources>

@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">PORTAS</string>
-    <string name="mod_show_vehicle">Teclas do veículo</string>
-    <string name="mod_show_vehicle_sub">Uma segunda página da fileira de teclas: modo de condução / ESC, 4x4, reduzida, bloqueio do diferencial, nitro e portas. Só aparece o que o carro tem. Requer o mod 2.1 ou mais recente.</string>
     <string name="mod_what_6">Modo de condução / ESC, 4x4, reduzida, bloqueio do diferencial, nitro e portas</string>
+    <string name="mod_vehicle_title">Teclas do veículo (segunda página)</string>
+    <string name="mod_vehicle_note">Toque na tecla ⋯ no fim da fileira para chegar a elas. Uma tecla só aparece nos carros que têm esse sistema. Requer o mod 2.1 ou mais recente.</string>
+    <string name="mod_show_drive_mode">Modo de condução / ESC</string>
+    <string name="mod_show_drive_mode_sub">Tecla ESC: próximo modo de condução, ou próximo modo de ESC / controle de tração</string>
+    <string name="mod_show_4wd">Tração nas quatro rodas</string>
+    <string name="mod_show_4wd_sub">Teclas 4WD, LO (reduzida) e DIFF (bloqueio do diferencial)</string>
+    <string name="mod_show_nitrous">Nitro</string>
+    <string name="mod_show_nitrous_sub">Tecla N₂O: arma ou desarma o sistema de nitro</string>
+    <string name="mod_show_doors">Portas</string>
+    <string name="mod_show_doors_sub">Uma tecla: abre as portas, o capô e o porta-malas, depois fecha</string>
 
 </resources>

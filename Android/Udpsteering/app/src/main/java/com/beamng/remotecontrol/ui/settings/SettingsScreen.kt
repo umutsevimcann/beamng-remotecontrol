@@ -301,7 +301,10 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     var handbrake by remember { mutableStateOf(settings.modShowHandbrake) }
     var horn by remember { mutableStateOf(settings.modShowHorn) }
     var lights by remember { mutableStateOf(settings.modShowLights) }
-    var vehicle by remember { mutableStateOf(settings.modShowVehicle) }
+    var driveMode by remember { mutableStateOf(settings.modShowDriveMode) }
+    var fourWd by remember { mutableStateOf(settings.modShow4wd) }
+    var nitrous by remember { mutableStateOf(settings.modShowNitrous) }
+    var doors by remember { mutableStateOf(settings.modShowDoors) }
     val modVersion = settings.lastModVersion
     val seen = modVersion.isNotEmpty()
 
@@ -378,12 +381,40 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
             settings.modShowLights = it
         }
     }
-    ToggleCard(
-        stringResource(R.string.mod_show_vehicle), stringResource(R.string.mod_show_vehicle_sub),
-        vehicle, u, Modifier.fillMaxWidth(),
-    ) {
-        vehicle = it
-        settings.modShowVehicle = it
+    // The second page of the key row (mod 2.1+): one switch per group.
+    Heading(stringResource(R.string.mod_vehicle_title), u)
+    Text(stringResource(R.string.mod_vehicle_note), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_drive_mode), stringResource(R.string.mod_show_drive_mode_sub),
+            driveMode, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            driveMode = it
+            settings.modShowDriveMode = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_4wd), stringResource(R.string.mod_show_4wd_sub),
+            fourWd, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            fourWd = it
+            settings.modShow4wd = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_nitrous), stringResource(R.string.mod_show_nitrous_sub),
+            nitrous, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            nitrous = it
+            settings.modShowNitrous = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_doors), stringResource(R.string.mod_show_doors_sub),
+            doors, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            doors = it
+            settings.modShowDoors = it
+        }
     }
 }
 

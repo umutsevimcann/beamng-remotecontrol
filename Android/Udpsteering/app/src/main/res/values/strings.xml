@@ -229,8 +229,16 @@
 
     <!-- Mod 2.1: vehicle keys -->
     <string name="mod_key_doors">DOORS</string>
-    <string name="mod_show_vehicle">Vehicle keys</string>
-    <string name="mod_show_vehicle_sub">A second page of the key row: drive mode / ESC, 4WD, low range, diff lock, nitrous and doors. Only what the car has is shown. Needs mod 2.1 or newer.</string>
     <string name="mod_what_6">Drive mode / ESC, 4WD, low range, diff lock, nitrous and doors</string>
+    <string name="mod_vehicle_title">Vehicle keys (second page)</string>
+    <string name="mod_vehicle_note">Tap the ⋯ key at the end of the key row to reach these. A key only appears on cars that have that system. Needs mod 2.1 or newer.</string>
+    <string name="mod_show_drive_mode">Drive mode / ESC</string>
+    <string name="mod_show_drive_mode_sub">ESC key: next drive mode, or next ESC / traction control mode</string>
+    <string name="mod_show_4wd">Four-wheel drive</string>
+    <string name="mod_show_4wd_sub">4WD, LO (low range) and DIFF (diff lock) keys</string>
+    <string name="mod_show_nitrous">Nitrous</string>
+    <string name="mod_show_nitrous_sub">N₂O key: arms or disarms the nitrous system</string>
+    <string name="mod_show_doors">Doors</string>
+    <string name="mod_show_doors_sub">One key: opens the doors, hood and trunk, then closes them</string>
 
 </resources>

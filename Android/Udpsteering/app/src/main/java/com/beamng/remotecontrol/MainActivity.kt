@@ -82,7 +82,10 @@ class MainActivity : AppCompatActivity() {
     private var modShowHandbrake by mutableStateOf(true)
     private var modShowHorn by mutableStateOf(true)
     private var modShowLights by mutableStateOf(true)
-    private var modShowVehicle by mutableStateOf(true)
+    private var modShowDriveMode by mutableStateOf(true)
+    private var modShow4wd by mutableStateOf(true)
+    private var modShowNitrous by mutableStateOf(true)
+    private var modShowDoors by mutableStateOf(true)
     private var modHasVehicleKeys = false // the linked mod is 2.1+
     private var modFeatures by mutableStateOf<Int?>(null)
     private var handbrakeOn by mutableStateOf(false)
@@ -168,7 +171,11 @@ class MainActivity : AppCompatActivity() {
                         ModControls(
                             showShift = modShowShift, showHandbrake = modShowHandbrake,
                             showHorn = modShowHorn, showLights = modShowLights,
-                            showVehicle = modShowVehicle && modHasVehicleKeys, features = modFeatures,
+                            showDriveMode = modShowDriveMode && modHasVehicleKeys,
+                            show4wd = modShow4wd && modHasVehicleKeys,
+                            showNitrous = modShowNitrous && modHasVehicleKeys,
+                            showDoors = modShowDoors && modHasVehicleKeys,
+                            features = modFeatures,
                             handbrakeOn = handbrakeOn,
                             onButton = { bit, pressed ->
                                 modButtons = if (pressed) modButtons or bit else modButtons and bit.inv()
@@ -221,7 +228,10 @@ class MainActivity : AppCompatActivity() {
         modShowHandbrake = settingsManager.modShowHandbrake
         modShowHorn = settingsManager.modShowHorn
         modShowLights = settingsManager.modShowLights
-        modShowVehicle = settingsManager.modShowVehicle
+        modShowDriveMode = settingsManager.modShowDriveMode
+        modShow4wd = settingsManager.modShow4wd
+        modShowNitrous = settingsManager.modShowNitrous
+        modShowDoors = settingsManager.modShowDoors
         // A key hidden in settings must not stay applied with no way to release it.
         if (!modShowHandbrake) {
             handbrakeOn = false
