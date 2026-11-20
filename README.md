@@ -11,6 +11,9 @@ live dashboard that works again on current game versions with no mods.
 dashboard designs, light and dark themes, nine languages) and adds an optional
 game mod, **RemoteControlPro**, for code-free pairing, gear shifting, handbrake,
 horn and lights.
+**v3.0.4** adds force-feedback steering (let go of the wheel and the car turns
+it), eight steering-wheel designs, four more dashboards, and keys for drive
+modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
@@ -23,12 +26,18 @@ horn and lights.
 * **Steering, throttle & brake** from the phone — tilt the phone, turn an on-screen
   wheel, or use arrow keys. Steering is linear: the app cancels the game's own
   steering curve, so a small turn is a small turn.
-* **Four dashboard designs** — Modern, Classic, Race and Minimal — plus light,
-  dark and follow-the-system themes, and a mirrored layout for left-handers.
+* **Eight dashboard designs** — Modern, Classic, Race, Minimal, Retro (LCD
+  digits), Cockpit (aircraft tapes), Drift (the car from above) and Telemetry
+  (a rolling graph) — plus light, dark and follow-the-system themes, and a
+  mirrored layout for left-handers.
+* **Eight steering wheels** — Sport, GT, Formula, Classic, Drift, Truck, Yoke
+  and Retro.
 * **RemoteControlPro mod (optional)** — pairs in about a second with no code, and
   adds shift up/down, handbrake, horn, headlights, fog lights, turn signals,
-  hazards and recover, analog pedals, and a rev counter and steering wheel that
-  match the car you are driving. See [The optional mod](#the-optional-mod-remotecontrolpro).
+  hazards and recover, analog pedals, force-feedback steering, keys for drive
+  mode / ESC, 4WD, low range, diff lock, nitrous, doors, camera, gearbox mode,
+  reset and pause, and a rev counter and steering wheel that match the car you
+  are driving. See [The optional mod](#the-optional-mod-remotecontrolpro).
 * **Live dashboard** using the game's built-in OutGauge stream (no mod required):
   speedometer, animated RPM gauge with redline, gear, fuel, engine temperature,
   turbo boost (auto-shown on turbo cars), and real dashboard warning lights
@@ -97,6 +106,9 @@ remote cannot:
 | Pairing searches for the game's code (first time: up to 2–3 min on 2.4 GHz) | Pairs in about a second, no code, no QR |
 | Pedals are on/off | Analog pedals |
 | Rev counter guesses the redline; on-screen wheel always turns 450° | Both match the car you are driving |
+| Let go of the on-screen wheel and it returns by estimate | The car turns it with the game's own force feedback, as on a wheel set |
+| — | Drive mode / ESC, 4WD, low range, diff lock, nitrous, doors (shown only on cars that have them) |
+| — | Camera, automatic/manual gearbox, reset, pause |
 
 Install:
 
@@ -172,8 +184,14 @@ All communication is UDP on the local network.
   `"RCP"`, version byte, floats steering (-1..1), throttle, brake, clutch,
   handbrake (0..1), then a uint32 button mask (bit 0 shift up, 1 shift down,
   2 horn, 3 headlights, 4 fog, 5 left signal, 6 right signal, 7 hazards,
-  8 recover). The mod sends back `RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>`
-  about twice a second.
+  8 recover, 9 reset, 10 drive mode/ESC, 11 4WD, 12 low range, 13 diff lock,
+  14 nitrous, 15 nitrous hold, 16 doors open, 17 doors close, 18 camera,
+  19 gearbox mode, 20 pause; bit 31 is a flag, "nobody holds the on-screen
+  wheel"). The mod sends back
+  `RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>|<features>` about twice a second
+  (features: 1 drive modes/ESC, 2 4WD, 4 nitrous) and, while the wheel is
+  free, `RCPS|<angle>` about 30 times a second: the angle its force feedback
+  has turned the wheel to. The hello may end with `|<wheelReturn%>` (20..200).
 * **Telemetry (game → app, port 4445):** the standard 96-byte OutGauge struct,
   sent by BeamNG's built-in `protocols_outgauge` (Options → Advanced → Protocols).
   A companion mod may append a 4-byte odometer (100 bytes).
