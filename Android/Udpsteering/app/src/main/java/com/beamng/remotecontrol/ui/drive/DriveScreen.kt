@@ -22,9 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -100,6 +102,8 @@ fun DriveScreen(
             }
         }
         var touchValue by remember(controlType) { mutableFloatStateOf(0f) }
+        // Which page of the mod's key row is showing: 0 lights, 1 vehicle systems.
+        var keyPage by rememberSaveable { mutableIntStateOf(0) }
         // Both arrows can be down at once; the bar shows their sum.
         var leftDown by remember(controlType) { mutableStateOf(false) }
         var rightDown by remember(controlType) { mutableStateOf(false) }
@@ -118,8 +122,8 @@ fun DriveScreen(
                     u,
                     Modifier.fillMaxWidth().weight(1f),
                 )
-                if (!dashboardOnly && mod != null && mod.showLights) {
-                    ModLightsRow(mod, telemetry, u, Modifier.fillMaxWidth().height(u * 11))
+                if (!dashboardOnly && mod != null && (mod.showLights || mod.showVehicle)) {
+                    ModKeyRow(mod, telemetry, keyPage, { keyPage = it }, u, Modifier.fillMaxWidth().height(u * 11))
                 }
                 if (!dashboardOnly) SteerBar(steerValue, Modifier.fillMaxWidth().height(u * 5))
             }

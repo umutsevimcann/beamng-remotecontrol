@@ -82,6 +82,9 @@ class MainActivity : AppCompatActivity() {
     private var modShowHandbrake by mutableStateOf(true)
     private var modShowHorn by mutableStateOf(true)
     private var modShowLights by mutableStateOf(true)
+    private var modShowVehicle by mutableStateOf(true)
+    private var modHasVehicleKeys = false // the linked mod is 2.1+
+    private var modFeatures by mutableStateOf<Int?>(null)
     private var handbrakeOn by mutableStateOf(false)
     private var wheelLockDeg by mutableFloatStateOf(WHEEL_LOCK_DEG)
     private var modRpmScale: RpmScale? = null // UI thread only
@@ -143,7 +146,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         settingsManager = SettingsManager.getInstance(this)
-        modLinked = (application as RemoteControlApplication).modInfo != null
+        val modInfo = (application as RemoteControlApplication).modInfo
+        modLinked = modInfo != null
+        modHasVehicleKeys = modInfo?.hasVehicleKeys == true
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -163,6 +168,7 @@ class MainActivity : AppCompatActivity() {
                         ModControls(
                             showShift = modShowShift, showHandbrake = modShowHandbrake,
                             showHorn = modShowHorn, showLights = modShowLights,
+                            showVehicle = modShowVehicle && modHasVehicleKeys, features = modFeatures,
                             handbrakeOn = handbrakeOn,
                             onButton = { bit, pressed ->
                                 modButtons = if (pressed) modButtons or bit else modButtons and bit.inv()
@@ -215,6 +221,7 @@ class MainActivity : AppCompatActivity() {
         modShowHandbrake = settingsManager.modShowHandbrake
         modShowHorn = settingsManager.modShowHorn
         modShowLights = settingsManager.modShowLights
+        modShowVehicle = settingsManager.modShowVehicle
         // A key hidden in settings must not stay applied with no way to release it.
         if (!modShowHandbrake) {
             handbrakeOn = false
@@ -514,6 +521,7 @@ class MainActivity : AppCompatActivity() {
             RpmScale(max = ceil(limit * 1.08f / 500f) * 500f, redline = limit)
         }
         wheelLockDeg = info.steeringLockDeg ?: WHEEL_LOCK_DEG
+        modFeatures = info.features
     }
 
     /**

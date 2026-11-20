@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">Devir saati kırmızı çizgiyi tahmin eder; ekrandaki direksiyon hep aynı miktarda döner</string>
     <string name="guide_mod_gauges_note">Göstergeler yine 2. bölümden (Canlı gösterge) gelir. Mod gösterge değil, kontrol ekler.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">KAPILAR</string>
+    <string name="mod_show_vehicle">Araç tuşları</string>
+    <string name="mod_show_vehicle_sub">Tuş sırasının ikinci sayfası: sürüş modu / ESC, 4WD, düşük vites, diferansiyel kilidi, nitro ve kapılar. Yalnızca araçta olanlar görünür. Mod 2.1 veya üstü gerekir.</string>
+    <string name="mod_what_6">Sürüş modu / ESC, 4WD, düşük vites, diferansiyel kilidi, nitro ve kapılar</string>
+
 </resources>

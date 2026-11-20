@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">The rev counter guesses the redline; the on-screen wheel always turns the same amount</string>
     <string name="guide_mod_gauges_note">The gauges still come from chapter 2 (Live dashboard). The mod adds controls, not gauges.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">DOORS</string>
+    <string name="mod_show_vehicle">Vehicle keys</string>
+    <string name="mod_show_vehicle_sub">A second page of the key row: drive mode / ESC, 4WD, low range, diff lock, nitrous and doors. Only what the car has is shown. Needs mod 2.1 or newer.</string>
+    <string name="mod_what_6">Drive mode / ESC, 4WD, low range, diff lock, nitrous and doors</string>
+
 </resources>

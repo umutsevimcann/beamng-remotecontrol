@@ -195,7 +195,7 @@ private fun ModChapter(u: Dp) {
                 letterSpacing = (u * 0.5f).asSp(), fontWeight = FontWeight.Bold,
             )
             Spacer(Modifier.height(u * 1.6f))
-            val lines = listOf(R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_5)
+            val lines = listOf(R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_6, R.string.mod_what_5)
             for (line in lines) Point(stringResource(line), Graphite.Orange, u)
         }
     }

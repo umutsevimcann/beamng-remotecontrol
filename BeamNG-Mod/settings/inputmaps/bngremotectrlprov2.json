@@ -1,6 +1,6 @@
 {
   "name":"BeamNG Remote (RemoteControlPro mod)",
-  "notes":"Phone controller provided by the RemoteControlPro mod: analog pedals, handbrake, shifting and lights.",
+  "notes":"Phone controller provided by the RemoteControlPro mod: analog pedals, handbrake, shifting, lights, drive modes, 4WD, nitrous and doors.",
   "bindings":[
     {"control":"xaxis",  "action":"steering",     "filterType":2, "linearity":1, "isInverted":false},
     {"control":"yaxis",  "action":"accelerate",   "filterType":2, "linearity":1},
@@ -16,6 +16,14 @@
     {"control":"button6", "action":"toggle_right_signal"},
     {"control":"button7", "action":"toggle_hazard_signal"},
     {"control":"button8", "action":"recover_vehicle"},
-    {"control":"button9", "action":"reset_physics"}
+    {"control":"button9", "action":"reset_physics"},
+    {"control":"button10", "action":"nextESCMode"},
+    {"control":"button11", "action":"toggle4WDStatus"},
+    {"control":"button12", "action":"toggleRangeStatus"},
+    {"control":"button13", "action":"toggleDiffMode"},
+    {"control":"button14", "action":"toggleNitrousOxide"},
+    {"control":"button15", "action":"overrideNitrousOxide"},
+    {"control":"button16", "action":"latchesOpen"},
+    {"control":"button17", "action":"latchesClose"}
   ]
 }

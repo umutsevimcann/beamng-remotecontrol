@@ -301,6 +301,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     var handbrake by remember { mutableStateOf(settings.modShowHandbrake) }
     var horn by remember { mutableStateOf(settings.modShowHorn) }
     var lights by remember { mutableStateOf(settings.modShowLights) }
+    var vehicle by remember { mutableStateOf(settings.modShowVehicle) }
     val modVersion = settings.lastModVersion
     val seen = modVersion.isNotEmpty()
 
@@ -317,7 +318,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     Heading(stringResource(R.string.mod_what_title), u)
     CardBox(u) {
         val points = listOf(
-            R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_5,
+            R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_6, R.string.mod_what_5,
         )
         for ((i, point) in points.withIndex()) {
             if (i > 0) Spacer(Modifier.height(u * 1.2f))
@@ -376,6 +377,13 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
             lights = it
             settings.modShowLights = it
         }
+    }
+    ToggleCard(
+        stringResource(R.string.mod_show_vehicle), stringResource(R.string.mod_show_vehicle_sub),
+        vehicle, u, Modifier.fillMaxWidth(),
+    ) {
+        vehicle = it
+        settings.modShowVehicle = it
     }
 }
 

@@ -90,4 +90,44 @@ class ModProtocolTest {
         assertNull(ModProtocol.parseVehicleInfo("RCPV|abc"))
         assertNull(ModProtocol.parseVehicleInfo("beam"))
     }
+
+    @Test
+    fun vehicleKeyBits_followTheModsInputmapOrder() {
+        // bngremotectrlprov2.json (mod 2.1): button10 drive mode/ESC, 11 4WD, 12 low range,
+        // 13 diff lock, 14 nitrous arm, 15 nitrous hold, 16 latches open, 17 latches close
+        assertEquals(1 shl 10, ModProtocol.BUTTON_DRIVE_MODE)
+        assertEquals(1 shl 11, ModProtocol.BUTTON_4WD)
+        assertEquals(1 shl 12, ModProtocol.BUTTON_LOW_RANGE)
+        assertEquals(1 shl 13, ModProtocol.BUTTON_DIFF)
+        assertEquals(1 shl 14, ModProtocol.BUTTON_NITROUS)
+        assertEquals(1 shl 15, ModProtocol.BUTTON_NITROUS_HOLD)
+        assertEquals(1 shl 16, ModProtocol.BUTTON_DOORS_OPEN)
+        assertEquals(1 shl 17, ModProtocol.BUTTON_DOORS_CLOSE)
+    }
+
+    @Test
+    fun vehicleInfo_carriesWhatTheCarHas_whenTheModSaysSo() {
+        // mod 2.1 appends a feature mask: 1 drive modes/ESC, 2 4WD, 4 nitrous
+        val v = ModProtocol.parseVehicleInfo("RCPV|7200|270|vivace|5")
+        assertEquals(5, v?.features)
+        assertEquals(true, v?.has(ModProtocol.FEATURE_DRIVE_MODE))
+        assertEquals(false, v?.has(ModProtocol.FEATURE_4WD))
+        assertEquals(true, v?.has(ModProtocol.FEATURE_NITROUS))
+
+        // mod 2.0 sends no mask: unknown, so nothing is ruled out
+        val old = ModProtocol.parseVehicleInfo("RCPV|7200|270|vivace")
+        assertNull(old?.features)
+        assertEquals(true, old?.has(ModProtocol.FEATURE_4WD))
+
+        // garbage in the mask is "unknown", not a crash
+        assertNull(ModProtocol.parseVehicleInfo("RCPV|7200|270|vivace|x")?.features)
+    }
+
+    @Test
+    fun modInfo_knowsWhetherTheModHasVehicleKeys() {
+        assertEquals(false, ModProtocol.ModInfo("PC", "2.0.0").hasVehicleKeys)
+        assertEquals(true, ModProtocol.ModInfo("PC", "2.1.0").hasVehicleKeys)
+        assertEquals(true, ModProtocol.ModInfo("PC", "3.0").hasVehicleKeys)
+        assertEquals(false, ModProtocol.ModInfo("PC", "nonsense").hasVehicleKeys)
+    }
 }

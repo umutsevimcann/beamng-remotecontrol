@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">Der Drehzahlmesser schätzt den roten Bereich; das Lenkrad auf dem Bildschirm dreht immer gleich weit</string>
     <string name="guide_mod_gauges_note">Die Anzeigen kommen weiterhin aus Kapitel 2 (Live-Anzeigen). Die Mod bringt Bedienelemente, keine Anzeigen.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">TÜREN</string>
+    <string name="mod_show_vehicle">Fahrzeugtasten</string>
+    <string name="mod_show_vehicle_sub">Eine zweite Seite der Tastenreihe: Fahrmodus / ESC, Allrad, Untersetzung, Differenzialsperre, Lachgas und Türen. Gezeigt wird nur, was das Auto hat. Benötigt Mod 2.1 oder neuer.</string>
+    <string name="mod_what_6">Fahrmodus / ESC, Allrad, Untersetzung, Differenzialsperre, Lachgas und Türen</string>
+
 </resources>

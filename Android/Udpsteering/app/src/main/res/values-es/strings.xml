@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">El cuentarrevoluciones estima la zona roja; el volante en pantalla gira siempre lo mismo</string>
     <string name="guide_mod_gauges_note">Los indicadores siguen viniendo del capítulo 2 (Tablero en vivo). El mod añade controles, no indicadores.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">PUERTAS</string>
+    <string name="mod_show_vehicle">Teclas del vehículo</string>
+    <string name="mod_show_vehicle_sub">Una segunda página de la fila de teclas: modo de conducción / ESC, 4x4, reductora, bloqueo de diferencial, nitro y puertas. Solo se muestra lo que tiene el coche. Requiere el mod 2.1 o posterior.</string>
+    <string name="mod_what_6">Modo de conducción / ESC, 4x4, reductora, bloqueo de diferencial, nitro y puertas</string>
+
 </resources>

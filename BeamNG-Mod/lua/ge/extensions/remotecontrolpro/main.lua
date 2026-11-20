@@ -9,8 +9,10 @@
 -- What it adds over the stock phone remote:
 --   * pairing without a code — the phone asks, the mod answers
 --   * analog throttle / brake / clutch / handbrake
---   * buttons: shift up/down, horn, lights, fog lights, signals, hazards, recover
---   * per-vehicle data sent back: rev limit and steering-wheel lock
+--   * buttons: shift up/down, horn, lights, fog lights, signals, hazards, recover,
+--     drive mode / ESC, 4WD, low range, diff lock, nitrous, door latches
+--   * per-vehicle data sent back: rev limit, steering-wheel lock, and which of the
+--     optional systems (drive modes, 4WD, nitrous) the car has
 --
 -- Wire protocol (version 1), UDP port 4450; replies go to the sender's address:
 --   phone -> mod   "RCP?|1|<deviceName>"                  hello (broadcast ok), ~every 3 s
@@ -20,18 +22,20 @@
 --                    float steering   -1 (left) .. 1 (right)
 --                    float throttle, brake, clutch, handbrake   0 .. 1
 --                    uint32 buttons   (bit n = button n held)
---   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicleName>"   ~2 Hz while driving
+--   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicleName>|<features>"   ~2 Hz while driving
+--                    features: 1 drive modes/ESC, 2 4WD, 4 nitrous (added in mod 2.1;
+--                    older apps ignore the extra field)
 -- A phone that stays silent for 10 s is unplugged.
 
 local M = {}
 
 local logTag = 'remotecontrolpro'
-local MOD_VERSION = '2.0.0'
+local MOD_VERSION = '2.1.0'
 local PROTOCOL = 1
 local PORT = 4450
 local DEVICE_TYPE = 'bngremotectrlprov2' -- must match the inputmap file name
 local N_AXES = 5      -- steering, throttle, brake, clutch, handbrake
-local N_BUTTONS = 10  -- see BUTTON order in the Android app (ModProtocol.kt)
+local N_BUTTONS = 18  -- see BUTTON order in the Android app (ModProtocol.kt)
 local TIMEOUT_MS = 10000
 local INFO_PERIOD = 0.5
 
@@ -174,8 +178,18 @@ local function receive(now)
   end
 end
 
--- Asks each driven vehicle for its rev limit and steering lock. The vehicle Lua
--- answers through onVehicleInfo; nothing here blocks on it.
+-- Runs in the vehicle's own Lua: the same controller lookups the game's input
+-- actions use, so a feature is reported exactly when its key would do something.
+local VEHICLE_QUERY = [[
+local f = 0
+if controller.getController('driveModes') or controller.getController('esc') then f = f + 1 end
+if #controller.getControllersByType('4wd') > 0 then f = f + 2 end
+if #controller.getControllersByType('nitrousOxideInjection') > 0 then f = f + 4 end
+obj:queueGameEngineLua(string.format(
+  "if remotecontrolpro_main then remotecontrolpro_main.onVehicleInfo(%d, %f, %f, %d) end",
+  obj:getId(), (electrics.values.maxrpm or 0), ((v.data.input and v.data.input.steeringWheelLock) or 0), f))
+]]
+
 -- The player a phone drives for, straight from the game's binding table. (The
 -- onInputBindingsChanged hook can fire while createDevice is still running,
 -- before the phone is in our table, so it is not a reliable source.)
@@ -185,24 +199,25 @@ local function playerOf(phone)
   return (player and player >= 0) and player or nil
 end
 
+-- Asks each driven vehicle for its rev limit and steering lock. The vehicle Lua
+-- answers through onVehicleInfo; nothing here blocks on it.
 local function requestVehicleInfo()
   for _, phone in pairs(phones) do
     local player = playerOf(phone)
     local vehicle = player and getPlayerVehicle(player) or nil
     if vehicle then
-      vehicle:queueLuaCommand(
-        'obj:queueGameEngineLua(string.format("if remotecontrolpro_main then remotecontrolpro_main.onVehicleInfo(%d, %f, %f) end", ' ..
-        'obj:getId(), (electrics.values.maxrpm or 0), ((v.data.input and v.data.input.steeringWheelLock) or 0)))')
+      vehicle:queueLuaCommand(VEHICLE_QUERY)
       local info = vehicleInfo[vehicle:getId()]
       if info then udpSocket:sendto(info, phone.ip, phone.port) end
     end
   end
 end
 
-local function onVehicleInfo(vehId, maxRpm, steeringLock)
+local function onVehicleInfo(vehId, maxRpm, steeringLock, features)
   local vehicle = getObjectByID(vehId)
   local name = vehicle and vehicle:getJBeamFilename() or ''
-  vehicleInfo[vehId] = string.format('RCPV|%d|%d|%s', maxRpm or 0, steeringLock or 0, tostring(name):gsub('[|\r\n]', '_'))
+  local safeName = tostring(name):gsub('[|\r\n]', '_')
+  vehicleInfo[vehId] = string.format('RCPV|%d|%d|%s|%d', maxRpm or 0, steeringLock or 0, safeName, features or 0)
 end
 
 local function onUpdate(dtReal)

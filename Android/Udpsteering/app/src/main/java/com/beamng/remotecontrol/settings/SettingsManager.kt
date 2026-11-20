@@ -104,6 +104,10 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_MOD_LIGHTS, true)
         set(v) = prefs.edit().putBoolean(KEY_MOD_LIGHTS, v).apply()
 
+    var modShowVehicle: Boolean
+        get() = prefs.getBoolean(KEY_MOD_VEHICLE, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_VEHICLE, v).apply()
+
     /** Name of the PC the mod reported last time (empty when we only know its IP). */
     var lastPcName: String
         get() = prefs.getString(KEY_LAST_PC_NAME, "") ?: ""
@@ -140,6 +144,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_MOD_HANDBRAKE = "mod_show_handbrake"
         const val KEY_MOD_HORN = "mod_show_horn"
         const val KEY_MOD_LIGHTS = "mod_show_lights"
+        const val KEY_MOD_VEHICLE = "mod_show_vehicle"
         const val KEY_LAST_PC_NAME = "last_pc_name"
         const val KEY_LAST_MOD_VERSION = "last_mod_version"
 

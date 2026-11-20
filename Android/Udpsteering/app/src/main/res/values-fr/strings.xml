@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">Le compte-tours estime la zone rouge ; le volant à l\'écran tourne toujours de la même amplitude</string>
     <string name="guide_mod_gauges_note">Les compteurs viennent toujours du chapitre 2 (Tableau de bord). Le mod ajoute des commandes, pas des compteurs.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">PORTES</string>
+    <string name="mod_show_vehicle">Touches du véhicule</string>
+    <string name="mod_show_vehicle_sub">Une deuxième page de la rangée de touches : mode de conduite / ESC, 4 roues motrices, gamme courte, blocage de différentiel, nitro et portes. Seul ce que la voiture possède est affiché. Nécessite le mod 2.1 ou plus récent.</string>
+    <string name="mod_what_6">Mode de conduite / ESC, 4 roues motrices, gamme courte, blocage de différentiel, nitro et portes</string>
+
 </resources>

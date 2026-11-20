@@ -227,4 +227,10 @@
     <string name="guide_mod_without_3">Obrotomierz zgaduje czerwone pole; kierownica na ekranie zawsze obraca się tak samo</string>
     <string name="guide_mod_gauges_note">Wskaźniki nadal pochodzą z rozdziału 2 (Wskaźniki). Mod dodaje sterowanie, nie wskaźniki.</string>
 
+    <!-- Mod 2.1: vehicle keys -->
+    <string name="mod_key_doors">DRZWI</string>
+    <string name="mod_show_vehicle">Przyciski pojazdu</string>
+    <string name="mod_show_vehicle_sub">Druga strona rzędu przycisków: tryb jazdy / ESC, napęd 4x4, reduktor, blokada dyferencjału, nitro i drzwi. Widać tylko to, co ma auto. Wymaga moda 2.1 lub nowszego.</string>
+    <string name="mod_what_6">Tryb jazdy / ESC, napęd 4x4, reduktor, blokada dyferencjału, nitro i drzwi</string>
+
 </resources>
