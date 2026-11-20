@@ -24,6 +24,9 @@
     {"control":"button14", "action":"toggleNitrousOxide"},
     {"control":"button15", "action":"overrideNitrousOxide"},
     {"control":"button16", "action":"latchesOpen"},
-    {"control":"button17", "action":"latchesClose"}
+    {"control":"button17", "action":"latchesClose"},
+    {"control":"button18", "action":"switch_camera_next"},
+    {"control":"button19", "action":"toggleShifterMode"},
+    {"control":"button20", "action":"pause"}
   ]
 }

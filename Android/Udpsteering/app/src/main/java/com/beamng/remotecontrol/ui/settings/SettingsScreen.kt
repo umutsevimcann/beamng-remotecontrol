@@ -55,6 +55,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.Canvas
 import com.beamng.remotecontrol.R
+import com.beamng.remotecontrol.ui.drive.drawWheel
+import com.beamng.remotecontrol.ui.drive.WheelStyle
+import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.AppLanguage
 import com.beamng.remotecontrol.ui.dash.DashArea
@@ -131,6 +134,9 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
     var deadZone by remember { mutableFloatStateOf(settings.deadZone) }
     var analogPedals by remember { mutableStateOf(settings.isAnalogPedals) }
     var mirrored by remember { mutableStateOf(settings.isMirrored) }
+    var selfAlign by remember { mutableStateOf(settings.isWheelSelfAlign) }
+    var wheelStyle by remember { mutableStateOf(settings.wheelStyle) }
+    var wheelReturn by remember { mutableFloatStateOf(settings.wheelReturnPercent.toFloat()) }
 
     Heading(stringResource(R.string.settings_control_type), u)
     // IntrinsicSize.Max: all three cards take the height of the tallest one,
@@ -171,6 +177,63 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
         }
         }
     }
+    // Arrow keys draw no wheel.
+    if (controlType != SettingsManager.CONTROL_BUTTONS) {
+        Heading(stringResource(R.string.settings_wheel_style), u)
+        for (rowStyles in WheelStyle.entries.chunked(4)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+                for (option in rowStyles) {
+                    val selected = option == wheelStyle
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(u * 2.5f))
+                            .clickable {
+                                wheelStyle = option
+                                settings.wheelStyle = option
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Canvas(
+                            Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1.35f)
+                                .background(Graphite.Inset, RoundedCornerShape(u * 2.5f))
+                                .border(if (selected) 2.dp else 1.dp, if (selected) Graphite.Orange else Graphite.Edge, RoundedCornerShape(u * 2.5f))
+                                .padding(u * 1.6f),
+                        ) { drawWheel(option) }
+                        Spacer(Modifier.height(u * 1.4f))
+                        Text(
+                            stringResource(option.nameRes), color = if (selected) Graphite.Text else Graphite.Muted,
+                            fontSize = (u * 3).asSp(), fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    }
+                }
+            }
+        }
+    }
+    // Only the on-screen wheel can be let go of.
+    if (controlType == SettingsManager.CONTROL_SLIDER) {
+        ToggleCard(
+            stringResource(R.string.settings_self_align), stringResource(R.string.settings_self_align_sub),
+            selfAlign, u, Modifier.fillMaxWidth(),
+        ) {
+            selfAlign = it
+            settings.isWheelSelfAlign = it
+        }
+        if (selfAlign) {
+            CardBox(u) {
+                SliderRow(
+                    stringResource(R.string.settings_wheel_return), stringResource(R.string.settings_wheel_return_sub),
+                    "${wheelReturn.roundToInt()}%", wheelReturn,
+                    ModProtocol.WHEEL_RETURN_MIN.toFloat()..ModProtocol.WHEEL_RETURN_MAX.toFloat(), u,
+                ) {
+                    wheelReturn = it
+                    settings.wheelReturnPercent = it.roundToInt()
+                }
+            }
+        }
+    }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
         ToggleCard(
             stringResource(R.string.settings_analog_pedals), stringResource(R.string.settings_analog_pedals_sub),
@@ -195,15 +258,13 @@ private fun DashboardSection(settings: SettingsManager, u: Dp) {
     var dashboardOnly by remember { mutableStateOf(settings.isDashboardOnly) }
     var perfTimer by remember { mutableStateOf(settings.isPerfTimerEnabled) }
     var metric by remember { mutableStateOf(settings.useMetricUnits()) }
-    val names = mapOf(
-        DashLayout.MODERN to R.string.dash_modern, DashLayout.CLASSIC to R.string.dash_classic,
-        DashLayout.RACE to R.string.dash_race, DashLayout.MINIMAL to R.string.dash_minimal,
-    )
 
     Heading(stringResource(R.string.settings_dash_layout), u)
+    val sample = remember(metric) { sampleDashState(metric) }
+    // Four thumbnails to a row.
+    for (rowLayouts in DashLayout.entries.chunked(4)) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
-        val sample = remember(metric) { sampleDashState(metric) }
-        for (option in DashLayout.entries) {
+        for (option in rowLayouts) {
             val selected = option == layout
             Column(
                 Modifier
@@ -228,11 +289,12 @@ private fun DashboardSection(settings: SettingsManager, u: Dp) {
                 }
                 Spacer(Modifier.height(u * 1.4f))
                 Text(
-                    stringResource(names.getValue(option)), color = if (selected) Graphite.Text else Graphite.Muted,
+                    stringResource(option.nameRes), color = if (selected) Graphite.Text else Graphite.Muted,
                     fontSize = (u * 3).asSp(), fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 )
             }
         }
+    }
     }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
         ToggleCard(
@@ -305,6 +367,12 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     var fourWd by remember { mutableStateOf(settings.modShow4wd) }
     var nitrous by remember { mutableStateOf(settings.modShowNitrous) }
     var doors by remember { mutableStateOf(settings.modShowDoors) }
+    var lowRange by remember { mutableStateOf(settings.modShowLowRange) }
+    var diffLock by remember { mutableStateOf(settings.modShowDiffLock) }
+    var camera by remember { mutableStateOf(settings.modShowCamera) }
+    var gearbox by remember { mutableStateOf(settings.modShowGearbox) }
+    var reset by remember { mutableStateOf(settings.modShowReset) }
+    var pause by remember { mutableStateOf(settings.modShowPause) }
     val modVersion = settings.lastModVersion
     val seen = modVersion.isNotEmpty()
 
@@ -322,6 +390,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     CardBox(u) {
         val points = listOf(
             R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_6, R.string.mod_what_5,
+            R.string.mod_what_7, R.string.mod_what_8,
         )
         for ((i, point) in points.withIndex()) {
             if (i > 0) Spacer(Modifier.height(u * 1.2f))
@@ -414,6 +483,57 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
         ) {
             doors = it
             settings.modShowDoors = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_low_range), stringResource(R.string.mod_show_low_range_sub),
+            lowRange, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            lowRange = it
+            settings.modShowLowRange = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_diff_lock), stringResource(R.string.mod_show_diff_lock_sub),
+            diffLock, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            diffLock = it
+            settings.modShowDiffLock = it
+        }
+    }
+    // The game page (mod 2.2+): one switch per key.
+    Heading(stringResource(R.string.mod_game_title), u)
+    Text(stringResource(R.string.mod_game_note), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_camera), stringResource(R.string.mod_show_camera_sub),
+            camera, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            camera = it
+            settings.modShowCamera = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_gearbox), stringResource(R.string.mod_show_gearbox_sub),
+            gearbox, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            gearbox = it
+            settings.modShowGearbox = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_reset), stringResource(R.string.mod_show_reset_sub),
+            reset, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            reset = it
+            settings.modShowReset = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_pause), stringResource(R.string.mod_show_pause_sub),
+            pause, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            pause = it
+            settings.modShowPause = it
         }
     }
 }

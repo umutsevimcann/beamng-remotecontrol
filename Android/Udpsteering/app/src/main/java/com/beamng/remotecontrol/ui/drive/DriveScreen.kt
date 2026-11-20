@@ -74,6 +74,11 @@ fun DriveScreen(
     mirrored: Boolean,
     mod: ModControls?,
     wheelLockDeg: Float,
+    wheelStyle: WheelStyle,
+    wheelRest: (() -> Float)?,
+    wheelRestStrength: () -> Float,
+    wheelGameAngle: () -> Float?,
+    onWheelHeld: (Boolean) -> Unit,
     steering: () -> Float,
     onThrottle: (Float) -> Unit,
     onBrake: (Float) -> Unit,
@@ -165,6 +170,11 @@ fun DriveScreen(
                             draggable = !isTilt,
                             displayValue = { tiltState.value },
                             lockDeg = wheelLockDeg,
+                            style = wheelStyle,
+                            restValue = wheelRest,
+                            restStrength = wheelRestStrength,
+                            gameAngle = wheelGameAngle,
+                            onHeld = onWheelHeld,
                             onValue = { v ->
                                 touchValue = v
                                 onWheel(v)

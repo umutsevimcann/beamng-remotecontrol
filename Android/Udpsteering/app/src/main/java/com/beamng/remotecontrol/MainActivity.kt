@@ -2,6 +2,7 @@ package com.beamng.remotecontrol
 
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -38,6 +39,7 @@ import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.protocol.MotionPacket
+import com.beamng.remotecontrol.protocol.SelfAlign
 import com.beamng.remotecontrol.protocol.Ports
 import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
@@ -46,6 +48,7 @@ import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.dash.RpmScale
 import com.beamng.remotecontrol.ui.dash.RpmScaleTracker
+import com.beamng.remotecontrol.ui.drive.WheelStyle
 import com.beamng.remotecontrol.ui.drive.DriveScreen
 import com.beamng.remotecontrol.ui.drive.ModControls
 import com.beamng.remotecontrol.ui.drive.WHEEL_LOCK_DEG
@@ -86,14 +89,30 @@ class MainActivity : AppCompatActivity() {
     private var modShow4wd by mutableStateOf(true)
     private var modShowNitrous by mutableStateOf(true)
     private var modShowDoors by mutableStateOf(true)
+    private var modShowLowRange by mutableStateOf(true)
+    private var modShowDiffLock by mutableStateOf(true)
+    private var modShowCamera by mutableStateOf(true)
+    private var modShowGearbox by mutableStateOf(true)
+    private var modShowReset by mutableStateOf(true)
+    private var modShowPause by mutableStateOf(true)
+    private var modHasGameKeys = false // the linked mod is 2.2+
     private var modHasVehicleKeys = false // the linked mod is 2.1+
     private var modFeatures by mutableStateOf<Int?>(null)
     private var handbrakeOn by mutableStateOf(false)
     private var wheelLockDeg by mutableFloatStateOf(WHEEL_LOCK_DEG)
+    private var wheelSelfAlign by mutableStateOf(true)
+    private var wheelStyle by mutableStateOf(WheelStyle.SPORT)
     private var modRpmScale: RpmScale? = null // UI thread only
     // Written on the UI thread, read by the sender coroutine.
     @Volatile private var handbrakeValue = 0f
     @Volatile private var modButtons = 0
+    // Force-feedback wheel (mod 2.2+): the game turns the wheel while no finger holds it.
+    @Volatile private var modHasWheelFeedback = false
+    @Volatile private var wheelHeld = false
+    @Volatile private var wheelReturnPercent = ModProtocol.WHEEL_RETURN_DEFAULT
+    @Volatile private var wheelFeedbackWanted = false // on-screen wheel + the setting
+    @Volatile private var gameWheelAngle = 0f
+    @Volatile private var gameWheelAngleMs = 0L
 
     // 0-100 timer state machine (UI thread only)
     private var timerArmed = false
@@ -152,6 +171,8 @@ class MainActivity : AppCompatActivity() {
         val modInfo = (application as RemoteControlApplication).modInfo
         modLinked = modInfo != null
         modHasVehicleKeys = modInfo?.hasVehicleKeys == true
+        modHasWheelFeedback = modInfo?.hasWheelFeedback == true
+        modHasGameKeys = modInfo?.hasGameKeys == true
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -175,6 +196,13 @@ class MainActivity : AppCompatActivity() {
                             show4wd = modShow4wd && modHasVehicleKeys,
                             showNitrous = modShowNitrous && modHasVehicleKeys,
                             showDoors = modShowDoors && modHasVehicleKeys,
+                            showLowRange = modShowLowRange && modHasVehicleKeys,
+                            showDiffLock = modShowDiffLock && modHasVehicleKeys,
+                            showCamera = modShowCamera && modHasGameKeys,
+                            showGearbox = modShowGearbox && modHasGameKeys,
+                            // Reset has been in the mod's inputmap since 2.0.
+                            showReset = modShowReset,
+                            showPause = modShowPause && modHasGameKeys,
                             features = modFeatures,
                             handbrakeOn = handbrakeOn,
                             onButton = { bit, pressed ->
@@ -189,7 +217,26 @@ class MainActivity : AppCompatActivity() {
                         null
                     },
                     wheelLockDeg = wheelLockDeg,
+                    wheelStyle = wheelStyle,
+                    // Null = plain centring. The slip angle is cleared when MotionSim goes
+                    // quiet, so without that stream this is the centre as well.
+                    wheelRest = if (wheelSelfAlign) {
+                        { SelfAlign.restPosition(telemetry.driftDeg) }
+                    } else {
+                        null
+                    },
                     steering = { steeringInputHandler?.getSteeringValue() ?: 0f },
+                    wheelRestStrength = { SelfAlign.strength(telemetry.speedMs, wheelReturnPercent) },
+                    // Fresh angle from the mod = the game is turning the wheel; stale or
+                    // none = fall back to our own estimate above.
+                    wheelGameAngle = {
+                        if (SystemClock.elapsedRealtime() - gameWheelAngleMs < GAME_WHEEL_FRESH_MS) gameWheelAngle else null
+                    },
+                    onWheelHeld = { held ->
+                        wheelHeld = held
+                        // An angle from before this grab says nothing about the next release.
+                        gameWheelAngleMs = 0L
+                    },
                     onThrottle = { value -> thrpushed = value },
                     onBrake = { value -> brpushed = value },
                     onSteerLeft = { pressed ->
@@ -224,6 +271,12 @@ class MainActivity : AppCompatActivity() {
         analogPedals = settingsManager.isAnalogPedals
         dashLayout = settingsManager.dashLayout
         mirrored = settingsManager.isMirrored
+        wheelSelfAlign = settingsManager.isWheelSelfAlign
+        wheelStyle = settingsManager.wheelStyle
+        wheelReturnPercent = settingsManager.wheelReturnPercent
+        wheelFeedbackWanted = wheelSelfAlign && controlType == SettingsManager.CONTROL_SLIDER
+        wheelHeld = false
+        gameWheelAngleMs = 0L
         modShowShift = settingsManager.modShowShift
         modShowHandbrake = settingsManager.modShowHandbrake
         modShowHorn = settingsManager.modShowHorn
@@ -232,6 +285,12 @@ class MainActivity : AppCompatActivity() {
         modShow4wd = settingsManager.modShow4wd
         modShowNitrous = settingsManager.modShowNitrous
         modShowDoors = settingsManager.modShowDoors
+        modShowLowRange = settingsManager.modShowLowRange
+        modShowDiffLock = settingsManager.modShowDiffLock
+        modShowCamera = settingsManager.modShowCamera
+        modShowGearbox = settingsManager.modShowGearbox
+        modShowReset = settingsManager.modShowReset
+        modShowPause = settingsManager.modShowPause
         // A key hidden in settings must not stay applied with no way to release it.
         if (!modShowHandbrake) {
             handbrakeOn = false
@@ -455,7 +514,7 @@ class MainActivity : AppCompatActivity() {
             DatagramSocket().use { socket ->
                 NetworkUtils.bindToNetwork(NetworkUtils.wifiNetwork(this), socket)
                 socket.soTimeout = 500
-                val hello = ModProtocol.hello(UdpDiscovery.deviceName())
+                val hello = ModProtocol.hello(UdpDiscovery.deviceName(), wheelReturnPercent)
                 coroutineScope {
                     val reader = launch { readModReplies(socket) }
                     var tick = 0
@@ -471,7 +530,12 @@ class MainActivity : AppCompatActivity() {
                                 val steering = steeringInputHandler?.getSteeringValue() ?: 0f
                                 val buffer = ModProtocol.control(
                                     steering = steering, throttle = thrpushed, brake = brpushed,
-                                    clutch = 0f, handbrake = handbrakeValue, buttons = modButtons,
+                                    clutch = 0f, handbrake = handbrakeValue,
+                                    buttons = if (modHasWheelFeedback && wheelFeedbackWanted && !wheelHeld) {
+                                        modButtons or ModProtocol.FLAG_WHEEL_FREE
+                                    } else {
+                                        modButtons
+                                    },
                                 )
                                 socket.send(DatagramPacket(buffer, buffer.size, host, Ports.MOD))
                                 if (failing) {
@@ -519,7 +583,14 @@ class MainActivity : AppCompatActivity() {
             } catch (e: IOException) {
                 return // socket closed: the link is ending
             }
-            val info = ModProtocol.parseVehicleInfo(String(buf, 0, packet.length)) ?: continue
+            val message = String(buf, 0, packet.length)
+            val angle = ModProtocol.parseWheelAngle(message)
+            if (angle != null) {
+                gameWheelAngle = angle
+                gameWheelAngleMs = SystemClock.elapsedRealtime()
+                continue
+            }
+            val info = ModProtocol.parseVehicleInfo(message) ?: continue
             withContext(Dispatchers.Main) { onVehicleInfo(info) }
         }
     }
@@ -715,6 +786,7 @@ class MainActivity : AppCompatActivity() {
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
         private const val SEND_RETRY_DELAY_MS = 250L
         private const val NEUTRAL_PACKETS = 3
+        private const val GAME_WHEEL_FRESH_MS = 250L // the mod reports the free wheel ~30 times a second
         private const val ABS_VIBRATION_COOLDOWN_MS = 150L
         private const val TELEMETRY_STALE_MS = 2000L
         private const val IMPACT_WINDOW_MS = 300L

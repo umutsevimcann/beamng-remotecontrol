@@ -21,6 +21,11 @@ fun DashArea(layout: DashLayout, state: DashState, u: Dp, modifier: Modifier = M
         DashLayout.CLASSIC -> ClassicDash(state, u, modifier)
         DashLayout.RACE -> RaceDash(state, u, modifier)
         DashLayout.MINIMAL -> MinimalDash(state, u, modifier)
+        // Drawn as one canvas each: they size themselves from the area, not from u.
+        DashLayout.RETRO -> RetroDash(state, modifier)
+        DashLayout.COCKPIT -> CockpitDash(state, modifier)
+        DashLayout.DRIFT -> DriftDash(state, modifier)
+        DashLayout.TELEMETRY -> TelemetryDash(state, modifier)
     }
 }
 

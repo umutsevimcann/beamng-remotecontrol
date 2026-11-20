@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,9 +56,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.beamng.remotecontrol.protocol.Receivepacket
+import com.beamng.remotecontrol.protocol.SelfAlign
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.theme.Graphite
 import com.beamng.remotecontrol.ui.theme.asSp
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -76,6 +79,13 @@ private const val HUB_DEAD_RADIUS = 0.22f
  * phase, so a value that changes every frame (tilt) redraws without recomposing.
  * [draggable] = true: the control. Drag it around its centre, up to ±450°
  * (multi-turn); it emits -1..1 through [onValue] and springs back on release.
+ * With [restValue] the released wheel is not snapped to the centre: it keeps
+ * steering, turning towards wherever [restValue] says the car's front wheels are
+ * being pulled (-1..1; counter-steer in a slide, the centre otherwise), as hard as
+ * [restStrength] says (see [SelfAlign.strength]). It moves like a wheel with weight.
+ * Better still, when [gameAngle] has a value the game itself is turning the released
+ * wheel with its force feedback, and the wheel simply shows that. [onHeld] tells
+ * the caller when a finger takes the wheel and when it lets go.
  */
 @Composable
 fun SteeringWheel(
@@ -83,6 +93,11 @@ fun SteeringWheel(
     draggable: Boolean,
     displayValue: () -> Float,
     lockDeg: Float = WHEEL_LOCK_DEG,
+    style: WheelStyle = WheelStyle.SPORT,
+    restValue: (() -> Float)? = null,
+    restStrength: () -> Float = { 1f },
+    gameAngle: () -> Float? = { null },
+    onHeld: (Boolean) -> Unit = {},
     onValue: (Float) -> Unit,
     onRelease: () -> Unit,
     modifier: Modifier = Modifier,
@@ -93,6 +108,61 @@ fun SteeringWheel(
     val currentOnRelease by rememberUpdatedState(onRelease)
     // The mod reports each car's real steering lock; without it, 450° each way.
     val currentLock by rememberUpdatedState(lockDeg)
+    val currentRest by rememberUpdatedState(restValue)
+    val currentStrength by rememberUpdatedState(restStrength)
+    val currentGameAngle by rememberUpdatedState(gameAngle)
+    val currentOnHeld by rememberUpdatedState(onHeld)
+    var held by remember { mutableStateOf(false) }
+
+    // Let go, the wheel is the car's: every frame it moves towards the rest position
+    // and that is what gets sent, until a finger takes it again.
+    if (draggable && restValue != null) {
+        LaunchedEffect(Unit) {
+            var lastNanos = 0L
+            var parked = true
+            var speed = 0f
+            while (true) {
+                val now = withFrameNanos { it }
+                val dt = if (lastNanos == 0L) 0f else (now - lastNanos) / 1e9f
+                lastNanos = now
+                val rest = currentRest
+                if (held || rest == null) {
+                    parked = false
+                    speed = 0f
+                    continue
+                }
+                val fromGame = currentGameAngle()
+                if (fromGame != null && fromGame.isFinite()) {
+                    // The game has the wheel. Keep the handler on the same angle, so a
+                    // finger that takes it back carries on from here.
+                    val a = fromGame.coerceIn(-1f, 1f)
+                    parked = false
+                    speed = 0f
+                    drag.snapTo(a * currentLock)
+                    currentOnValue(a)
+                    continue
+                }
+                val target = rest().let { if (it.isFinite()) it.coerceIn(-1f, 1f) else 0f } * currentLock
+                val moved = SelfAlign.step(SelfAlign.WheelMotion(drag.value, speed), target, currentStrength(), dt)
+                // The steering stops are solid.
+                val next = moved.angle.coerceIn(-currentLock, currentLock)
+                speed = if (next == moved.angle) moved.speed else 0f
+                if (target == 0f && abs(next) < 0.5f && abs(speed) < 5f) {
+                    // Settled on the centre: say so once, then stay quiet.
+                    if (!parked) {
+                        parked = true
+                        speed = 0f
+                        drag.snapTo(0f)
+                        currentOnRelease()
+                    }
+                } else {
+                    parked = false
+                    drag.snapTo(next)
+                    currentOnValue(next / currentLock)
+                }
+            }
+        }
+    }
 
     // The gesture coroutine outlives recompositions, hence currentOnValue/currentOnRelease:
     // with stale lambdas the wheel kept driving the previous control type's handler.
@@ -106,6 +176,8 @@ fun SteeringWheel(
             // and tell the handler, which was already reset to 0 on release —
             // otherwise the first move would jump from 0 to that angle.
             var current = drag.value
+            held = true
+            currentOnHeld(true)
             scope.launch { drag.stop() }
             currentOnValue(current / currentLock)
             val deadRadius = minOf(cx, cy) * HUB_DEAD_RADIUS
@@ -128,9 +200,13 @@ fun SteeringWheel(
                     currentOnValue(current / currentLock)
                 }
             } finally {
-                // Self-centring, like a real wheel let go at speed.
-                currentOnRelease()
-                scope.launch { drag.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)) }
+                held = false
+                currentOnHeld(false)
+                if (currentRest == null) {
+                    // Plain self-centring: the car gets 0 at once, the picture springs back.
+                    currentOnRelease()
+                    scope.launch { drag.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)) }
+                }
             }
         }
     }
@@ -147,11 +223,12 @@ fun SteeringWheel(
             Modifier.fillMaxSize().graphicsLayer {
                 rotationZ = if (draggable) drag.value else displayValue() * currentLock
             },
-        ) { drawWheel() }
+        ) { drawWheel(style) }
     }
 }
 
-private fun DrawScope.drawWheel() {
+/** The original: leather rim, three brushed-metal spokes. */
+internal fun DrawScope.drawSportWheel() {
     val r = size.minDimension / 2f * 0.94f
     val c = center
     val rimW = r * 0.21f

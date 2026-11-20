@@ -2,6 +2,8 @@ package com.beamng.remotecontrol.ui.menu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -213,13 +215,11 @@ private fun MenuRow(title: String, value: String, u: Dp, onClick: () -> Unit) {
 
 @Composable
 private fun LayoutSelector(selected: DashLayout, onLayout: (DashLayout) -> Unit, u: Dp, modifier: Modifier) {
-    val names = mapOf(
-        DashLayout.MODERN to R.string.dash_modern,
-        DashLayout.CLASSIC to R.string.dash_classic,
-        DashLayout.RACE to R.string.dash_race,
-        DashLayout.MINIMAL to R.string.dash_minimal,
-    )
-    Row(modifier, horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+    // Eight names do not fit across every phone: the row scrolls sideways.
+    Row(
+        modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically,
+    ) {
         for (layout in DashLayout.entries) {
             val isSelected = layout == selected
             Column(
@@ -227,7 +227,7 @@ private fun LayoutSelector(selected: DashLayout, onLayout: (DashLayout) -> Unit,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    stringResource(names.getValue(layout)),
+                    stringResource(layout.nameRes),
                     color = if (isSelected) Graphite.Text else Graphite.Muted,
                     fontSize = (u * 3.1f).asSp(), fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 )

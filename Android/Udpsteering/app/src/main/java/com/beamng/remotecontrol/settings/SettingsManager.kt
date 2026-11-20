@@ -1,5 +1,7 @@
 package com.beamng.remotecontrol.settings
 
+import com.beamng.remotecontrol.protocol.ModProtocol
+import com.beamng.remotecontrol.ui.drive.WheelStyle
 import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.theme.ThemeMode
 import android.content.Context
@@ -77,10 +79,28 @@ class SettingsManager private constructor(context: Context) {
         get() = DashLayout.fromKey(prefs.getString(KEY_DASH_LAYOUT, null))
         set(layout) = prefs.edit().putString(KEY_DASH_LAYOUT, layout.key).apply()
 
+    /** Which steering wheel the drive screen draws. */
+    var wheelStyle: WheelStyle
+        get() = WheelStyle.fromKey(prefs.getString(KEY_WHEEL_STYLE, null))
+        set(style) = prefs.edit().putString(KEY_WHEEL_STYLE, style.key).apply()
+
     /** Wheel on the right, pedals on the left — for left-handed players. */
     var isMirrored: Boolean
         get() = prefs.getBoolean(KEY_MIRRORED, DEFAULT_MIRRORED)
         set(enabled) = prefs.edit().putBoolean(KEY_MIRRORED, enabled).apply()
+
+    /** Released on-screen wheel follows the car (counter-steers in a slide) instead of snapping to the centre. */
+    var isWheelSelfAlign: Boolean
+        get() = prefs.getBoolean(KEY_WHEEL_SELF_ALIGN, true)
+        set(enabled) = prefs.edit().putBoolean(KEY_WHEEL_SELF_ALIGN, enabled).apply()
+
+    /** How hard the released wheel is pulled back, percent (the force-feedback strength of a wheel set). */
+    var wheelReturnPercent: Int
+        get() = prefs.getInt(KEY_WHEEL_RETURN, ModProtocol.WHEEL_RETURN_DEFAULT)
+            .coerceIn(ModProtocol.WHEEL_RETURN_MIN, ModProtocol.WHEEL_RETURN_MAX)
+        set(value) = prefs.edit().putInt(
+            KEY_WHEEL_RETURN, value.coerceIn(ModProtocol.WHEEL_RETURN_MIN, ModProtocol.WHEEL_RETURN_MAX),
+        ).apply()
 
     // ==================== THEME ====================
 
@@ -117,6 +137,25 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_MOD_DOORS, true)
         set(v) = prefs.edit().putBoolean(KEY_MOD_DOORS, v).apply()
 
+    var modShowLowRange: Boolean
+        get() = prefs.getBoolean(KEY_MOD_LOW_RANGE, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_LOW_RANGE, v).apply()
+    var modShowDiffLock: Boolean
+        get() = prefs.getBoolean(KEY_MOD_DIFF_LOCK, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_DIFF_LOCK, v).apply()
+    var modShowCamera: Boolean
+        get() = prefs.getBoolean(KEY_MOD_CAMERA, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_CAMERA, v).apply()
+    var modShowGearbox: Boolean
+        get() = prefs.getBoolean(KEY_MOD_GEARBOX, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_GEARBOX, v).apply()
+    var modShowReset: Boolean
+        get() = prefs.getBoolean(KEY_MOD_RESET, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_RESET, v).apply()
+    var modShowPause: Boolean
+        get() = prefs.getBoolean(KEY_MOD_PAUSE, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_PAUSE, v).apply()
+
     /** Name of the PC the mod reported last time (empty when we only know its IP). */
     var lastPcName: String
         get() = prefs.getString(KEY_LAST_PC_NAME, "") ?: ""
@@ -148,6 +187,9 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_ANALOG_PEDALS = "analog_pedals"
         const val KEY_DASH_LAYOUT = "dash_layout"
         const val KEY_MIRRORED = "mirrored_layout"
+        const val KEY_WHEEL_SELF_ALIGN = "wheel_self_align"
+        const val KEY_WHEEL_STYLE = "wheel_style"
+        const val KEY_WHEEL_RETURN = "wheel_return_percent"
         const val KEY_THEME = "theme_mode"
         const val KEY_MOD_SHIFT = "mod_show_shift"
         const val KEY_MOD_HANDBRAKE = "mod_show_handbrake"
@@ -157,6 +199,12 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_MOD_4WD = "mod_show_4wd"
         const val KEY_MOD_NITROUS = "mod_show_nitrous"
         const val KEY_MOD_DOORS = "mod_show_doors"
+        const val KEY_MOD_LOW_RANGE = "mod_show_low_range"
+        const val KEY_MOD_DIFF_LOCK = "mod_show_diff_lock"
+        const val KEY_MOD_CAMERA = "mod_show_camera"
+        const val KEY_MOD_GEARBOX = "mod_show_gearbox"
+        const val KEY_MOD_RESET = "mod_show_reset"
+        const val KEY_MOD_PAUSE = "mod_show_pause"
         const val KEY_LAST_PC_NAME = "last_pc_name"
         const val KEY_LAST_MOD_VERSION = "last_mod_version"
 

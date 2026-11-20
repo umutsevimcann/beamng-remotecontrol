@@ -130,4 +130,48 @@ class ModProtocolTest {
         assertEquals(true, ModProtocol.ModInfo("PC", "3.0").hasVehicleKeys)
         assertEquals(false, ModProtocol.ModInfo("PC", "nonsense").hasVehicleKeys)
     }
+
+    @Test
+    fun wheelFreeFlag_isTheTopBit_clearOfEveryButton() {
+        // bit 31: not a button of the virtual device, a flag the mod reads itself
+        assertEquals(0x80000000.toInt(), ModProtocol.FLAG_WHEEL_FREE)
+        val packet = ModProtocol.control(0f, 0f, 0f, 0f, 0f, ModProtocol.FLAG_WHEEL_FREE or ModProtocol.BUTTON_HORN)
+        assertEquals(0x04.toByte(), packet[24])
+        assertEquals(0x80.toByte(), packet[27])
+    }
+
+    @Test
+    fun wheelAngle_isWhereTheGameHasTheReleasedWheel() {
+        assertEquals(-0.4312f, ModProtocol.parseWheelAngle("RCPS|-0.4312")!!, 1e-6f)
+        assertEquals(1f, ModProtocol.parseWheelAngle("RCPS|1.7")!!, 0f) // past the lock: clamp
+        assertNull(ModProtocol.parseWheelAngle("RCPS|nan"))
+        assertNull(ModProtocol.parseWheelAngle("RCPS|"))
+        assertNull(ModProtocol.parseWheelAngle("RCPV|7200|270|vivace"))
+    }
+
+    @Test
+    fun modInfo_knowsWhetherTheModHasForceFeedback() {
+        assertEquals(false, ModProtocol.ModInfo("PC", "2.1.0").hasWheelFeedback)
+        assertEquals(true, ModProtocol.ModInfo("PC", "2.2.0").hasWheelFeedback)
+        assertEquals(true, ModProtocol.ModInfo("PC", "3.0").hasWheelFeedback)
+        assertEquals(false, ModProtocol.ModInfo("PC", "").hasWheelFeedback)
+    }
+
+    @Test
+    fun hello_canCarryHowHardTheWheelReturns() {
+        // percent of the game's force feedback; older mods never read a fourth field
+        assertEquals("RCP?|1|Phone|150", String(ModProtocol.hello("Phone", wheelReturnPercent = 150)))
+        assertEquals("RCP?|1|Phone|200", String(ModProtocol.hello("Phone", wheelReturnPercent = 900)))
+        assertEquals("RCP?|1|Phone|20", String(ModProtocol.hello("Phone", wheelReturnPercent = -5)))
+    }
+
+    @Test
+    fun gameKeyBits_followTheModsInputmapOrder() {
+        assertEquals(1 shl 9, ModProtocol.BUTTON_RESET)
+        assertEquals(1 shl 18, ModProtocol.BUTTON_CAMERA)
+        assertEquals(1 shl 19, ModProtocol.BUTTON_GEARBOX_MODE)
+        assertEquals(1 shl 20, ModProtocol.BUTTON_PAUSE)
+        assertEquals(false, ModProtocol.ModInfo("PC", "2.1.0").hasGameKeys)
+        assertEquals(true, ModProtocol.ModInfo("PC", "2.2.0").hasGameKeys)
+    }
 }

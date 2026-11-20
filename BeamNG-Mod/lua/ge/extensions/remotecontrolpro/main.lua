@@ -10,12 +10,18 @@
 --   * pairing without a code — the phone asks, the mod answers
 --   * analog throttle / brake / clutch / handbrake
 --   * buttons: shift up/down, horn, lights, fog lights, signals, hazards, recover,
---     drive mode / ESC, 4WD, low range, diff lock, nitrous, door latches
+--     drive mode / ESC, 4WD, low range, diff lock, nitrous, door latches,
+--     camera, gearbox mode (automatic / manual), pause
+--   * a force-feedback steering wheel: let go of the on-screen wheel and the car
+--     turns it (self-centring, counter-steer in a slide), through the game's own
+--     virtual-wheel hook (hydros.enableVirtualWheel)
 --   * per-vehicle data sent back: rev limit, steering-wheel lock, and which of the
 --     optional systems (drive modes, 4WD, nitrous) the car has
 --
 -- Wire protocol (version 1), UDP port 4450; replies go to the sender's address:
---   phone -> mod   "RCP?|1|<deviceName>"                  hello (broadcast ok), ~every 3 s
+--   phone -> mod   "RCP?|1|<deviceName>[|<wheelReturn>]"  hello (broadcast ok), ~every 3 s
+--                    wheelReturn (2.2): 20..200, percent of the force feedback that
+--                    turns the released wheel (the "FFB strength" of a wheel set)
 --   mod   -> phone "RCP!|1|<pcName>|<modVersion>"         answer to every hello
 --   phone -> mod   28 bytes, little-endian                control, ~100 Hz
 --                    char[3] "RCP", uint8 version (1)
@@ -25,19 +31,24 @@
 --   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicleName>|<features>"   ~2 Hz while driving
 --                    features: 1 drive modes/ESC, 2 4WD, 4 nitrous (added in mod 2.1;
 --                    older apps ignore the extra field)
+--   mod   -> phone "RCPS|<angle>"   ~30 Hz while the phone's wheel is free (mod 2.2)
+--                    Control buttons bit 31 = "nobody holds the on-screen wheel". The
+--                    mod then lets the game's own force feedback turn the wheel, as it
+--                    would a wheel set, and reports the angle, -1 (left) .. 1 (right).
 -- A phone that stays silent for 10 s is unplugged.
 
 local M = {}
 
 local logTag = 'remotecontrolpro'
-local MOD_VERSION = '2.1.0'
+local MOD_VERSION = '2.2.0'
 local PROTOCOL = 1
 local PORT = 4450
 local DEVICE_TYPE = 'bngremotectrlprov2' -- must match the inputmap file name
 local N_AXES = 5      -- steering, throttle, brake, clutch, handbrake
-local N_BUTTONS = 18  -- see BUTTON order in the Android app (ModProtocol.kt)
+local N_BUTTONS = 21  -- see BUTTON order in the Android app (ModProtocol.kt)
 local TIMEOUT_MS = 10000
 local INFO_PERIOD = 0.5
+local FLAG_WHEEL_FREE = 0x80000000 -- control buttons bit 31
 
 local min, max = math.min, math.max
 
@@ -58,7 +69,8 @@ if ffi then
 end
 
 local udpSocket = nil
--- phones by ip: { ip, port, name, deviceInst, lastSeen, axes = {}, buttons = 0 }
+-- phones by ip: { ip, port, name, deviceInst, lastSeen, axes = {}, buttons = 0,
+--                 wheelFree, wheelVeh (vehicle id the virtual wheel is installed on) }
 -- One device per phone, whatever socket it talks from: the app pairs from one
 -- UDP port and drives from another, and gets a new one on every reconnect.
 local phones = {}
@@ -94,9 +106,71 @@ local function openSocket()
   return true
 end
 
+-- Runs in the vehicle's own Lua. hydros.enableVirtualWheel is the game's hook for a
+-- wheel that is simulated instead of plugged in: the game computes the force-feedback
+-- torque exactly as for a wheel set and hands it to our function, and asks our
+-- other function for the wheel angle every frame.
+--   held: the angle is the phone's own steering (what the game already has).
+--   free: the wheel is a mass that the torque turns; its angle is the steering.
+local VEHICLE_WHEEL_ON = [[
+if not rcpWheel then
+  -- Start from where the steering is now: the first command may already say "free".
+  local start = electrics.values.steering_input or 0
+  if start ~= start then start = 0 end
+  local w = {free = false, angle = start, vel = 0, t = math.huge, sent = 0,
+             inertia = 0.35, damping = 0.9, gain = 1}
+  rcpWheel = w
+  local clock = os.clockhp or os.clock
+  w.force = function(o, id, torque)
+    local t = clock()
+    local dt = math.min(math.max(t - w.t, 0), 0.05)
+    w.t = t
+    if not w.free or torque ~= torque then return end
+    w.vel = w.vel + dt * (-torque * w.gain - w.damping * w.vel) / w.inertia
+    local a = math.min(1, math.max(-1, w.angle + dt * w.vel))
+    if a == 1 or a == -1 then w.vel = 0 end
+    w.angle = a
+    if t - w.sent > 0.033 then
+      w.sent = t
+      obj:queueGameEngineLua(string.format(
+        'if remotecontrolpro_main then remotecontrolpro_main.onWheelAngle(%d, %.4f) end', obj:getId(), a))
+    end
+  end
+  w.angleFn = function()
+    if not w.free then
+      local a = electrics.values.steering_input or 0
+      if a ~= a then a = 0 end
+      w.angle = a
+      w.vel = 0
+    end
+    return w.angle
+  end
+end
+if not rcpWheel.on then
+  rcpWheel.on = true
+  hydros.enableVirtualWheel(true, rcpWheel.angleFn, rcpWheel.force)
+end
+]]
+
+local VEHICLE_WHEEL_OFF = [[
+if rcpWheel and rcpWheel.on then
+  rcpWheel.on = false
+  rcpWheel.free = false
+  hydros.enableVirtualWheel(false)
+end
+]]
+
+local function wheelOff(phone)
+  if not phone.wheelVeh then return end
+  local vehicle = getObjectByID(phone.wheelVeh)
+  if vehicle then vehicle:queueLuaCommand(VEHICLE_WHEEL_OFF) end
+  phone.wheelVeh = nil
+end
+
 local function unplug(key)
   local phone = phones[key]
   if not phone then return end
+  wheelOff(phone)
   if phone.deviceInst then
     extensions.core_input_virtualInput.deleteDevice(phone.deviceInst)
   end
@@ -137,6 +211,7 @@ local function handleControl(phone, data)
   emitAxis(phone, 4, clamp01(pkt.handbrake))
 
   local buttons = tonumber(pkt.buttons)
+  phone.wheelFree = buttons >= FLAG_WHEEL_FREE
   if buttons ~= phone.buttons then
     for i = 0, N_BUTTONS - 1 do
       local mask = bit.lshift(1, i)
@@ -164,6 +239,12 @@ local function receive(now)
         if phone then
           phone.lastSeen = now
           phone.port = port
+          local gain = min(2, max(0.2, (tonumber(args[4]) or 100) / 100))
+          if gain ~= gain then gain = 1 end
+          if gain ~= phone.wheelGain then
+            phone.wheelGain = gain
+            phone.wheelSent = nil -- tell the vehicle
+          end
           udpSocket:sendto('RCP!|' .. PROTOCOL .. '|' .. pcName() .. '|' .. MOD_VERSION, ip, port)
         end
       end
@@ -199,12 +280,48 @@ local function playerOf(phone)
   return (player and player >= 0) and player or nil
 end
 
+-- Installs the virtual wheel on the car a phone drives (and takes it off the car
+-- it left), then tells it whether the phone is holding the wheel. Only for phones
+-- that have ever let go: tilt and arrow-key steering never touch the game's FFB.
+local function syncWheel(phone, vehicle)
+  if phone.wheelFree then phone.wheelWanted = true end
+  if not phone.wheelWanted then return end
+  local vehId = vehicle and vehicle:getId() or nil
+  if phone.wheelVeh ~= vehId then
+    wheelOff(phone)
+    phone.wheelVeh = vehId
+    phone.wheelSent = nil
+  end
+  if not vehicle then return end
+  if phone.wheelSent ~= phone.wheelFree then
+    phone.wheelSent = phone.wheelFree
+    vehicle:queueLuaCommand(VEHICLE_WHEEL_ON .. string.format(
+      'rcpWheel.gain = %.3f rcpWheel.free = %s', phone.wheelGain or 1, tostring(phone.wheelFree)))
+  end
+end
+
+local function vehicleOf(phone)
+  local player = playerOf(phone)
+  return player and getPlayerVehicle(player) or nil
+end
+
+local function onWheelAngle(vehId, angle)
+  if not udpSocket then return end
+  for _, phone in pairs(phones) do
+    if phone.wheelVeh == vehId and phone.wheelFree then
+      udpSocket:sendto(string.format('RCPS|%.4f', angle), phone.ip, phone.port)
+    end
+  end
+end
+
 -- Asks each driven vehicle for its rev limit and steering lock. The vehicle Lua
 -- answers through onVehicleInfo; nothing here blocks on it.
 local function requestVehicleInfo()
   for _, phone in pairs(phones) do
     local player = playerOf(phone)
     local vehicle = player and getPlayerVehicle(player) or nil
+    -- A reset or reload wipes the vehicle's Lua: install the wheel again.
+    phone.wheelSent = nil
     if vehicle then
       vehicle:queueLuaCommand(VEHICLE_QUERY)
       local info = vehicleInfo[vehicle:getId()]
@@ -229,6 +346,10 @@ local function onUpdate(dtReal)
   end
 
   receive(now)
+
+  for _, phone in pairs(phones) do
+    if phone.wheelFree or phone.wheelWanted then syncWheel(phone, vehicleOf(phone)) end
+  end
 
   infoTimer = infoTimer + (dtReal or 0)
   if infoTimer >= INFO_PERIOD then
@@ -263,5 +384,6 @@ M.onExtensionLoaded = onExtensionLoaded
 M.onExtensionUnloaded = onExtensionUnloaded
 M.onVehicleDestroyed = onVehicleDestroyed
 M.onVehicleInfo = onVehicleInfo
+M.onWheelAngle = onWheelAngle
 
 return M

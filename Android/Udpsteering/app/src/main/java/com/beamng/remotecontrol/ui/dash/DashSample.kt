@@ -15,6 +15,9 @@ fun sampleDashState(metricUnits: Boolean = true): DashState {
         gear = "4"
         fuel = 0.71f
         engTemp = 91f
+        throttleEcho = 0.7f
+        driftDeg = 18f
+        driftMaxDeg = 31f
         lights[Receivepacket.INDEX_TC] = true
     }
     return DashState(telemetry, metricUnits, perfTimerEnabled = false, rpmScale = RpmScale(8000f, 6500f))
