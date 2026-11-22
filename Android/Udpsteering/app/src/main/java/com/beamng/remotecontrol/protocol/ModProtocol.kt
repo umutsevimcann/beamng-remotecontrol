@@ -12,18 +12,24 @@ import java.nio.ByteOrder
  *                    wheelReturn (mod 2.2+): 20..200, how hard the released wheel
  *                    is pulled, in percent of the game's force feedback
  *   mod   -> phone "RCP!|1|<pcName>|<modVersion>"
- *   phone -> mod   28 bytes little-endian                    control, ~100 Hz
+ *   phone -> mod   36 bytes little-endian                    control, ~100 Hz
  *                    "RCP", version, float steering (-1..1),
- *                    float throttle, brake, clutch, handbrake (0..1), uint32 buttons
+ *                    float throttle, brake, clutch, handbrake (0..1), uint32 buttons,
+ *                    then (mod 2.3+) float lookX, lookY: the look drag since the last
+ *                    packet; older mods read the first 28 bytes and ignore the rest
  *   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>[|<features>]"
  *                    features (mod 2.1+): 1 drive modes/ESC, 2 4WD, 4 nitrous
  *   mod   -> phone "RCPS|<angle>"                          released wheel, ~30 Hz (mod 2.2+)
+ *   mod   -> phone "RCPW|<0|1>"                            the player is on foot (mod 2.3+)
  *                    angle -1..1: where the game's force feedback has turned the
  *                    wheel while buttons bit 31 (wheel free) is set
  */
 object ModProtocol {
     const val VERSION = 1
-    const val CONTROL_SIZE = 28
+    const val CONTROL_SIZE = 36
+
+    /** Largest look drag one packet may carry; more is a glitch, not a flick. */
+    const val LOOK_LIMIT = 2000f
 
     // Bit n = button n of the mod's virtual device; order fixed by bngremotectrlprov2.json.
     const val BUTTON_SHIFT_UP = 1 shl 0
@@ -49,6 +55,12 @@ object ModProtocol {
     const val BUTTON_CAMERA = 1 shl 18
     const val BUTTON_GEARBOX_MODE = 1 shl 19
     const val BUTTON_PAUSE = 1 shl 20
+    // Mod 2.3+.
+    const val BUTTON_MAP = 1 shl 21
+    const val BUTTON_WALK = 1 shl 22
+    const val BUTTON_INTERACT = 1 shl 23
+    /** On foot: zoom the view in and out (the game has no third-person walking camera). */
+    const val BUTTON_VIEW = 1 shl 24
 
     /**
      * Not a button: "nobody is holding the wheel". Mod 2.2+ then turns the wheel
@@ -68,6 +80,9 @@ object ModProtocol {
 
         /** Camera, gearbox mode and pause keys arrived with mod 2.2 (reset works on any mod). */
         val hasGameKeys: Boolean get() = atLeast(2, 2)
+
+        /** The map key arrived with mod 2.3. */
+        val hasMapKey: Boolean get() = atLeast(2, 3)
 
         /** The released wheel is turned by the game's force feedback from mod 2.2. */
         val hasWheelFeedback: Boolean get() = atLeast(2, 2)
@@ -108,7 +123,10 @@ object ModProtocol {
         return ModInfo(pcName = parts[2].ifBlank { "PC" }, modVersion = parts[3])
     }
 
-    fun control(steering: Float, throttle: Float, brake: Float, clutch: Float, handbrake: Float, buttons: Int): ByteArray {
+    fun control(
+        steering: Float, throttle: Float, brake: Float, clutch: Float, handbrake: Float, buttons: Int,
+        lookX: Float = 0f, lookY: Float = 0f,
+    ): ByteArray {
         val buf = ByteBuffer.allocate(CONTROL_SIZE).order(ByteOrder.LITTLE_ENDIAN)
         buf.put('R'.code.toByte()).put('C'.code.toByte()).put('P'.code.toByte()).put(VERSION.toByte())
         buf.putFloat(sane(steering, -1f))
@@ -117,6 +135,8 @@ object ModProtocol {
         buf.putFloat(sane(clutch, 0f))
         buf.putFloat(sane(handbrake, 0f))
         buf.putInt(buttons)
+        buf.putFloat(look(lookX))
+        buf.putFloat(look(lookY))
         return buf.array()
     }
 
@@ -141,6 +161,28 @@ object ModProtocol {
         if (!message.startsWith("RCPS|")) return null
         val angle = message.substring(5).trim().toFloatOrNull() ?: return null
         return if (angle.isFinite()) angle.coerceIn(-1f, 1f) else null
+    }
+
+    private fun look(v: Float): Float = if (v.isFinite()) v.coerceIn(-LOOK_LIMIT, LOOK_LIMIT) else 0f
+
+    /** "RCPW|1" / "RCPW|0": whether the player this phone drives is on foot; null for anything else. */
+    fun parseWalking(message: String): Boolean? = when (message.trim()) {
+        "RCPW|1" -> true
+        "RCPW|0" -> false
+        else -> null
+    }
+
+    /** What the control packet carries while walking; the mod reads it back the same way. */
+    data class WalkAxes(val steering: Float, val throttle: Float, val brake: Float, val handbrake: Float)
+
+    /**
+     * The walk stick ([x] right, [y] forward, both -1..1) as the axes the mod walks with:
+     * forward = throttle - brake, sideways = steering, sprint = handbrake.
+     */
+    fun walkAxes(x: Float, y: Float, sprint: Boolean): WalkAxes {
+        val sx = if (x.isFinite()) x.coerceIn(-1f, 1f) else 0f
+        val sy = if (y.isFinite()) y.coerceIn(-1f, 1f) else 0f
+        return WalkAxes(sx, sy.coerceAtLeast(0f), (-sy).coerceAtLeast(0f), if (sprint) 1f else 0f)
     }
 
     private fun sane(v: Float, min: Float): Float = if (v.isFinite()) v.coerceIn(min, 1f) else 0f

@@ -14,6 +14,9 @@ horn and lights.
 **v3.0.4** adds force-feedback steering (let go of the wheel and the car turns
 it), eight steering-wheel designs, four more dashboards, and keys for drive
 modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
+The next update adds **walking**: get out of the car and the phone turns into a
+walking screen (stick, drag to look, jump, crouch, interact), plus finer
+vibration and more choices for how the controls work.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
@@ -32,12 +35,15 @@ modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
   mirrored layout for left-handers.
 * **Eight steering wheels** — Sport, GT, Formula, Classic, Drift, Truck, Yoke
   and Retro.
+* **Your choice of layout** — pedals side by side or one per thumb (tilt
+  steering), handbrake held or latched, horn under the wheel, in its centre or
+  both, every mod key switched on or off on its own.
 * **RemoteControlPro mod (optional)** — pairs in about a second with no code, and
   adds shift up/down, handbrake, horn, headlights, fog lights, turn signals,
   hazards and recover, analog pedals, force-feedback steering, keys for drive
   mode / ESC, 4WD, low range, diff lock, nitrous, doors, camera, gearbox mode,
-  reset and pause, and a rev counter and steering wheel that match the car you
-  are driving. See [The optional mod](#the-optional-mod-remotecontrolpro).
+  reset, pause, map and interact, a rev counter and steering wheel that match
+  the car you are driving, and a **walking screen** on foot. See [The optional mod](#the-optional-mod-remotecontrolpro).
 * **Live dashboard** using the game's built-in OutGauge stream (no mod required):
   speedometer, animated RPM gauge with redline, gear, fuel, engine temperature,
   turbo boost (auto-shown on turbo cars), and real dashboard warning lights
@@ -47,7 +53,9 @@ modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
 * **0-100 timer** — optional; times launches from standstill and keeps your best.
 * **Dashboard-only mode** — hide the controls and use the phone as a pure gauge
   cluster (great with a wheel/keyboard).
-* **Crash & gear haptics** — vibration on impacts, gear changes and hard braking.
+* **Vibration** — crashes (read from the car's body acceleration, stronger the
+  harder the hit), hard landings, gear changes, ABS, traction control / ESC and
+  the rev limiter; each one switched on or off on its own.
 * **Auto-reconnect** — connect once; the app re-registers with the game after
   being backgrounded.
 * **In-app Setup Guide** — a personalized how-to that shows *your* phone's IP and
@@ -108,7 +116,9 @@ remote cannot:
 | Rev counter guesses the redline; on-screen wheel always turns 450° | Both match the car you are driving |
 | Let go of the on-screen wheel and it returns by estimate | The car turns it with the game's own force feedback, as on a wheel set |
 | — | Drive mode / ESC, 4WD, low range, diff lock, nitrous, doors (shown only on cars that have them) |
-| — | Camera, automatic/manual gearbox, reset, pause |
+| — | Camera, automatic/manual gearbox, reset, pause, big map, interact (start missions and jobs) |
+| — | Drag the gauges to look around from the car |
+| — | **Walking screen**: get out and walk with a stick, drag (or turn the phone) to look, jump, crouch, zoom, get back in |
 
 Install:
 
@@ -123,6 +133,22 @@ The mod follows BeamNG's modding rules: it replaces no game file, runs next to t
 stock phone remote on its own UDP port (4450) with its own input device, and is
 removed by deleting the zip. The gauges still come from OutGauge (step 2 above) —
 the mod adds controls, not gauges. Source: [`BeamNG-Mod/`](BeamNG-Mod/).
+
+#### Walking (mod 2.3 or newer)
+
+Tap **WALK** on the game page of the key row (or press the game's own key) and
+the phone switches to a walking screen by itself; get back in and the drive
+screen returns.
+
+* **Stick** on the left half (it appears where your thumb lands): walk; push
+  it to the edge to sprint, or use a separate sprint key.
+* **Drag the right half** to look around, like a mouse. Optionally turn the
+  phone to aim, and invert the up/down look.
+* **Keys**: jump, crouch (held or latched), use / interact, zoom (like
+  binoculars), get back in, and the map.
+* **Left-handed?** Put the stick on the right in Settings → Walking.
+
+The game's own phone remote cannot walk; all of this needs the mod.
 
 ### Troubleshooting
 
@@ -180,23 +206,30 @@ All communication is UDP on the local network.
   The stock game thresholds throttle/brake at 0.5 (on/off) and applies a steering
   curve of `input^2.5`, which the app cancels by sending `input^(1/2.5)`.
 * **RemoteControlPro mod (port 4450, protocol 1):** hello `RCP?|1|<device>` →
-  reply `RCP!|1|<pc-name>|<mod-version>`; control is 28 bytes Little-Endian —
+  reply `RCP!|1|<pc-name>|<mod-version>`; control is 28 bytes Little-Endian
+  (36 from app 3.0.5: two more floats, the look drag) —
   `"RCP"`, version byte, floats steering (-1..1), throttle, brake, clutch,
   handbrake (0..1), then a uint32 button mask (bit 0 shift up, 1 shift down,
   2 horn, 3 headlights, 4 fog, 5 left signal, 6 right signal, 7 hazards,
   8 recover, 9 reset, 10 drive mode/ESC, 11 4WD, 12 low range, 13 diff lock,
   14 nitrous, 15 nitrous hold, 16 doors open, 17 doors close, 18 camera,
-  19 gearbox mode, 20 pause; bit 31 is a flag, "nobody holds the on-screen
-  wheel"). The mod sends back
+  19 gearbox mode, 20 pause, 21 big map, 22 walking mode, 23 interact,
+  24 zoom on foot; bit 31 is a flag, "nobody holds the on-screen
+  wheel"). On foot the mod reads the same axes as walking: forward = throttle −
+  brake, sideways = steering, handbrake = sprint, shift up = jump, shift down =
+  crouch. The mod sends back
   `RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>|<features>` about twice a second
   (features: 1 drive modes/ESC, 2 4WD, 4 nitrous) and, while the wheel is
   free, `RCPS|<angle>` about 30 times a second: the angle its force feedback
   has turned the wheel to. The hello may end with `|<wheelReturn%>` (20..200).
+  `RCPW|1` / `RCPW|0` says the player got out of the car / back in; the
+  phone swaps screens on it.
 * **Telemetry (game → app, port 4445):** the standard 96-byte OutGauge struct,
   sent by BeamNG's built-in `protocols_outgauge` (Options → Advanced → Protocols).
   A companion mod may append a 4-byte odometer (100 bytes).
 * **Motion (game → app, port 4446):** the MotionSim struct (`BNG1` magic), used
-  for the drift meter.
+  for the drift meter, the released-wheel estimate and crash / landing vibration
+  (body acceleration at bytes 28–39, gravity excluded).
 
 ### OutGauge struct (Little-Endian)
 

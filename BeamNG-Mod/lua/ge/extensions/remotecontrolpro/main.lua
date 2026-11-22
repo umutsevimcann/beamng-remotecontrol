@@ -11,7 +11,11 @@
 --   * analog throttle / brake / clutch / handbrake
 --   * buttons: shift up/down, horn, lights, fog lights, signals, hazards, recover,
 --     drive mode / ESC, 4WD, low range, diff lock, nitrous, door latches,
---     camera, gearbox mode (automatic / manual), pause
+--     camera, gearbox mode (automatic / manual), pause, big map, walking mode,
+--     interact (start missions and jobs), zoom on foot
+--   * look around: the phone's drag turns the camera, in the car and on foot
+--   * walking: on foot, the same phone walks the character — gas forward, brake
+--     back, wheel left/right, shift up jumps, shift down crouches, handbrake sprints
 --   * a force-feedback steering wheel: let go of the on-screen wheel and the car
 --     turns it (self-centring, counter-steer in a slide), through the game's own
 --     virtual-wheel hook (hydros.enableVirtualWheel)
@@ -23,11 +27,14 @@
 --                    wheelReturn (2.2): 20..200, percent of the force feedback that
 --                    turns the released wheel (the "FFB strength" of a wheel set)
 --   mod   -> phone "RCP!|1|<pcName>|<modVersion>"         answer to every hello
---   phone -> mod   28 bytes, little-endian                control, ~100 Hz
+--   phone -> mod   28 or 36 bytes, little-endian          control, ~100 Hz
 --                    char[3] "RCP", uint8 version (1)
 --                    float steering   -1 (left) .. 1 (right)
 --                    float throttle, brake, clutch, handbrake   0 .. 1
 --                    uint32 buttons   (bit n = button n held)
+--                    float lookX, lookY (2.3, optional): look drag since the last packet
+--   mod   -> phone "RCPW|<0|1>"     the player is on foot (2.3): sent on every change
+--                    and with the vehicle info
 --   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicleName>|<features>"   ~2 Hz while driving
 --                    features: 1 drive modes/ESC, 2 4WD, 4 nitrous (added in mod 2.1;
 --                    older apps ignore the extra field)
@@ -40,15 +47,19 @@
 local M = {}
 
 local logTag = 'remotecontrolpro'
-local MOD_VERSION = '2.2.0'
+local MOD_VERSION = '2.3.0'
 local PROTOCOL = 1
 local PORT = 4450
 local DEVICE_TYPE = 'bngremotectrlprov2' -- must match the inputmap file name
 local N_AXES = 5      -- steering, throttle, brake, clutch, handbrake
-local N_BUTTONS = 21  -- see BUTTON order in the Android app (ModProtocol.kt)
+local N_BUTTONS = 25  -- see BUTTON order in the Android app (ModProtocol.kt)
 local TIMEOUT_MS = 10000
 local INFO_PERIOD = 0.5
 local FLAG_WHEEL_FREE = 0x80000000 -- control buttons bit 31
+local BIT_SHIFT_UP, BIT_SHIFT_DOWN = 0, 1
+local BIT_MAP = 21
+local BIT_VIEW = 24
+local WALK_PERIOD = 0.033 -- seconds between walking updates sent to the character
 
 local min, max = math.min, math.max
 
@@ -64,11 +75,13 @@ if ffi then
     float steering, throttle, brake, clutch, handbrake;
     uint32_t buttons;
   } rcp_control_t;
+  typedef struct { float lookX, lookY; } rcp_look_t;
   #pragma pack(pop)
   ]])
 end
 
 local udpSocket = nil
+local stopWalking -- defined with the walking code below; unplug needs it first
 -- phones by ip: { ip, port, name, deviceInst, lastSeen, axes = {}, buttons = 0,
 --                 wheelFree, wheelVeh (vehicle id the virtual wheel is installed on) }
 -- One device per phone, whatever socket it talks from: the app pairs from one
@@ -171,6 +184,7 @@ local function unplug(key)
   local phone = phones[key]
   if not phone then return end
   wheelOff(phone)
+  stopWalking(phone)
   if phone.deviceInst then
     extensions.core_input_virtualInput.deleteDevice(phone.deviceInst)
   end
@@ -204,14 +218,38 @@ local function handleControl(phone, data)
   local steering = pkt.steering
   if steering ~= steering then steering = 0 end
   -- The inputmap binds the steering axis centred: 0 = full left, 1 = full right.
+  phone.steer = min(1, max(-1, steering))
+  phone.throttle = clamp01(pkt.throttle)
+  phone.brake = clamp01(pkt.brake)
+  phone.handbrake = clamp01(pkt.handbrake)
   emitAxis(phone, 0, (min(1, max(-1, steering)) + 1) * 0.5)
   emitAxis(phone, 1, clamp01(pkt.throttle))
   emitAxis(phone, 2, clamp01(pkt.brake))
   emitAxis(phone, 3, clamp01(pkt.clutch))
   emitAxis(phone, 4, clamp01(pkt.handbrake))
 
+  if #data >= 36 then
+    local look = ffi.new('rcp_look_t')
+    ffi.copy(look, data:sub(29, 36), 8)
+    local lx, ly = look.lookX, look.lookY
+    -- Summed until the next frame applies them; NaN and absurd values are dropped.
+    if lx == lx and ly == ly and math.abs(lx) < 5000 and math.abs(ly) < 5000 then
+      phone.lookX = (phone.lookX or 0) + lx
+      phone.lookY = (phone.lookY or 0) + ly
+    end
+  end
+
   local buttons = tonumber(pkt.buttons)
   phone.wheelFree = buttons >= FLAG_WHEEL_FREE
+  -- The map key is handled here, not through the inputmap: once the big map is open
+  -- the game blocks the action that opened it, so a bound key could never close it.
+  local mapMask = bit.lshift(1, BIT_MAP)
+  if bit.band(buttons, mapMask) ~= 0 and bit.band(phone.buttons, mapMask) == 0 and freeroam_bigMapMode then
+    freeroam_bigMapMode.toggleBigMap()
+  end
+  -- Zoom on foot: done in onUpdate, which knows the player.
+  local viewMask = bit.lshift(1, BIT_VIEW)
+  if bit.band(buttons, viewMask) ~= 0 and bit.band(phone.buttons, viewMask) == 0 then phone.viewToggle = true end
   if buttons ~= phone.buttons then
     for i = 0, N_BUTTONS - 1 do
       local mask = bit.lshift(1, i)
@@ -300,6 +338,52 @@ local function syncWheel(phone, vehicle)
   end
 end
 
+
+-- On foot the player drives an invisible "unicycle" whose playerController reads
+-- walk commands, not the car actions our inputmap binds. So while the player a
+-- phone drives is walking, the mod turns the phone's controls into those commands.
+local function isWalking(player)
+  return player ~= nil and gameplay_walk ~= nil and gameplay_walk.isWalking(player) == true
+end
+
+local WALK_CMD = "local p = controller.getControllerSafe('playerController') if p then "
+  .. "p.walkUpDownRaw(%.3f) p.walkLeftRightRaw(%.3f) p.setSpeedCoef(%d) %s end"
+
+local function walk(phone, vehicle, now)
+  local fwd = (phone.throttle or 0) - (phone.brake or 0)
+  local side = phone.steer or 0
+  local sprint = (phone.handbrake or 0) > 0.5 and 1 or 0
+  local buttons = phone.buttons or 0
+  local up = bit.band(buttons, bit.lshift(1, BIT_SHIFT_UP)) ~= 0
+  local down = bit.band(buttons, bit.lshift(1, BIT_SHIFT_DOWN)) ~= 0
+  local extra = ''
+  if up and not phone.walkJumpHeld then extra = extra .. 'p.jump(1) ' end
+  if down ~= (phone.walkCrouch == true) then extra = extra .. 'p.crouch(' .. (down and -1 or 1) .. ') ' end
+  phone.walkJumpHeld = up
+  phone.walkCrouch = down
+  local state = string.format('%.3f|%.3f|%d', fwd, side, sprint)
+  -- An unchanged state is resent now and then in case a command was lost, but only
+  -- while moving: a phone lying still must not keep stopping a character that another
+  -- device (a second phone, the keyboard) is walking.
+  local still = fwd == 0 and side == 0 and sprint == 0
+  if extra == '' and state == phone.walkState and (still or now - (phone.walkSent or 0) < 500) then return end
+  if extra == '' and now - (phone.walkSent or 0) < WALK_PERIOD * 1000 then return end
+  phone.walkState = state
+  phone.walkSent = now
+  phone.walkVeh = vehicle:getId()
+  vehicle:queueLuaCommand(string.format(WALK_CMD, fwd, side, sprint, extra))
+end
+
+-- Leaving walking mode (or the phone going away) must not leave the character walking.
+function stopWalking(phone)
+  if not phone.walkVeh then return end
+  local vehicle = getObjectByID(phone.walkVeh)
+  if vehicle then vehicle:queueLuaCommand(string.format(WALK_CMD, 0, 0, 0, 'p.crouch(1) ')) end
+  phone.walkVeh = nil
+  phone.walkState = nil
+  phone.walkCrouch = nil
+end
+
 local function vehicleOf(phone)
   local player = playerOf(phone)
   return player and getPlayerVehicle(player) or nil
@@ -326,6 +410,8 @@ local function requestVehicleInfo()
       vehicle:queueLuaCommand(VEHICLE_QUERY)
       local info = vehicleInfo[vehicle:getId()]
       if info then udpSocket:sendto(info, phone.ip, phone.port) end
+      -- Repeated now and then, in case the change itself was lost.
+      if phone.walkingSent ~= nil then udpSocket:sendto(phone.walkingSent and 'RCPW|1' or 'RCPW|0', phone.ip, phone.port) end
     end
   end
 end
@@ -348,7 +434,35 @@ local function onUpdate(dtReal)
   receive(now)
 
   for _, phone in pairs(phones) do
-    if phone.wheelFree or phone.wheelWanted then syncWheel(phone, vehicleOf(phone)) end
+    local player = playerOf(phone)
+    local vehicle = player and getPlayerVehicle(player) or nil
+    local walking = isWalking(player) and vehicle ~= nil
+    if walking ~= phone.walkingSent then
+      -- The phone swaps to its walking screen on this, so it goes out at once.
+      phone.walkingSent = walking
+      udpSocket:sendto(walking and 'RCPW|1' or 'RCPW|0', phone.ip, phone.port)
+    end
+    if walking then
+      -- No force feedback on foot: the character is not a car.
+      if phone.wheelVeh then wheelOff(phone) end
+      walk(phone, vehicle, now)
+      -- On foot the game always looks through the character's eyes; what it can do
+      -- is zoom (55° to 27°, like binoculars). That only works in its walking camera.
+      if phone.viewToggle then
+        if core_camera.getActiveCamName(player) ~= 'unicycle' then core_camera.setByName(player, 'unicycle') end
+        core_camera.unicycleZoomToggle(player)
+      end
+    else
+      stopWalking(phone)
+      if phone.wheelFree or phone.wheelWanted then syncWheel(phone, vehicle) end
+    end
+    phone.viewToggle = nil
+    -- Look: the phone's drag turns the camera the way a mouse does, in the car too.
+    if player and ((phone.lookX or 0) ~= 0 or (phone.lookY or 0) ~= 0) then
+      core_camera.rotate_yaw_relative(phone.lookX or 0, player)
+      core_camera.rotate_pitch_relative(-(phone.lookY or 0), player)
+    end
+    phone.lookX, phone.lookY = 0, 0
   end
 
   infoTimer = infoTimer + (dtReal or 0)

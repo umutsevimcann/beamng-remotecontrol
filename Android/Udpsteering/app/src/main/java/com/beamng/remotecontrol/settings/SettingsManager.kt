@@ -79,6 +79,70 @@ class SettingsManager private constructor(context: Context) {
         get() = DashLayout.fromKey(prefs.getString(KEY_DASH_LAYOUT, null))
         set(layout) = prefs.edit().putString(KEY_DASH_LAYOUT, layout.key).apply()
 
+    /** Pedals: both on one side (the default), or brake on one side and gas on the other (tilt steering only). */
+    var isSplitPedals: Boolean
+        get() = prefs.getBoolean(KEY_SPLIT_PEDALS, false)
+        set(v) = prefs.edit().putBoolean(KEY_SPLIT_PEDALS, v).apply()
+
+    /** Handbrake key: false = tap on, tap off; true = applied only while held. */
+    var isHandbrakeHold: Boolean
+        get() = prefs.getBoolean(KEY_HANDBRAKE_HOLD, false)
+        set(v) = prefs.edit().putBoolean(KEY_HANDBRAKE_HOLD, v).apply()
+
+    /** Where the horn is: [HORN_KEY] under the wheel, [HORN_HUB] on the wheel's hub, or [HORN_BOTH]. */
+    var hornPlace: Int
+        get() = prefs.getInt(KEY_HORN_PLACE, HORN_KEY).coerceIn(HORN_KEY, HORN_BOTH)
+        set(v) = prefs.edit().putInt(KEY_HORN_PLACE, v.coerceIn(HORN_KEY, HORN_BOTH)).apply()
+
+    var modShowWalk: Boolean
+        get() = prefs.getBoolean(KEY_MOD_WALK, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_WALK, v).apply()
+
+    /** Walking screen: sprint by pushing the stick to its edge (default) or with its own key. */
+    var isWalkSprintKey: Boolean
+        get() = prefs.getBoolean(KEY_WALK_SPRINT_KEY, false)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_SPRINT_KEY, v).apply()
+
+    /** Walking screen: the stick on the right, for left-handed players. */
+    var isWalkStickRight: Boolean
+        get() = prefs.getBoolean(KEY_WALK_STICK_RIGHT, false)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_STICK_RIGHT, v).apply()
+
+    /** Walking screen: how far a drag turns the camera, 0.3..3 × the default. */
+    var walkLookSpeed: Float
+        get() = prefs.getFloat(KEY_WALK_LOOK, 1f).let { if (it.isFinite()) it.coerceIn(0.3f, 3f) else 1f }
+        set(v) = prefs.edit().putFloat(KEY_WALK_LOOK, v.coerceIn(0.3f, 3f)).apply()
+
+    var isWalkCrouchToggle: Boolean
+        get() = prefs.getBoolean(KEY_WALK_CROUCH_TOGGLE, false)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_CROUCH_TOGGLE, v).apply()
+    var isWalkInvertLook: Boolean
+        get() = prefs.getBoolean(KEY_WALK_INVERT, false)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_INVERT, v).apply()
+    var isWalkGyroAim: Boolean
+        get() = prefs.getBoolean(KEY_WALK_GYRO, false)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_GYRO, v).apply()
+    var walkShowInteract: Boolean
+        get() = prefs.getBoolean(KEY_WALK_INTERACT, true)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_INTERACT, v).apply()
+    var walkShowView: Boolean
+        get() = prefs.getBoolean(KEY_WALK_VIEW, true)
+        set(v) = prefs.edit().putBoolean(KEY_WALK_VIEW, v).apply()
+    var modShowInteract: Boolean
+        get() = prefs.getBoolean(KEY_MOD_INTERACT, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_INTERACT, v).apply()
+    var isLookDrag: Boolean
+        get() = prefs.getBoolean(KEY_LOOK_DRAG, false)
+        set(v) = prefs.edit().putBoolean(KEY_LOOK_DRAG, v).apply()
+    /** Turning the phone to aim on foot: 0.3..3 × the default. */
+    var walkGyroSpeed: Float
+        get() = prefs.getFloat(KEY_WALK_GYRO_SPEED, 1f).let { if (it.isFinite()) it.coerceIn(0.3f, 3f) else 1f }
+        set(v) = prefs.edit().putFloat(KEY_WALK_GYRO_SPEED, v.coerceIn(0.3f, 3f)).apply()
+
+    var modShowMap: Boolean
+        get() = prefs.getBoolean(KEY_MOD_MAP, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_MAP, v).apply()
+
     /** Which steering wheel the drive screen draws. */
     var wheelStyle: WheelStyle
         get() = WheelStyle.fromKey(prefs.getString(KEY_WHEEL_STYLE, null))
@@ -101,6 +165,26 @@ class SettingsManager private constructor(context: Context) {
         set(value) = prefs.edit().putInt(
             KEY_WHEEL_RETURN, value.coerceIn(ModProtocol.WHEEL_RETURN_MIN, ModProtocol.WHEEL_RETURN_MAX),
         ).apply()
+
+    /** Which events vibrate (each its own switch; [isHapticEnabled] turns them all off). */
+    var hapticGear: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_GEAR, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_GEAR, v).apply()
+    var hapticImpact: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_IMPACT, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_IMPACT, v).apply()
+    var hapticLanding: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_LANDING, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_LANDING, v).apply()
+    var hapticAbs: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_ABS, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_ABS, v).apply()
+    var hapticTraction: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_TRACTION, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_TRACTION, v).apply()
+    var hapticRedline: Boolean
+        get() = prefs.getBoolean(KEY_HAPTIC_REDLINE, true)
+        set(v) = prefs.edit().putBoolean(KEY_HAPTIC_REDLINE, v).apply()
 
     // ==================== THEME ====================
 
@@ -180,6 +264,12 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_STEERING_LOCK = "steering_lock_deg"
         const val KEY_USE_METRIC = "use_metric"
         const val KEY_HAPTIC_ENABLED = "haptic_enabled"
+        const val KEY_HAPTIC_GEAR = "haptic_gear"
+        const val KEY_HAPTIC_IMPACT = "haptic_impact"
+        const val KEY_HAPTIC_LANDING = "haptic_landing"
+        const val KEY_HAPTIC_ABS = "haptic_abs"
+        const val KEY_HAPTIC_TRACTION = "haptic_traction"
+        const val KEY_HAPTIC_REDLINE = "haptic_redline"
         const val KEY_LAST_IP = "last_ip"
         const val KEY_DEAD_ZONE = "dead_zone"
         const val KEY_DASHBOARD_ONLY = "dashboard_only"
@@ -189,6 +279,25 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_MIRRORED = "mirrored_layout"
         const val KEY_WHEEL_SELF_ALIGN = "wheel_self_align"
         const val KEY_WHEEL_STYLE = "wheel_style"
+        const val KEY_SPLIT_PEDALS = "split_pedals"
+        const val KEY_HANDBRAKE_HOLD = "handbrake_hold"
+        const val KEY_HORN_PLACE = "horn_place"
+        const val KEY_MOD_MAP = "mod_show_map"
+        const val KEY_MOD_WALK = "mod_show_walk"
+        const val KEY_WALK_SPRINT_KEY = "walk_sprint_key"
+        const val KEY_WALK_LOOK = "walk_look_speed"
+        const val KEY_WALK_STICK_RIGHT = "walk_stick_right"
+        const val KEY_WALK_CROUCH_TOGGLE = "walk_crouch_toggle"
+        const val KEY_WALK_INVERT = "walk_invert_look"
+        const val KEY_WALK_GYRO = "walk_gyro_aim"
+        const val KEY_WALK_INTERACT = "walk_show_interact"
+        const val KEY_WALK_VIEW = "walk_show_view"
+        const val KEY_MOD_INTERACT = "mod_show_interact"
+        const val KEY_LOOK_DRAG = "look_drag_gauges"
+        const val KEY_WALK_GYRO_SPEED = "walk_gyro_speed"
+        const val HORN_KEY = 0
+        const val HORN_HUB = 1
+        const val HORN_BOTH = 2
         const val KEY_WHEEL_RETURN = "wheel_return_percent"
         const val KEY_THEME = "theme_mode"
         const val KEY_MOD_SHIFT = "mod_show_shift"

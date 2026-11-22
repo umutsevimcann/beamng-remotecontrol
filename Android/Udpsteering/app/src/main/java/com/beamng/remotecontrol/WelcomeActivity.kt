@@ -24,6 +24,7 @@ import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.network.UdpDiscovery.SweepPhase
+import com.beamng.remotecontrol.ui.AppLanguage
 import com.beamng.remotecontrol.ui.ManualCodeDialog
 import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.menu.MainMenuScreen
@@ -51,6 +52,9 @@ class WelcomeActivity : AppCompatActivity() {
     /** Bumped per search; late callbacks from an older sweep are ignored. */
     private var searchGeneration = 0
 
+    // The app language this instance was built with (see AppLanguage.apply).
+    private var builtLanguage = ""
+
     private val cameraPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) openScanner()
@@ -63,6 +67,7 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        builtLanguage = AppLanguage.requestedTags()
         // Draw edge to edge on every Android version; the screens pad themselves
         // with safeDrawingPadding (system bars + display cutout).
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -181,6 +186,12 @@ class WelcomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // The language was changed in Settings: rebuild instead of trusting the
+        // in-place update. No search can be running here (onStop cancels it).
+        if (AppLanguage.changedSince(builtLanguage)) {
+            recreate()
+            return
+        }
         savedPcIp = settings.lastIP.takeIf { it.isNotEmpty() }
         savedPcName = settings.lastPcName.takeIf { it.isNotEmpty() }
         dashLayout = settings.dashLayout

@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -75,7 +76,7 @@ import com.beamng.remotecontrol.ui.theme.asSp
 import com.beamng.remotecontrol.ui.theme.screenBackground
 import kotlin.math.roundToInt
 
-enum class SettingsSection { DRIVING, DASHBOARD, FEEDBACK, MOD, GENERAL }
+enum class SettingsSection { DRIVING, DASHBOARD, FEEDBACK, MOD, WALK, GENERAL }
 
 /**
  * Two-pane settings: sections on the left, only the selected section's settings on
@@ -103,6 +104,7 @@ fun SettingsScreen(settings: SettingsManager, onBack: () -> Unit, onSetupGuide: 
                     SectionTab(stringResource(R.string.settings_sec_dashboard), section == SettingsSection.DASHBOARD, u) { section = SettingsSection.DASHBOARD }
                     SectionTab(stringResource(R.string.settings_sec_feedback), section == SettingsSection.FEEDBACK, u) { section = SettingsSection.FEEDBACK }
                     SectionTab(stringResource(R.string.settings_sec_mod), section == SettingsSection.MOD, u) { section = SettingsSection.MOD }
+                    SectionTab(stringResource(R.string.settings_sec_walk), section == SettingsSection.WALK, u) { section = SettingsSection.WALK }
                     SectionTab(stringResource(R.string.settings_sec_general), section == SettingsSection.GENERAL, u) { section = SettingsSection.GENERAL }
                 }
                 // ---- the selected section ----
@@ -116,6 +118,7 @@ fun SettingsScreen(settings: SettingsManager, onBack: () -> Unit, onSetupGuide: 
                             SettingsSection.DASHBOARD -> DashboardSection(settings, u)
                             SettingsSection.FEEDBACK -> FeedbackSection(settings, u)
                             SettingsSection.MOD -> ModSection(settings, u)
+                            SettingsSection.WALK -> WalkSection(settings, u)
                             SettingsSection.GENERAL -> GeneralSection(u, onSetupGuide)
                         }
                     }
@@ -136,6 +139,7 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
     var mirrored by remember { mutableStateOf(settings.isMirrored) }
     var selfAlign by remember { mutableStateOf(settings.isWheelSelfAlign) }
     var wheelStyle by remember { mutableStateOf(settings.wheelStyle) }
+    var splitPedals by remember { mutableStateOf(settings.isSplitPedals) }
     var wheelReturn by remember { mutableFloatStateOf(settings.wheelReturnPercent.toFloat()) }
 
     Heading(stringResource(R.string.settings_control_type), u)
@@ -175,6 +179,17 @@ private fun DrivingSection(settings: SettingsManager, u: Dp) {
             deadZone = it
             settings.deadZone = it
         }
+        }
+    }
+    // With tilt the phone steers itself, so both thumbs are free for pedals.
+    if (controlType == SettingsManager.CONTROL_GYROSCOPE) {
+        OptionCard(
+            stringResource(R.string.settings_pedals), stringResource(R.string.settings_pedals_sub),
+            listOf(stringResource(R.string.settings_pedals_together), stringResource(R.string.settings_pedals_split)),
+            if (splitPedals) 1 else 0, u,
+        ) {
+            splitPedals = it == 1
+            settings.isSplitPedals = splitPedals
         }
     }
     // Arrow keys draw no wheel.
@@ -335,19 +350,61 @@ private fun FeedbackSection(settings: SettingsManager, u: Dp) {
         haptics = it
         settings.isHapticEnabled = it
     }
-    // What the phone actually reacts to, so the switch isn't a mystery.
-    Heading(stringResource(R.string.settings_haptics_when), u)
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
-        val events = listOf(
-            R.string.haptic_gear to R.string.haptic_gear_sub,
-            R.string.haptic_impact to R.string.haptic_impact_sub,
-            R.string.haptic_abs to R.string.haptic_abs_sub,
-        )
-        for ((title, sub) in events) {
-            CardBox(u, Modifier.weight(1f).fillMaxHeight().alpha(if (haptics) 1f else 0.45f)) {
-                Text(stringResource(title), color = Graphite.Text, fontSize = (u * 3.3f).asSp(), fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(u * 0.8f))
-                Text(stringResource(sub), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+    // One switch per event; hidden while vibration is off altogether.
+    if (haptics) {
+        var gear by remember { mutableStateOf(settings.hapticGear) }
+        var impact by remember { mutableStateOf(settings.hapticImpact) }
+        var landing by remember { mutableStateOf(settings.hapticLanding) }
+        var abs by remember { mutableStateOf(settings.hapticAbs) }
+        var traction by remember { mutableStateOf(settings.hapticTraction) }
+        var redline by remember { mutableStateOf(settings.hapticRedline) }
+        Heading(stringResource(R.string.settings_haptics_when), u)
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+            ToggleCard(
+                stringResource(R.string.haptic_gear), stringResource(R.string.haptic_gear_sub),
+                gear, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                gear = it
+                settings.hapticGear = it
+            }
+            ToggleCard(
+                stringResource(R.string.haptic_impact), stringResource(R.string.haptic_impact_sub),
+                impact, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                impact = it
+                settings.hapticImpact = it
+            }
+        }
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+            ToggleCard(
+                stringResource(R.string.haptic_landing), stringResource(R.string.haptic_landing_sub),
+                landing, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                landing = it
+                settings.hapticLanding = it
+            }
+            ToggleCard(
+                stringResource(R.string.haptic_abs), stringResource(R.string.haptic_abs_sub),
+                abs, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                abs = it
+                settings.hapticAbs = it
+            }
+        }
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+            ToggleCard(
+                stringResource(R.string.haptic_traction), stringResource(R.string.haptic_traction_sub),
+                traction, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                traction = it
+                settings.hapticTraction = it
+            }
+            ToggleCard(
+                stringResource(R.string.haptic_redline), stringResource(R.string.haptic_redline_sub),
+                redline, u, Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                redline = it
+                settings.hapticRedline = it
             }
         }
     }
@@ -373,6 +430,12 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     var gearbox by remember { mutableStateOf(settings.modShowGearbox) }
     var reset by remember { mutableStateOf(settings.modShowReset) }
     var pause by remember { mutableStateOf(settings.modShowPause) }
+    var map by remember { mutableStateOf(settings.modShowMap) }
+    var walk by remember { mutableStateOf(settings.modShowWalk) }
+    var interact by remember { mutableStateOf(settings.modShowInteract) }
+    var lookDrag by remember { mutableStateOf(settings.isLookDrag) }
+    var handbrakeHold by remember { mutableStateOf(settings.isHandbrakeHold) }
+    var hornPlace by remember { mutableIntStateOf(settings.hornPlace) }
     val modVersion = settings.lastModVersion
     val seen = modVersion.isNotEmpty()
 
@@ -390,7 +453,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     CardBox(u) {
         val points = listOf(
             R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_6, R.string.mod_what_5,
-            R.string.mod_what_7, R.string.mod_what_8,
+            R.string.mod_what_7, R.string.mod_what_8, R.string.mod_what_9,
         )
         for ((i, point) in points.withIndex()) {
             if (i > 0) Spacer(Modifier.height(u * 1.2f))
@@ -448,6 +511,29 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
         ) {
             lights = it
             settings.modShowLights = it
+        }
+    }
+    if (handbrake) {
+        OptionCard(
+            stringResource(R.string.settings_handbrake_style), stringResource(R.string.settings_handbrake_style_sub),
+            listOf(stringResource(R.string.settings_handbrake_latch), stringResource(R.string.settings_handbrake_hold)),
+            if (handbrakeHold) 1 else 0, u,
+        ) {
+            handbrakeHold = it == 1
+            settings.isHandbrakeHold = handbrakeHold
+        }
+    }
+    if (horn) {
+        OptionCard(
+            stringResource(R.string.settings_horn_place), stringResource(R.string.settings_horn_place_sub),
+            listOf(
+                stringResource(R.string.settings_horn_key), stringResource(R.string.settings_horn_hub),
+                stringResource(R.string.settings_horn_both),
+            ),
+            hornPlace, u,
+        ) {
+            hornPlace = it
+            settings.hornPlace = it
         }
     }
     // The second page of the key row (mod 2.1+): one switch per group.
@@ -534,6 +620,38 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
         ) {
             pause = it
             settings.modShowPause = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_map), stringResource(R.string.mod_show_map_sub),
+            map, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            map = it
+            settings.modShowMap = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_show_walk), stringResource(R.string.mod_show_walk_sub),
+            walk, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            walk = it
+            settings.modShowWalk = it
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(
+            stringResource(R.string.mod_show_interact), stringResource(R.string.mod_show_interact_sub),
+            interact, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            interact = it
+            settings.modShowInteract = it
+        }
+        ToggleCard(
+            stringResource(R.string.mod_look_drag), stringResource(R.string.mod_look_drag_sub),
+            lookDrag, u, Modifier.weight(1f).fillMaxHeight(),
+        ) {
+            lookDrag = it
+            settings.isLookDrag = it
         }
     }
 }
@@ -846,4 +964,125 @@ private fun Pill(label: String, selected: Boolean, u: Dp, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(horizontal = u * 3.5f, vertical = u * 1.8f),
     )
+}
+
+/** On foot (mod 2.3+): the walking screen that replaces the drive screen when you get out. */
+@Composable
+private fun WalkSection(settings: SettingsManager, u: Dp) {
+    var sprintKey by remember { mutableStateOf(settings.isWalkSprintKey) }
+    var stickRight by remember { mutableStateOf(settings.isWalkStickRight) }
+    var lookSpeed by remember { mutableFloatStateOf(settings.walkLookSpeed) }
+    var crouchToggle by remember { mutableStateOf(settings.isWalkCrouchToggle) }
+    var invert by remember { mutableStateOf(settings.isWalkInvertLook) }
+    var gyro by remember { mutableStateOf(settings.isWalkGyroAim) }
+    var gyroSpeed by remember { mutableFloatStateOf(settings.walkGyroSpeed) }
+    var interact by remember { mutableStateOf(settings.walkShowInteract) }
+    var view by remember { mutableStateOf(settings.walkShowView) }
+
+    // Said first and plainly: none of this exists without the mod.
+    CardBox(u, selected = true) {
+        Text(stringResource(R.string.walk_title), color = Graphite.Text, fontSize = (u * 3.6f).asSp(), fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(u * 0.8f))
+        Text(stringResource(R.string.walk_mod_note), color = Graphite.Orange, fontSize = (u * 2.9f).asSp(), lineHeight = (u * 4f).asSp())
+        Spacer(Modifier.height(u * 0.8f))
+        Text(stringResource(R.string.walk_note), color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+    }
+    OptionCard(
+        stringResource(R.string.walk_stick), stringResource(R.string.walk_stick_sub),
+        listOf(stringResource(R.string.walk_stick_left), stringResource(R.string.walk_stick_right)),
+        if (stickRight) 1 else 0, u,
+    ) {
+        stickRight = it == 1
+        settings.isWalkStickRight = stickRight
+    }
+    OptionCard(
+        stringResource(R.string.walk_sprint), stringResource(R.string.walk_sprint_sub),
+        listOf(stringResource(R.string.walk_sprint_edge), stringResource(R.string.walk_sprint_key_option)),
+        if (sprintKey) 1 else 0, u,
+    ) {
+        sprintKey = it == 1
+        settings.isWalkSprintKey = sprintKey
+    }
+    CardBox(u) {
+        SliderRow(
+            stringResource(R.string.walk_look), stringResource(R.string.walk_look_sub),
+            "×%.1f".format(lookSpeed), lookSpeed, 0.3f..3f, u,
+        ) {
+            lookSpeed = it
+            settings.walkLookSpeed = it
+        }
+    }
+    OptionCard(
+        stringResource(R.string.walk_crouch), stringResource(R.string.walk_crouch_sub),
+        listOf(stringResource(R.string.walk_crouch_hold), stringResource(R.string.walk_crouch_toggle)),
+        if (crouchToggle) 1 else 0, u,
+    ) {
+        crouchToggle = it == 1
+        settings.isWalkCrouchToggle = crouchToggle
+    }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(stringResource(R.string.walk_invert), stringResource(R.string.walk_invert_sub), invert, u, Modifier.weight(1f).fillMaxHeight()) {
+            invert = it
+            settings.isWalkInvertLook = it
+        }
+        ToggleCard(stringResource(R.string.walk_gyro), stringResource(R.string.walk_gyro_sub), gyro, u, Modifier.weight(1f).fillMaxHeight()) {
+            gyro = it
+            settings.isWalkGyroAim = it
+        }
+    }
+    if (gyro) {
+        CardBox(u) {
+            SliderRow(
+                stringResource(R.string.walk_gyro_speed), stringResource(R.string.walk_gyro_speed_sub),
+                "×%.1f".format(gyroSpeed), gyroSpeed, 0.3f..3f, u,
+            ) {
+                gyroSpeed = it
+                settings.walkGyroSpeed = it
+            }
+        }
+    }
+    Heading(stringResource(R.string.walk_keys_title), u)
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 2.4f)) {
+        ToggleCard(stringResource(R.string.walk_show_interact), stringResource(R.string.walk_show_interact_sub), interact, u, Modifier.weight(1f).fillMaxHeight()) {
+            interact = it
+            settings.walkShowInteract = it
+        }
+        ToggleCard(stringResource(R.string.walk_show_view), stringResource(R.string.walk_show_view_sub), view, u, Modifier.weight(1f).fillMaxHeight()) {
+            view = it
+            settings.walkShowView = it
+        }
+    }
+}
+
+/** A setting with a few named options side by side; the chosen one is lit. */
+@Composable
+private fun OptionCard(title: String, subtitle: String, options: List<String>, selected: Int, u: Dp, onSelect: (Int) -> Unit) {
+    CardBox(u) {
+        Text(title, color = Graphite.Text, fontSize = (u * 3.3f).asSp(), fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(u * 0.6f))
+        Text(subtitle, color = Graphite.Muted, fontSize = (u * 2.7f).asSp(), lineHeight = (u * 3.8f).asSp())
+        Spacer(Modifier.height(u * 1.8f))
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(u * 1.6f)) {
+            options.forEachIndexed { i, label ->
+                val on = i == selected
+                val shape = RoundedCornerShape(u * 2f)
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(shape)
+                        .background(if (on) Graphite.Selected else Graphite.Inset)
+                        .border(if (on) 2.dp else 1.dp, if (on) Graphite.Orange else Graphite.Edge, shape)
+                        .clickable { onSelect(i) }
+                        .padding(horizontal = u * 1.6f, vertical = u * 2f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        label, color = if (on) Graphite.Text else Graphite.Muted, fontSize = (u * 2.9f).asSp(),
+                        fontWeight = if (on) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+    }
 }

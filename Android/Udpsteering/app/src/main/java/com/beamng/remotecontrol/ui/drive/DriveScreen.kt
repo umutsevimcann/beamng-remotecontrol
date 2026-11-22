@@ -2,6 +2,8 @@ package com.beamng.remotecontrol.ui.drive
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import com.beamng.remotecontrol.R
+import com.beamng.remotecontrol.protocol.ModProtocol
 import com.beamng.remotecontrol.settings.SettingsManager
 import com.beamng.remotecontrol.ui.TelemetryUiState
 import com.beamng.remotecontrol.ui.dash.DashArea
@@ -70,6 +73,7 @@ fun DriveScreen(
     dashboardOnly: Boolean,
     perfTimerEnabled: Boolean,
     analogPedals: Boolean,
+    splitPedals: Boolean,
     layout: DashLayout,
     mirrored: Boolean,
     mod: ModControls?,
@@ -79,6 +83,8 @@ fun DriveScreen(
     wheelRestStrength: () -> Float,
     wheelGameAngle: () -> Float?,
     onWheelHeld: (Boolean) -> Unit,
+    /** Non-null: dragging the gauges turns the camera (mod 2.3+), in dp. */
+    onLookDrag: ((Float, Float) -> Unit)?,
     steering: () -> Float,
     onThrottle: (Float) -> Unit,
     onBrake: (Float) -> Unit,
@@ -121,13 +127,21 @@ fun DriveScreen(
                 verticalArrangement = Arrangement.spacedBy(u * 2.2f),
             ) {
                 WarningRow(telemetry, u, Modifier.fillMaxWidth().height(u * 7))
+                val look = onLookDrag
+                val lookModifier = if (look == null) Modifier else Modifier.pointerInput(Unit) {
+                    val density = this.density
+                    detectDragGestures { change, drag ->
+                        change.consume()
+                        look(drag.x / density, drag.y / density)
+                    }
+                }
                 DashArea(
                     layout,
                     DashState(telemetry, metricUnits, perfTimerEnabled, telemetry.rpmScale),
                     u,
-                    Modifier.fillMaxWidth().weight(1f),
+                    Modifier.fillMaxWidth().weight(1f).then(lookModifier),
                 )
-                if (!dashboardOnly && mod != null && (mod.showLights || mod.showVehicle)) {
+                if (!dashboardOnly && mod != null && (mod.showLights || mod.showVehicle || mod.showGame)) {
                     ModKeyRow(mod, telemetry, keyPage, { keyPage = it }, u, Modifier.fillMaxWidth().height(u * 11))
                 }
                 if (!dashboardOnly) SteerBar(steerValue, Modifier.fillMaxWidth().height(u * 5))
@@ -175,6 +189,11 @@ fun DriveScreen(
                             restStrength = wheelRestStrength,
                             gameAngle = wheelGameAngle,
                             onHeld = onWheelHeld,
+                            onHub = if (mod != null && mod.hornOnHub) {
+                                { pressed -> mod.onButton(ModProtocol.BUTTON_HORN, pressed) }
+                            } else {
+                                null
+                            },
                             onValue = { v ->
                                 touchValue = v
                                 onWheel(v)
@@ -215,13 +234,57 @@ fun DriveScreen(
                     )
                 }
             }
+            // Split pedals (tilt only, the phone steers itself): one thumb per pedal,
+            // the brake with the shift paddles above it, the gas with horn and handbrake.
+            val brakeSide: @Composable RowScope.() -> Unit = {
+                Column(
+                    Modifier.align(Alignment.Bottom).padding(bottom = u * 2),
+                    verticalArrangement = Arrangement.spacedBy(u * 2),
+                ) {
+                    if (mod != null && mod.showShift) {
+                        // A little shorter than beside the wheel: mirrored, this column sits right
+                        // under the settings gear, and the top paddle must stay clear of it.
+                        ShiftKey(up = true, mod, u, Modifier.width(cu * 24).height(u * 15))
+                        ShiftKey(up = false, mod, u, Modifier.width(cu * 24).height(u * 15))
+                    }
+                    Pedal(
+                        stringResource(R.string.drive_brake), Graphite.Red, cu * 24, u * 46,
+                        plateFraction = 0.52f, analog = analogPedals, u = cu, onValue = onBrake,
+                    )
+                }
+            }
+            val gasSide: @Composable RowScope.() -> Unit = {
+                Column(
+                    Modifier.align(Alignment.Bottom).padding(bottom = u * 2),
+                    verticalArrangement = Arrangement.spacedBy(u * 2),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    val keys = mod != null && (mod.showHorn || mod.showHandbrake)
+                    if (mod != null && keys) {
+                        ModWheelKeys(mod, u, Modifier.width(cu * 24).height(u * 12))
+                    }
+                    // With keys above it the gas is shorter, so the keys start well below
+                    // the settings gear in the corner and a thumb cannot catch both.
+                    Pedal(
+                        stringResource(R.string.drive_gas), Graphite.Orange, cu * 24, if (keys) u * 58 else u * 72,
+                        plateFraction = 0.78f, analog = analogPedals, u = cu, onValue = onThrottle,
+                    )
+                }
+            }
             Row(
                 Modifier.fillMaxSize().padding(horizontal = cu * 3),
                 horizontalArrangement = Arrangement.spacedBy(cu * 3),
             ) {
-                if (mirrored) pedalSide() else steerSide()
-                centre()
-                if (mirrored) steerSide() else pedalSide()
+                if (isTilt && splitPedals) {
+                    // Mirrored puts the gas under the left thumb.
+                    if (mirrored) gasSide() else brakeSide()
+                    centre()
+                    if (mirrored) brakeSide() else gasSide()
+                } else {
+                    if (mirrored) pedalSide() else steerSide()
+                    centre()
+                    if (mirrored) steerSide() else pedalSide()
+                }
             }
         }
 
@@ -232,7 +295,7 @@ fun DriveScreen(
 }
 
 @Composable
-private fun SettingsGear(u: Dp, onClick: () -> Unit, modifier: Modifier) {
+internal fun SettingsGear(u: Dp, onClick: () -> Unit, modifier: Modifier) {
     Text(
         "⚙", color = Graphite.Muted, fontSize = (u * 6).asSp(),
         modifier = modifier

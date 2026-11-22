@@ -19,6 +19,10 @@ class MotionPacket(data: ByteArray, length: Int) {
     var isValid = false; private set
     var velX = 0f; private set
     var velY = 0f; private set
+    /** Body acceleration in m/s², gravity excluded (z up): what a crash or a landing shows up in. */
+    var accX = 0f; private set
+    var accY = 0f; private set
+    var accZ = 0f; private set
     var yawPos = 0f; private set
 
     init {
@@ -28,6 +32,9 @@ class MotionPacket(data: ByteArray, length: Int) {
         ) {
             velX = EndianUtils.readSwappedFloat(data, 16)
             velY = EndianUtils.readSwappedFloat(data, 20)
+            accX = EndianUtils.readSwappedFloat(data, 28)
+            accY = EndianUtils.readSwappedFloat(data, 32)
+            accZ = EndianUtils.readSwappedFloat(data, 36)
             yawPos = EndianUtils.readSwappedFloat(data, 60)
             isValid = true
         }

@@ -98,6 +98,8 @@ fun SteeringWheel(
     restStrength: () -> Float = { 1f },
     gameAngle: () -> Float? = { null },
     onHeld: (Boolean) -> Unit = {},
+    /** Non-null: the hub is a horn button, pressed (true) and let go (false). */
+    onHub: ((Boolean) -> Unit)? = null,
     onValue: (Float) -> Unit,
     onRelease: () -> Unit,
     modifier: Modifier = Modifier,
@@ -112,6 +114,7 @@ fun SteeringWheel(
     val currentStrength by rememberUpdatedState(restStrength)
     val currentGameAngle by rememberUpdatedState(gameAngle)
     val currentOnHeld by rememberUpdatedState(onHeld)
+    val currentOnHub by rememberUpdatedState(onHub)
     var held by remember { mutableStateOf(false) }
 
     // Let go, the wheel is the car's: every frame it moves towards the rest position
@@ -166,11 +169,30 @@ fun SteeringWheel(
 
     // The gesture coroutine outlives recompositions, hence currentOnValue/currentOnRelease:
     // with stale lambdas the wheel kept driving the previous control type's handler.
-    val input = if (!draggable) Modifier else Modifier.pointerInput(Unit) {
+    val input = if (!draggable && onHub == null) Modifier else Modifier.pointerInput(draggable) {
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
             val cx = this.size.width / 2f
             val cy = this.size.height / 2f
+            val hubR = minOf(cx, cy) * HUB_DEAD_RADIUS
+            val hub = currentOnHub
+            val ox = down.position.x - cx
+            val oy = down.position.y - cy
+            if (hub != null && ox * ox + oy * oy < hubR * hubR) {
+                // A press that starts on the hub sounds the horn until the finger lifts;
+                // it never steers, so the wheel stays where it was.
+                hub(true)
+                try {
+                    while (true) {
+                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                    }
+                } finally {
+                    hub(false)
+                }
+                return@awaitEachGesture
+            }
+            if (!draggable) return@awaitEachGesture
             var last = atan2(down.position.y - cy, down.position.x - cx)
             // Grabbed while still springing back: carry on from where the wheel is
             // and tell the handler, which was already reset to 0 on release —

@@ -2,6 +2,10 @@ package com.beamng.remotecontrol
 
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.SystemClock
 import android.os.Build
 import android.os.Bundle
@@ -38,6 +42,8 @@ import com.beamng.remotecontrol.input.SteeringInputHandler
 import com.beamng.remotecontrol.network.NetworkUtils
 import com.beamng.remotecontrol.network.UdpDiscovery
 import com.beamng.remotecontrol.protocol.ModProtocol
+import com.beamng.remotecontrol.feedback.HapticEngine
+import com.beamng.remotecontrol.input.GyroLook
 import com.beamng.remotecontrol.protocol.MotionPacket
 import com.beamng.remotecontrol.protocol.SelfAlign
 import com.beamng.remotecontrol.protocol.Ports
@@ -45,9 +51,11 @@ import com.beamng.remotecontrol.protocol.Receivepacket
 import com.beamng.remotecontrol.protocol.Sendpacket
 import com.beamng.remotecontrol.protocol.SteeringCurve
 import com.beamng.remotecontrol.settings.SettingsManager
+import com.beamng.remotecontrol.ui.AppLanguage
 import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.dash.RpmScale
 import com.beamng.remotecontrol.ui.dash.RpmScaleTracker
+import com.beamng.remotecontrol.ui.drive.WalkScreen
 import com.beamng.remotecontrol.ui.drive.WheelStyle
 import com.beamng.remotecontrol.ui.drive.DriveScreen
 import com.beamng.remotecontrol.ui.drive.ModControls
@@ -95,6 +103,12 @@ class MainActivity : AppCompatActivity() {
     private var modShowGearbox by mutableStateOf(true)
     private var modShowReset by mutableStateOf(true)
     private var modShowPause by mutableStateOf(true)
+    private var modShowMap by mutableStateOf(true)
+    private var modShowWalk by mutableStateOf(true)
+    private var modHasMapKey = false // the linked mod is 2.3+
+    private var splitPedals by mutableStateOf(false)
+    private var handbrakeHold by mutableStateOf(false)
+    private var hornPlace by mutableIntStateOf(SettingsManager.HORN_KEY)
     private var modHasGameKeys = false // the linked mod is 2.2+
     private var modHasVehicleKeys = false // the linked mod is 2.1+
     private var modFeatures by mutableStateOf<Int?>(null)
@@ -110,6 +124,33 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var modHasWheelFeedback = false
     @Volatile private var wheelHeld = false
     @Volatile private var wheelReturnPercent = ModProtocol.WHEEL_RETURN_DEFAULT
+
+    // On foot (mod 2.3+): the walking screen replaces the drive screen.
+    private var walking by mutableStateOf(false)
+    @Volatile private var walkingNow = false
+    @Volatile private var stickX = 0f
+    @Volatile private var stickY = 0f
+    @Volatile private var stickSprint = false
+    @Volatile private var sprintKey = false
+    private var walkSprintKey by mutableStateOf(false)
+    private var walkStickRight by mutableStateOf(false)
+    private var walkCrouchToggle by mutableStateOf(false)
+    private var walkShowInteract by mutableStateOf(true)
+    private var walkShowView by mutableStateOf(true)
+    private var modShowInteract by mutableStateOf(true)
+    private var lookDrag by mutableStateOf(false)
+    private var walkInvertLook = false
+    private var walkGyroAim = false
+    private var walkGyroSpeed = 1f
+    // Aim by turning the phone on foot: gravity says which way is up.
+    private val gravityNow = FloatArray(3)
+    private var lastGyroNs = 0L
+    private var gyroListening = false
+    @Volatile private var walkLookSpeed = 1f
+    // Look drag waiting for the next packet; written on the UI thread, taken by the sender.
+    private val lookLock = Any()
+    private var lookPendingX = 0f
+    private var lookPendingY = 0f
     @Volatile private var wheelFeedbackWanted = false // on-screen wheel + the setting
     @Volatile private var gameWheelAngle = 0f
     @Volatile private var gameWheelAngleMs = 0L
@@ -136,16 +177,16 @@ class MainActivity : AppCompatActivity() {
 
     // Haptic Feedback
     private var vibrator: Vibrator? = null
-    private var oldGearString = ""
-    private var impactWindowSpeed = 0
-    private var impactWindowStartMs = 0L
-    private var lastImpactVibrationTime = 0L
-    private var lastAbsVibrationTime = 0L
+    private val hapticEngine = HapticEngine()
+    private var haptics: HapticEngine.Options? = null
 
     // Drift indicator (MotionSim protocol, optional second stream)
     private var motionJob: Job? = null
     @Volatile private var motionSocket: DatagramSocket? = null
     private var lastMotionMs = 0L
+
+    // The app language this instance was built with (see AppLanguage.apply).
+    private var builtLanguage = ""
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         if (hasFocus) {
@@ -156,6 +197,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        builtLanguage = AppLanguage.requestedTags()
 
         hideSystemUI()
 
@@ -173,12 +215,43 @@ class MainActivity : AppCompatActivity() {
         modHasVehicleKeys = modInfo?.hasVehicleKeys == true
         modHasWheelFeedback = modInfo?.hasWheelFeedback == true
         modHasGameKeys = modInfo?.hasGameKeys == true
+        modHasMapKey = modInfo?.hasMapKey == true
+        // A latched handbrake survives the language rebuild (onResume drops it
+        // again if the key was hidden or switched to hold meanwhile).
+        if (modLinked && savedInstanceState?.getBoolean(STATE_HANDBRAKE_ON) == true) {
+            handbrakeOn = true
+            handbrakeValue = 1f
+        }
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         setContent {
             RemoteTheme {
+                if (modLinked && walking && !dashboardOnly) {
+                    WalkScreen(
+                        connected = telemetry.connected,
+                        sprintOnEdge = !walkSprintKey,
+                        stickOnRight = walkStickRight,
+                        crouchToggle = walkCrouchToggle,
+                        showInteract = walkShowInteract,
+                        showView = walkShowView,
+                        showMap = modShowMap && modHasMapKey,
+                        onStick = { x, y, sprint ->
+                            stickX = x
+                            stickY = y
+                            stickSprint = sprint
+                        },
+                        onLook = { dx, dy -> addLook(dx * LOOK_UNITS_PER_DP * walkLookSpeed, dy * LOOK_UNITS_PER_DP * walkLookSpeed) },
+                        onButton = { bit, pressed ->
+                            modButtons = if (pressed) modButtons or bit else modButtons and bit.inv()
+                        },
+                        onSprintKey = { pressed -> sprintKey = pressed },
+                        onOpenSettings = {
+                            startActivity(Intent(this, SettingsActivity::class.java))
+                        },
+                    )
+                } else {
                 DriveScreen(
                     telemetry = telemetry,
                     metricUnits = metricUnits,
@@ -186,12 +259,13 @@ class MainActivity : AppCompatActivity() {
                     dashboardOnly = dashboardOnly,
                     perfTimerEnabled = perfTimer,
                     analogPedals = analogPedals,
+                    splitPedals = splitPedals,
                     layout = dashLayout,
                     mirrored = mirrored,
                     mod = if (modLinked) {
                         ModControls(
                             showShift = modShowShift, showHandbrake = modShowHandbrake,
-                            showHorn = modShowHorn, showLights = modShowLights,
+                            showHorn = modShowHorn && hornPlace != SettingsManager.HORN_HUB, showLights = modShowLights,
                             showDriveMode = modShowDriveMode && modHasVehicleKeys,
                             show4wd = modShow4wd && modHasVehicleKeys,
                             showNitrous = modShowNitrous && modHasVehicleKeys,
@@ -203,6 +277,12 @@ class MainActivity : AppCompatActivity() {
                             // Reset has been in the mod's inputmap since 2.0.
                             showReset = modShowReset,
                             showPause = modShowPause && modHasGameKeys,
+                            showMap = modShowMap && modHasMapKey,
+                            // Walking mode came in the same mod release as the map key.
+                            showWalk = modShowWalk && modHasMapKey,
+                            showInteract = modShowInteract && modHasMapKey,
+                            handbrakeHold = handbrakeHold,
+                            hornOnHub = modShowHorn && hornPlace != SettingsManager.HORN_KEY,
                             features = modFeatures,
                             handbrakeOn = handbrakeOn,
                             onButton = { bit, pressed ->
@@ -232,6 +312,11 @@ class MainActivity : AppCompatActivity() {
                     wheelGameAngle = {
                         if (SystemClock.elapsedRealtime() - gameWheelAngleMs < GAME_WHEEL_FRESH_MS) gameWheelAngle else null
                     },
+                    onLookDrag = if (lookDrag && modHasMapKey) {
+                        { dx, dy -> addLook(dx * LOOK_UNITS_PER_DP * walkLookSpeed, dy * LOOK_UNITS_PER_DP * walkLookSpeed) }
+                    } else {
+                        null
+                    },
                     onWheelHeld = { held ->
                         wheelHeld = held
                         // An angle from before this grab says nothing about the next release.
@@ -255,14 +340,29 @@ class MainActivity : AppCompatActivity() {
                         startActivity(Intent(this, SettingsActivity::class.java))
                     },
                 )
+                }
             }
         }
     }
 
     // ==================== LIFECYCLE ====================
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_HANDBRAKE_ON, handbrakeOn)
+    }
+
     override fun onResume() {
         super.onResume()
+
+        // The language was changed in Settings: rebuild instead of trusting the
+        // in-place update. Nothing is started for the instance that is going away,
+        // so the link comes up once, in the new one; the pedals were released and
+        // the neutral state sent when Settings opened (onPause).
+        if (AppLanguage.changedSince(builtLanguage)) {
+            recreate()
+            return
+        }
 
         metricUnits = settingsManager.useMetricUnits()
         dashboardOnly = settingsManager.isDashboardOnly
@@ -272,8 +372,21 @@ class MainActivity : AppCompatActivity() {
         dashLayout = settingsManager.dashLayout
         mirrored = settingsManager.isMirrored
         wheelSelfAlign = settingsManager.isWheelSelfAlign
+        haptics = hapticOptions()
         wheelStyle = settingsManager.wheelStyle
         wheelReturnPercent = settingsManager.wheelReturnPercent
+        walkSprintKey = settingsManager.isWalkSprintKey
+        walkStickRight = settingsManager.isWalkStickRight
+        walkCrouchToggle = settingsManager.isWalkCrouchToggle
+        walkShowInteract = settingsManager.walkShowInteract
+        walkShowView = settingsManager.walkShowView
+        modShowInteract = settingsManager.modShowInteract
+        lookDrag = settingsManager.isLookDrag
+        walkInvertLook = settingsManager.isWalkInvertLook
+        walkGyroAim = settingsManager.isWalkGyroAim
+        walkGyroSpeed = settingsManager.walkGyroSpeed
+        setGyroAim(walkGyroAim && modLinked)
+        walkLookSpeed = settingsManager.walkLookSpeed
         wheelFeedbackWanted = wheelSelfAlign && controlType == SettingsManager.CONTROL_SLIDER
         wheelHeld = false
         gameWheelAngleMs = 0L
@@ -291,6 +404,17 @@ class MainActivity : AppCompatActivity() {
         modShowGearbox = settingsManager.modShowGearbox
         modShowReset = settingsManager.modShowReset
         modShowPause = settingsManager.modShowPause
+        modShowMap = settingsManager.modShowMap
+        modShowWalk = settingsManager.modShowWalk
+        splitPedals = settingsManager.isSplitPedals
+        hornPlace = settingsManager.hornPlace
+        // Switched to hold while the handbrake was latched on: let it off.
+        val hold = settingsManager.isHandbrakeHold
+        if (hold && !handbrakeHold) {
+            handbrakeOn = false
+            handbrakeValue = 0f
+        }
+        handbrakeHold = hold
         // A key hidden in settings must not stay applied with no way to release it.
         if (!modShowHandbrake) {
             handbrakeOn = false
@@ -313,6 +437,7 @@ class MainActivity : AppCompatActivity() {
         modButtons = 0
         stopUdpTasks()
         steeringInputHandler?.stop()
+        setGyroAim(false)
     }
 
     override fun onDestroy() {
@@ -353,47 +478,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun processHapticFeedback(p: Receivepacket, newSpeed: Int) {
-        if (!settingsManager.isHapticEnabled) return
+    /** What the player wants to feel, read in onResume; null = vibration off altogether. */
+    private fun hapticOptions(): HapticEngine.Options? {
+        val s = settingsManager
+        if (!s.isHapticEnabled) return null
+        return HapticEngine.Options(
+            gear = s.hapticGear, impact = s.hapticImpact, landing = s.hapticLanding,
+            abs = s.hapticAbs, traction = s.hapticTraction, redline = s.hapticRedline,
+        )
+    }
 
-        val now = System.currentTimeMillis()
+    private fun play(pulses: List<HapticEngine.Pulse>) {
+        // Two in one packet (a gear change on the limiter): the stronger one.
+        val p = pulses.maxByOrNull { it.amplitude * it.ms } ?: return
+        doVibrate(p.ms, p.amplitude)
+    }
 
-        // 1. Gear Change
-        val currentGear = p.gear
-        if (currentGear != oldGearString) {
-            doVibrate(50, VibrationEffect.DEFAULT_AMPLITUDE)
-            oldGearString = currentGear
-        }
-
-        // 2. Impact detection over a ~300ms window. Telemetry arrives at up to
-        // 60Hz, so the per-packet delta of even a violent crash is only a few
-        // km/h — the old per-packet comparison could never fire.
-        if (impactWindowStartMs == 0L) {
-            impactWindowStartMs = now
-            impactWindowSpeed = newSpeed
-        } else if (now - impactWindowStartMs >= IMPACT_WINDOW_MS) {
-            val drop = abs(impactWindowSpeed - newSpeed)
-            if (drop > 25 && (now - lastImpactVibrationTime) > IMPACT_VIBRATION_COOLDOWN_MS) {
-                when {
-                    drop > 60 -> doVibrate(600, 255)  // Severe crash
-                    drop > 40 -> doVibrate(300, 180)  // Medium impact
-                    else -> doVibrate(150, 100)       // Minor bump
-                }
-                lastImpactVibrationTime = now
-            }
-            impactWindowStartMs = now
-            impactWindowSpeed = newSpeed
-        }
-
-        // 3. ABS feel: pulse only while ABS is actually intervening. The game sets
-        // this showLights bit from electrics absActive (outgauge.lua), so a held
-        // brake at standstill — or on a car without ABS — stays silent.
-        if (p.activeLightsArr[Receivepacket.INDEX_ABS] && newSpeed > 5 &&
-            (now - lastAbsVibrationTime) > ABS_VIBRATION_COOLDOWN_MS
-        ) {
-            doVibrate(40, 60)
-            lastAbsVibrationTime = now
-        }
+    private fun processHapticFeedback(p: Receivepacket) {
+        val options = haptics ?: return
+        play(
+            hapticEngine.onTelemetry(
+                SystemClock.elapsedRealtime(), p.gear, p.speed * 3.6f,
+                p.activeLightsArr[Receivepacket.INDEX_ABS], p.activeLightsArr[Receivepacket.INDEX_TC],
+                p.rpm, telemetry.rpmScale.redline, options,
+            ),
+        )
     }
 
     // ==================== NETWORKING ====================
@@ -527,8 +636,29 @@ class MainActivity : AppCompatActivity() {
                                     socket.send(DatagramPacket(hello, hello.size, host, Ports.MOD))
                                 }
                                 // The mod's inputmap is linear (linearity 1): no SteeringCurve here.
+                                val buffer = if (walkingNow) {
+                                    // On foot the stick walks; the mod reads it from the same axes.
+                                    val w = ModProtocol.walkAxes(stickX, stickY, stickSprint || sprintKey)
+                                    val look = synchronized(lookLock) {
+                                        val l = lookPendingX to lookPendingY
+                                        lookPendingX = 0f
+                                        lookPendingY = 0f
+                                        l
+                                    }
+                                    ModProtocol.control(
+                                        steering = w.steering, throttle = w.throttle, brake = w.brake,
+                                        clutch = 0f, handbrake = w.handbrake, buttons = modButtons,
+                                        lookX = look.first, lookY = look.second,
+                                    )
+                                } else {
                                 val steering = steeringInputHandler?.getSteeringValue() ?: 0f
-                                val buffer = ModProtocol.control(
+                                val look = synchronized(lookLock) {
+                                    val l = lookPendingX to lookPendingY
+                                    lookPendingX = 0f
+                                    lookPendingY = 0f
+                                    l
+                                }
+                                ModProtocol.control(
                                     steering = steering, throttle = thrpushed, brake = brpushed,
                                     clutch = 0f, handbrake = handbrakeValue,
                                     buttons = if (modHasWheelFeedback && wheelFeedbackWanted && !wheelHeld) {
@@ -536,7 +666,9 @@ class MainActivity : AppCompatActivity() {
                                     } else {
                                         modButtons
                                     },
+                                    lookX = look.first, lookY = look.second,
                                 )
+                                }
                                 socket.send(DatagramPacket(buffer, buffer.size, host, Ports.MOD))
                                 if (failing) {
                                     failing = false
@@ -584,6 +716,11 @@ class MainActivity : AppCompatActivity() {
                 return // socket closed: the link is ending
             }
             val message = String(buf, 0, packet.length)
+            val onFoot = ModProtocol.parseWalking(message)
+            if (onFoot != null) {
+                if (onFoot != walkingNow) withContext(Dispatchers.Main) { onWalkingChanged(onFoot) }
+                continue
+            }
             val angle = ModProtocol.parseWheelAngle(message)
             if (angle != null) {
                 gameWheelAngle = angle
@@ -592,6 +729,70 @@ class MainActivity : AppCompatActivity() {
             }
             val info = ModProtocol.parseVehicleInfo(message) ?: continue
             withContext(Dispatchers.Main) { onVehicleInfo(info) }
+        }
+    }
+
+    /** UI thread: look drag for the next packet; [y] is down-positive, flipped if the player inverted it. */
+    private fun addLook(x: Float, y: Float) {
+        if (!x.isFinite() || !y.isFinite()) return
+        synchronized(lookLock) {
+            lookPendingX += x
+            lookPendingY += if (walkInvertLook) -y else y
+        }
+    }
+
+    private val gyroAimListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            when (event.sensor.type) {
+                Sensor.TYPE_GRAVITY -> System.arraycopy(event.values, 0, gravityNow, 0, 3)
+                Sensor.TYPE_GYROSCOPE -> {
+                    val last = lastGyroNs
+                    lastGyroNs = event.timestamp
+                    // Only on foot; a stale timestamp after a pause would be one huge jump.
+                    if (!walkingNow || last == 0L) return
+                    val dt = (event.timestamp - last) / 1e9f
+                    if (dt > 0.1f) return
+                    @Suppress("DEPRECATION")
+                    val rotation = windowManager.defaultDisplay.rotation
+                    val (x, y) = GyroLook.delta(event.values, gravityNow, rotation, dt, walkGyroSpeed)
+                    addLook(x, y)
+                }
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+    }
+
+    private fun setGyroAim(on: Boolean) {
+        val sm = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        if (on && !gyroListening) {
+            val gyro = sm.getDefaultSensor(Sensor.TYPE_GYROSCOPE) ?: return
+            val gravity = sm.getDefaultSensor(Sensor.TYPE_GRAVITY) ?: return
+            lastGyroNs = 0L
+            sm.registerListener(gyroAimListener, gravity, SensorManager.SENSOR_DELAY_GAME)
+            sm.registerListener(gyroAimListener, gyro, SensorManager.SENSOR_DELAY_GAME)
+            gyroListening = true
+        } else if (!on && gyroListening) {
+            sm.unregisterListener(gyroAimListener)
+            gyroListening = false
+        }
+    }
+
+    /** UI thread: the player got out of the car or back in. Nothing held carries over. */
+    private fun onWalkingChanged(onFoot: Boolean) {
+        if (isFinishing || isDestroyed) return
+        walkingNow = onFoot
+        walking = onFoot
+        stickX = 0f
+        stickY = 0f
+        stickSprint = false
+        sprintKey = false
+        modButtons = 0
+        thrpushed = 0f
+        brpushed = 0f
+        synchronized(lookLock) {
+            lookPendingX = 0f
+            lookPendingY = 0f
         }
     }
 
@@ -704,6 +905,7 @@ class MainActivity : AppCompatActivity() {
         lastMotionMs = System.currentTimeMillis()
         val slip = p.slipAngleDeg()
         telemetry.driftDeg = slip
+        haptics?.let { play(hapticEngine.onMotion(SystemClock.elapsedRealtime(), p.accX, p.accY, p.accZ, it)) }
         if (slip != null) {
             val a = abs(slip)
             telemetry.driftMaxDeg = telemetry.driftMaxDeg?.let { maxOf(it, a) } ?: a
@@ -750,7 +952,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             (2.23694f * p.speed).roundToInt()
         }
-        processHapticFeedback(p, newSpeed)
+        processHapticFeedback(p)
     }
 
     /** 0-100 km/h stopwatch: arms at standstill, stops at 100, keeps session best. */
@@ -782,13 +984,13 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "BeamNG"
-        private const val IMPACT_VIBRATION_COOLDOWN_MS = 500L
+        private const val STATE_HANDBRAKE_ON = "handbrake_on"
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
         private const val SEND_RETRY_DELAY_MS = 250L
         private const val NEUTRAL_PACKETS = 3
+        // Look drag sent per dp of finger travel at speed 1: a 200 dp swipe turns about 80°.
+        private const val LOOK_UNITS_PER_DP = 5f
         private const val GAME_WHEEL_FRESH_MS = 250L // the mod reports the free wheel ~30 times a second
-        private const val ABS_VIBRATION_COOLDOWN_MS = 150L
         private const val TELEMETRY_STALE_MS = 2000L
-        private const val IMPACT_WINDOW_MS = 300L
     }
 }

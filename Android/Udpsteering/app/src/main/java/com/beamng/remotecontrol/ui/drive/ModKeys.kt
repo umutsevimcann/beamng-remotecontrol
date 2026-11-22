@@ -69,6 +69,13 @@ data class ModControls(
     val showGearbox: Boolean,
     val showReset: Boolean,
     val showPause: Boolean,
+    val showMap: Boolean,
+    val showWalk: Boolean,
+    val showInteract: Boolean,
+    /** Handbrake key applies only while held, instead of tap on / tap off. */
+    val handbrakeHold: Boolean,
+    /** The wheel's hub is a horn button. */
+    val hornOnHub: Boolean,
     /** ModProtocol.FEATURE_* the car has; null = the mod did not say, assume all. */
     val features: Int?,
     val handbrakeOn: Boolean,
@@ -89,14 +96,15 @@ data class ModControls(
     val showVehicle get() = driveModeKey || fourWdKey || lowRangeKey || diffLockKey || nitrousKey || showDoors
 
     /** Is any key of the game page switched on? */
-    val showGame get() = showCamera || showGearbox || showReset || showPause
+    val showGame get() = showCamera || showGearbox || showReset || showPause || showMap || showWalk || showInteract
 }
 
 /** The symbols on the keys: the ones a car's own switches carry, so no language is needed. */
 enum class KeyGlyph {
     HEADLIGHTS, FOG, SIGNAL_LEFT, SIGNAL_RIGHT, HAZARD, RECOVER, HANDBRAKE, HORN, SHIFT_UP, SHIFT_DOWN, MORE,
     STABILITY, FOUR_WD, LOW_RANGE, DIFF_LOCK, NITROUS, DOORS,
-    CAMERA, GEARBOX, RESET, PAUSE,
+    CAMERA, GEARBOX, RESET, PAUSE, MAP, WALK,
+    JUMP, CROUCH, SPRINT, ENTER_CAR, INTERACT, VIEW,
 }
 
 /**
@@ -227,6 +235,9 @@ private fun RowScope.GameKeys(mod: ModControls, u: Dp) {
         if (mod.showGearbox) add(Triple(KeyGlyph.GEARBOX, R.string.mod_key_gearbox, ModProtocol.BUTTON_GEARBOX_MODE))
         if (mod.showReset) add(Triple(KeyGlyph.RESET, R.string.mod_key_reset, ModProtocol.BUTTON_RESET))
         if (mod.showPause) add(Triple(KeyGlyph.PAUSE, R.string.mod_key_pause, ModProtocol.BUTTON_PAUSE))
+        if (mod.showMap) add(Triple(KeyGlyph.MAP, R.string.mod_key_map, ModProtocol.BUTTON_MAP))
+        if (mod.showWalk) add(Triple(KeyGlyph.WALK, R.string.mod_key_walk, ModProtocol.BUTTON_WALK))
+        if (mod.showInteract) add(Triple(KeyGlyph.INTERACT, R.string.mod_key_interact, ModProtocol.BUTTON_INTERACT))
     }
     for ((glyph, label, bit) in keys) {
         val accent = if (bit == ModProtocol.BUTTON_RESET) Graphite.Red else Graphite.Orange
@@ -310,8 +321,15 @@ fun ModWheelKeys(mod: ModControls, u: Dp, modifier: Modifier) {
             }
         }
         if (mod.showHandbrake) {
-            LatchKey(mod.handbrakeOn, u, Modifier.weight(1f).fillMaxHeight(), onChange = mod.onHandbrake) { tint ->
-                KeyLabel(KeyGlyph.HANDBRAKE, tint, u, u * 8f)
+            if (mod.handbrakeHold) {
+                // Pulled for as long as the thumb stays on it, like a drift handbrake.
+                HoldKey(u, Modifier.weight(1f).fillMaxHeight(), Graphite.Red, onPress = mod.onHandbrake) { tint ->
+                    KeyLabel(KeyGlyph.HANDBRAKE, tint, u, u * 8f)
+                }
+            } else {
+                LatchKey(mod.handbrakeOn, u, Modifier.weight(1f).fillMaxHeight(), onChange = mod.onHandbrake) { tint ->
+                    KeyLabel(KeyGlyph.HANDBRAKE, tint, u, u * 8f)
+                }
             }
         }
     }
@@ -329,7 +347,7 @@ fun ShiftKey(up: Boolean, mod: ModControls, u: Dp, modifier: Modifier) {
 
 // ==================== glyphs ====================
 
-private fun DrawScope.drawGlyph(glyph: KeyGlyph, color: Color) {
+internal fun DrawScope.drawGlyph(glyph: KeyGlyph, color: Color) {
     val s = size.minDimension
     val c = center
     val r = s * 0.42f
@@ -550,6 +568,101 @@ private fun DrawScope.drawGlyph(glyph: KeyGlyph, color: Color) {
                     androidx.compose.ui.geometry.CornerRadius(r * 0.1f),
                 )
             }
+        }
+        KeyGlyph.MAP -> {
+            // A folded map: three panels in a zigzag, and a pin.
+            val fold = Path().apply {
+                moveTo(c.x - r, c.y - r * 0.62f)
+                lineTo(c.x - r * 0.33f, c.y - r * 0.82f)
+                lineTo(c.x + r * 0.33f, c.y - r * 0.62f)
+                lineTo(c.x + r, c.y - r * 0.82f)
+                lineTo(c.x + r, c.y + r * 0.62f)
+                lineTo(c.x + r * 0.33f, c.y + r * 0.82f)
+                lineTo(c.x - r * 0.33f, c.y + r * 0.62f)
+                lineTo(c.x - r, c.y + r * 0.82f)
+                close()
+            }
+            drawPath(fold, color, style = line)
+            drawLine(color, Offset(c.x - r * 0.33f, c.y - r * 0.82f), Offset(c.x - r * 0.33f, c.y + r * 0.62f), line.width * 0.7f)
+            drawLine(color, Offset(c.x + r * 0.33f, c.y - r * 0.62f), Offset(c.x + r * 0.33f, c.y + r * 0.82f), line.width * 0.7f)
+            drawCircle(color, r * 0.2f, Offset(c.x, c.y - r * 0.05f))
+        }
+        KeyGlyph.WALK -> {
+            // A walking figure: head, body, a leg forward and an arm swinging back.
+            drawCircle(color, r * 0.18f, Offset(c.x + r * 0.08f, c.y - r * 0.78f))
+            val hip = Offset(c.x - r * 0.02f, c.y + r * 0.15f)
+            val neck = Offset(c.x + r * 0.10f, c.y - r * 0.50f)
+            drawLine(color, neck, hip, line.width * 1.15f, StrokeCap.Round)
+            drawLine(color, hip, Offset(c.x + r * 0.42f, c.y + r * 0.55f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x + r * 0.42f, c.y + r * 0.55f), Offset(c.x + r * 0.40f, c.y + r * 0.95f), line.width, StrokeCap.Round)
+            drawLine(color, hip, Offset(c.x - r * 0.30f, c.y + r * 0.60f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x - r * 0.30f, c.y + r * 0.60f), Offset(c.x - r * 0.55f, c.y + r * 0.92f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x + r * 0.07f, c.y - r * 0.38f), Offset(c.x + r * 0.50f, c.y - r * 0.05f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x + r * 0.07f, c.y - r * 0.38f), Offset(c.x - r * 0.38f, c.y - r * 0.12f), line.width, StrokeCap.Round)
+        }
+        KeyGlyph.JUMP -> {
+            // An arrow leaving a line: off the ground.
+            drawLine(color, Offset(c.x - r * 0.8f, c.y + r * 0.85f), Offset(c.x + r * 0.8f, c.y + r * 0.85f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x, c.y + r * 0.5f), Offset(c.x, c.y - r * 0.75f), line.width * 1.2f, StrokeCap.Round)
+            val head = Path().apply {
+                moveTo(c.x, c.y - r * 1.0f); lineTo(c.x + r * 0.5f, c.y - r * 0.35f); lineTo(c.x - r * 0.5f, c.y - r * 0.35f); close()
+            }
+            drawPath(head, color)
+        }
+        KeyGlyph.CROUCH -> {
+            // An arrow pressing down onto a line.
+            drawLine(color, Offset(c.x - r * 0.8f, c.y + r * 0.85f), Offset(c.x + r * 0.8f, c.y + r * 0.85f), line.width, StrokeCap.Round)
+            drawLine(color, Offset(c.x, c.y - r * 0.9f), Offset(c.x, c.y + r * 0.1f), line.width * 1.2f, StrokeCap.Round)
+            val head = Path().apply {
+                moveTo(c.x, c.y + r * 0.6f); lineTo(c.x + r * 0.5f, c.y - r * 0.05f); lineTo(c.x - r * 0.5f, c.y - r * 0.05f); close()
+            }
+            drawPath(head, color)
+        }
+        KeyGlyph.SPRINT -> {
+            // Three chevrons pointing ahead: faster.
+            for (i in -1..1) {
+                val x = c.x + i * r * 0.5f
+                val p = Path().apply {
+                    moveTo(x - r * 0.3f, c.y - r * 0.6f); lineTo(x + r * 0.2f, c.y); lineTo(x - r * 0.3f, c.y + r * 0.6f)
+                }
+                drawPath(p, color, style = Stroke(line.width, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            }
+        }
+        KeyGlyph.ENTER_CAR -> {
+            // A car from the side with an arrow going into it.
+            val body = Path().apply {
+                moveTo(c.x - r, c.y + r * 0.35f)
+                lineTo(c.x - r, c.y - r * 0.05f)
+                lineTo(c.x - r * 0.55f, c.y - r * 0.1f)
+                lineTo(c.x - r * 0.25f, c.y - r * 0.55f)
+                lineTo(c.x + r * 0.45f, c.y - r * 0.55f)
+                lineTo(c.x + r * 0.75f, c.y - r * 0.1f)
+                lineTo(c.x + r, c.y - r * 0.02f)
+                lineTo(c.x + r, c.y + r * 0.35f)
+                close()
+            }
+            drawPath(body, color, style = line)
+            drawCircle(color, r * 0.2f, Offset(c.x - r * 0.55f, c.y + r * 0.45f))
+            drawCircle(color, r * 0.2f, Offset(c.x + r * 0.55f, c.y + r * 0.45f))
+            drawLine(color, Offset(c.x, c.y - r * 1.0f), Offset(c.x, c.y - r * 0.7f), line.width, StrokeCap.Round)
+        }
+        KeyGlyph.INTERACT -> {
+            // A pointing tap: a ring, a dot, and short rays — "use this".
+            drawCircle(color, r * 0.5f, c, style = line)
+            drawCircle(color, r * 0.16f, c)
+            for (k in 0 until 4) {
+                val a = (k * 90.0 + 45.0) * PI / 180.0
+                val dx = cos(a).toFloat()
+                val dy = sin(a).toFloat()
+                drawLine(color, Offset(c.x + dx * r * 0.72f, c.y + dy * r * 0.72f), Offset(c.x + dx * r * 1.0f, c.y + dy * r * 1.0f), line.width, StrokeCap.Round)
+            }
+        }
+        KeyGlyph.VIEW -> {
+            // A magnifying glass: zoom.
+            drawCircle(color, r * 0.55f, Offset(c.x - r * 0.15f, c.y - r * 0.15f), style = line)
+            drawLine(color, Offset(c.x + r * 0.25f, c.y + r * 0.25f), Offset(c.x + r * 0.85f, c.y + r * 0.85f), line.width * 1.4f, StrokeCap.Round)
+            drawLine(color, Offset(c.x - r * 0.42f, c.y - r * 0.15f), Offset(c.x + r * 0.12f, c.y - r * 0.15f), line.width * 0.8f, StrokeCap.Round)
+            drawLine(color, Offset(c.x - r * 0.15f, c.y - r * 0.42f), Offset(c.x - r * 0.15f, c.y + r * 0.12f), line.width * 0.8f, StrokeCap.Round)
         }
         KeyGlyph.MORE -> {
             for (i in -1..1) drawCircle(color, s * 0.085f, Offset(c.x + i * r * 0.72f, c.y))

@@ -46,11 +46,28 @@ enum class AppLanguage(val tag: String, val nativeName: String, val flag: String
          * configChanges="locale|layoutDirection", so nothing is recreated: the
          * configuration changes in place and Compose re-reads its strings (a
          * recreate showed as the screen blinking off and on).
+         *
+         * That in-place change only holds for the screen the user is looking at.
+         * Below Android 13 AppCompat writes the new locale straight into the
+         * resources of the activities behind it, while the context they were built
+         * with still carries the old one: whenever the system refreshes those
+         * resources (a 180° turn, a window change on resume) the old language is
+         * back and their view tree is told so. Screens that can sit behind Settings
+         * therefore compare [requestedTags] on resume and rebuild themselves.
          */
         fun apply(language: AppLanguage) {
             AppCompatDelegate.setApplicationLocales(
                 LocaleListCompat.forLanguageTags(language.tag),
             )
         }
+
+        /**
+         * The explicit per-app choice as language tags; empty = follow the system.
+         * An activity keeps the value it was created with and recreates itself when
+         * [changedSince] says the choice moved on while it was in the background.
+         */
+        fun requestedTags(): String = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+
+        fun changedSince(builtWith: String): Boolean = builtWith != requestedTags()
     }
 }

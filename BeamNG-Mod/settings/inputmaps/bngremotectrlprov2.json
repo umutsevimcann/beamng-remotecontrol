@@ -27,6 +27,8 @@
     {"control":"button17", "action":"latchesClose"},
     {"control":"button18", "action":"switch_camera_next"},
     {"control":"button19", "action":"toggleShifterMode"},
-    {"control":"button20", "action":"pause"}
+    {"control":"button20", "action":"pause"},
+    {"control":"button22", "action":"toggleWalkingMode"},
+    {"control":"button23", "action":"gameplay_interact"}
   ]
 }

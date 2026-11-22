@@ -39,7 +39,7 @@ class ModProtocolTest {
             steering = -0.5f, throttle = 0.25f, brake = 1f, clutch = 0f, handbrake = 1f,
             buttons = ModProtocol.BUTTON_SHIFT_UP or ModProtocol.BUTTON_HORN,
         )
-        assertEquals(28, packet.size)
+        assertEquals(ModProtocol.CONTROL_SIZE, packet.size) // the first 28 bytes are protocol 1 as ever
         assertArrayEquals(byteArrayOf('R'.code.toByte(), 'C'.code.toByte(), 'P'.code.toByte(), 1), packet.copyOfRange(0, 4))
         val buf = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN)
         assertEquals(-0.5f, buf.getFloat(4))
@@ -173,5 +173,61 @@ class ModProtocolTest {
         assertEquals(1 shl 20, ModProtocol.BUTTON_PAUSE)
         assertEquals(false, ModProtocol.ModInfo("PC", "2.1.0").hasGameKeys)
         assertEquals(true, ModProtocol.ModInfo("PC", "2.2.0").hasGameKeys)
+    }
+
+    @Test
+    fun mapKey_isButton21_andNeedsMod23() {
+        assertEquals(1 shl 21, ModProtocol.BUTTON_MAP)
+        assertEquals(false, ModProtocol.ModInfo("PC", "2.2.0").hasMapKey)
+        assertEquals(true, ModProtocol.ModInfo("PC", "2.3.0").hasMapKey)
+    }
+
+    @Test
+    fun walkKey_isButton22() {
+        assertEquals(1 shl 22, ModProtocol.BUTTON_WALK)
+    }
+
+    @Test
+    fun control_carriesTheLookDrag_afterTheOriginal28Bytes() {
+        // A mod older than 2.3 reads only the first 28 bytes; the look drag rides behind them.
+        val packet = ModProtocol.control(0f, 0f, 0f, 0f, 0f, 0, lookX = 12.5f, lookY = -4f)
+        assertEquals(36, packet.size)
+        val buf = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(12.5f, buf.getFloat(28), 0f)
+        assertEquals(-4f, buf.getFloat(32), 0f)
+        // Garbage never goes on the wire, and one packet cannot spin the camera round.
+        val wild = ByteBuffer.wrap(ModProtocol.control(0f, 0f, 0f, 0f, 0f, 0, lookX = Float.NaN, lookY = 1e9f))
+            .order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(0f, wild.getFloat(28), 0f)
+        assertEquals(ModProtocol.LOOK_LIMIT, wild.getFloat(32), 0f)
+    }
+
+    @Test
+    fun walking_isWhatTheModSaysAboutThePlayer() {
+        assertEquals(true, ModProtocol.parseWalking("RCPW|1"))
+        assertEquals(false, ModProtocol.parseWalking("RCPW|0"))
+        assertNull(ModProtocol.parseWalking("RCPW|x"))
+        assertNull(ModProtocol.parseWalking("RCPV|7200|270|vivace"))
+    }
+
+    @Test
+    fun walkStick_turnsIntoTheAxesTheModWalksWith() {
+        // Forward half-way, a little right: throttle forward, no brake, steering sideways.
+        val w = ModProtocol.walkAxes(x = 0.3f, y = 0.5f, sprint = false)
+        assertEquals(0.3f, w.steering, 1e-6f)
+        assertEquals(0.5f, w.throttle, 1e-6f)
+        assertEquals(0f, w.brake, 0f)
+        assertEquals(0f, w.handbrake, 0f)
+        // Backwards and sprinting.
+        val back = ModProtocol.walkAxes(x = 0f, y = -1f, sprint = true)
+        assertEquals(0f, back.throttle, 0f)
+        assertEquals(1f, back.brake, 0f)
+        assertEquals(1f, back.handbrake, 0f)
+    }
+
+    @Test
+    fun interactAndViewKeys_areButtons23And24() {
+        assertEquals(1 shl 23, ModProtocol.BUTTON_INTERACT)
+        assertEquals(1 shl 24, ModProtocol.BUTTON_VIEW)
     }
 }
