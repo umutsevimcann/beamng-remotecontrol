@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Gauges frozen after a game update? Re-tick the options — settings occasionally reset.</string>
     <string name="guide_trouble_5">No router? Turn on the phone\'s hotspot, connect the PC to it, and use the address shown at the top of this page.</string>
     <string name="guide_trouble_6">Gauges stay empty in split-screen? The game switches its dashboard stream off while multi-seat is on.</string>
+    <string name="guide_trouble_7">Phone and PC must be on the same network: their IP addresses start with the same three numbers (192.168.0.x and 192.168.31.x are different networks). A house with several routers often splits them. Connect both to the same Wi-Fi, or turn on the PC\'s Mobile hotspot and connect the phone to it.</string>
+    <string name="guide_trouble_8">The game shows a firewall lock next to \"Use your phone or tablet\"? It checks only once, when you switch the option on, and does not update afterwards. Switch it off and on again to recheck; whether the phone connects is what counts.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Align the code shown in the game — connects automatically</string>

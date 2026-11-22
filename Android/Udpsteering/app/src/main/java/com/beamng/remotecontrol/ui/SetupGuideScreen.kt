@@ -219,6 +219,7 @@ private fun ModChapter(u: Dp) {
 private fun TroubleChapter(u: Dp) {
     Label(stringResource(R.string.guide_trouble_title), u)
     val items = listOf(
+        R.string.guide_trouble_7, R.string.guide_trouble_8,
         R.string.guide_trouble_1, R.string.guide_trouble_2, R.string.guide_trouble_3,
         R.string.guide_trouble_4, R.string.guide_trouble_5, R.string.guide_trouble_6,
     )

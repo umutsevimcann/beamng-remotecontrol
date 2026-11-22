@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Compteurs figés après une mise à jour du jeu ? Recochez les options — les réglages sont parfois réinitialisés.</string>
     <string name="guide_trouble_5">Pas de routeur ? Activez le point d\'accès du téléphone, connectez-y le PC et utilisez l\'adresse affichée en haut de cette page.</string>
     <string name="guide_trouble_6">Compteurs vides en écran partagé ? Le jeu coupe son flux de données tant que le mode multi-joueurs local est actif.</string>
+    <string name="guide_trouble_7">Le téléphone et le PC doivent être sur le même réseau : leurs adresses IP commencent par les trois mêmes nombres (192.168.0.x et 192.168.31.x sont des réseaux différents). Dans une maison avec plusieurs routeurs, c’est fréquent. Connectez les deux au même Wi-Fi, ou activez le point d’accès mobile du PC et connectez-y le téléphone.</string>
+    <string name="guide_trouble_8">Le jeu affiche un cadenas de pare-feu à côté de « Utiliser votre téléphone ou tablette » ? Il ne vérifie qu’une fois, quand vous activez l’option, puis ne se met plus à jour. Désactivez et réactivez pour revérifier ; ce qui compte, c’est que le téléphone se connecte.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Visez le code affiché dans le jeu — la connexion est automatique</string>

@@ -155,6 +155,15 @@ The game's own phone remote cannot walk; all of this needs the mod.
 
 ### Troubleshooting
 
+* **Phone and PC on the same network?** Their IP addresses must start with the
+  same three numbers: `192.168.0.x` and `192.168.31.x` are different networks, even
+  in the same house. Several routers in one home often split devices like this.
+  Connect both to the same Wi-Fi, or turn on the PC's **Mobile hotspot** and
+  connect the phone to it.
+* **The game shows a firewall lock next to "Use your phone or tablet"?** The
+  game checks only once, when the option is switched on, and never updates the
+  warning afterwards. Switch the option off and on to recheck; what counts is
+  whether the phone connects.
 * **Gauges frozen?** Re-check the IP in the app (routers reassign it), then Ctrl+R.
 * **Nothing arrives?** Allow BeamNG.drive through the Windows Firewall, and confirm
   phone + PC share the same network (guest Wi-Fi often isolates devices).

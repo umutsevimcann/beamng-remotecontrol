@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Wskaźniki zamarły po aktualizacji gry? Zaznacz opcje ponownie — ustawienia czasem się resetują.</string>
     <string name="guide_trouble_5">Nie masz routera? Włącz hotspot w telefonie, połącz z nim komputer i użyj adresu pokazanego na górze tej strony.</string>
     <string name="guide_trouble_6">Wskaźniki są puste w trybie podzielonego ekranu? Gra wyłącza strumień danych, gdy włączony jest tryb wielu graczy.</string>
+    <string name="guide_trouble_7">Telefon i PC muszą być w tej samej sieci: ich adresy IP zaczynają się od tych samych trzech liczb (192.168.0.x i 192.168.31.x to różne sieci). W domach z kilkoma routerami zdarza się to często. Połącz oba z tym samym Wi-Fi albo włącz hotspot mobilny w PC i połącz z nim telefon.</string>
+    <string name="guide_trouble_8">Gra pokazuje kłódkę zapory obok „Używaj telefonu lub tabletu”? Sprawdza tylko raz, przy włączeniu opcji, i potem się nie odświeża. Wyłącz i włącz ponownie, aby sprawdzić jeszcze raz; liczy się to, czy telefon się łączy.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Wyceluj w kod pokazany w grze — połączy się automatycznie</string>

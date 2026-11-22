@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Mostradores travados após uma atualização do jogo? Marque as opções de novo — as configurações às vezes são redefinidas.</string>
     <string name="guide_trouble_5">Sem roteador? Ligue o roteador do celular, conecte o PC a ele e use o endereço mostrado no topo desta página.</string>
     <string name="guide_trouble_6">Mostradores vazios em tela dividida? O jogo desliga o envio de dados enquanto o modo de vários jogadores está ativo.</string>
+    <string name="guide_trouble_7">O celular e o PC precisam estar na mesma rede: os endereços IP começam com os mesmos três números (192.168.0.x e 192.168.31.x são redes diferentes). Em casas com vários roteadores isso é comum. Conecte os dois ao mesmo Wi-Fi ou ative o hotspot móvel do PC e conecte o celular a ele.</string>
+    <string name="guide_trouble_8">O jogo mostra um cadeado de firewall ao lado de “Usar seu celular ou tablet”? Ele verifica só uma vez, quando você ativa a opção, e depois não atualiza. Desative e ative de novo para verificar outra vez; o que importa é se o celular conecta.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Alinhe o código mostrado no jogo — conecta automaticamente</string>

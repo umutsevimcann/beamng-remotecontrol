@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Oyun güncellemesinden sonra göstergeler dondu mu? Kutuları yeniden işaretle — ayarlar bazen sıfırlanır.</string>
     <string name="guide_trouble_5">Router yok mu? Telefonun hotspot\'unu aç, PC\'yi ona bağla ve bu sayfanın başındaki adresi kullan.</string>
     <string name="guide_trouble_6">Bölünmüş ekranda göstergeler boş mu? Oyun, çoklu koltuk açıkken gösterge akışını kapatır.</string>
+    <string name="guide_trouble_7">Telefon ve bilgisayar aynı ağda olmalı: IP adresleri aynı üç sayıyla başlar (192.168.0.x ile 192.168.31.x farklı ağlardır). Birden fazla router olan evlerde sık olur. İkisini aynı Wi-Fi\'a bağlayın ya da bilgisayarın Mobil etkin noktasını açıp telefonu ona bağlayın.</string>
+    <string name="guide_trouble_8">Oyun \"Telefon veya tablet kullan\" seçeneğinin yanında güvenlik duvarı kilidi mi gösteriyor? Yalnızca seçeneği açtığınız anda bir kez kontrol eder, sonra güncellenmez. Yeniden kontrol için kapatıp açın; asıl ölçüt telefonun bağlanıp bağlanmadığıdır.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Oyundaki kodu çerçeveye hizala — bağlantı kendiliğinden kurulur</string>

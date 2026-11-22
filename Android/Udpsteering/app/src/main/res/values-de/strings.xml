@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">Anzeigen nach einem Spiel-Update eingefroren? Häkchen neu setzen — Einstellungen werden gelegentlich zurückgesetzt.</string>
     <string name="guide_trouble_5">Kein Router? Hotspot des Handys einschalten, den PC damit verbinden und die oben angezeigte Adresse verwenden.</string>
     <string name="guide_trouble_6">Anzeigen bleiben im Splitscreen leer? Das Spiel schaltet den Datenstrom ab, solange Multi-Seat aktiv ist.</string>
+    <string name="guide_trouble_7">Handy und PC müssen im selben Netz sein: Ihre IP-Adressen beginnen mit denselben drei Zahlen (192.168.0.x und 192.168.31.x sind verschiedene Netze). In Häusern mit mehreren Routern passiert das oft. Verbinde beide mit demselben WLAN oder schalte den mobilen Hotspot des PCs ein und verbinde das Handy damit.</string>
+    <string name="guide_trouble_8">Das Spiel zeigt ein Firewall-Schloss neben \"Handy oder Tablet verwenden\"? Es prüft nur einmal beim Einschalten der Option und aktualisiert sich danach nicht. Zum erneuten Prüfen aus- und wieder einschalten; entscheidend ist, ob das Handy sich verbindet.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Den Code aus dem Spiel in den Rahmen halten — verbindet sich automatisch</string>

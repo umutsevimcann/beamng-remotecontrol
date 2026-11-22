@@ -116,6 +116,8 @@
     <string name="guide_trouble_4">¿Indicadores congelados tras una actualización del juego? Vuelve a marcar las opciones: a veces los ajustes se restablecen.</string>
     <string name="guide_trouble_5">¿Sin router? Activa el punto de acceso del teléfono, conecta el PC a él y usa la dirección que aparece arriba en esta página.</string>
     <string name="guide_trouble_6">¿Indicadores vacíos en pantalla dividida? El juego apaga el envío de datos mientras está activo el modo de varios jugadores.</string>
+    <string name="guide_trouble_7">El móvil y el PC deben estar en la misma red: sus direcciones IP empiezan por los mismos tres números (192.168.0.x y 192.168.31.x son redes distintas). En casas con varios routers pasa a menudo. Conecta los dos al mismo Wi-Fi o activa la zona con cobertura inalámbrica móvil del PC y conecta el móvil a ella.</string>
+    <string name="guide_trouble_8">¿El juego muestra un candado de firewall junto a “Usar tu móvil o tableta”? Solo comprueba una vez, al activar la opción, y después no se actualiza. Desactívala y actívala de nuevo para volver a comprobar; lo que cuenta es si el móvil se conecta.</string>
 
     <!-- Scanner -->
     <string name="scan_hint">Alinea el código que muestra el juego: se conecta automáticamente</string>
