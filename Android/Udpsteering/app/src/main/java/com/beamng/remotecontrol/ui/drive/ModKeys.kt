@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -72,6 +74,9 @@ data class ModControls(
     val showMap: Boolean,
     val showWalk: Boolean,
     val showInteract: Boolean,
+    val showMenu: Boolean,
+    /** The MENU key was tapped: open the game's menu and the phone's menu pad. */
+    val onMenuPad: () -> Unit,
     /** Handbrake key applies only while held, instead of tap on / tap off. */
     val handbrakeHold: Boolean,
     /** The wheel's hub is a horn button. */
@@ -96,7 +101,7 @@ data class ModControls(
     val showVehicle get() = driveModeKey || fourWdKey || lowRangeKey || diffLockKey || nitrousKey || showDoors
 
     /** Is any key of the game page switched on? */
-    val showGame get() = showCamera || showGearbox || showReset || showPause || showMap || showWalk || showInteract
+    val showGame get() = showCamera || showGearbox || showReset || showPause || showMap || showWalk || showInteract || showMenu
 }
 
 /** The symbols on the keys: the ones a car's own switches carry, so no language is needed. */
@@ -104,7 +109,7 @@ enum class KeyGlyph {
     HEADLIGHTS, FOG, SIGNAL_LEFT, SIGNAL_RIGHT, HAZARD, RECOVER, HANDBRAKE, HORN, SHIFT_UP, SHIFT_DOWN, MORE,
     STABILITY, FOUR_WD, LOW_RANGE, DIFF_LOCK, NITROUS, DOORS,
     CAMERA, GEARBOX, RESET, PAUSE, MAP, WALK,
-    JUMP, CROUCH, SPRINT, ENTER_CAR, INTERACT, VIEW,
+    JUMP, CROUCH, SPRINT, ENTER_CAR, INTERACT, VIEW, MENU,
 }
 
 /**
@@ -190,59 +195,142 @@ fun KeyLabel(glyph: KeyGlyph, tint: Color, u: Dp, glyphSize: Dp, caption: String
     }
 }
 
-/** The pages of the key row, in the order the last key steps through them. */
-private enum class KeyPage { LIGHTS, VEHICLE, GAME }
+/** One key of the game pages: what it shows and what a press does. */
+private class GameKey(val glyph: KeyGlyph, val label: Int, val accent: Color, val onPress: (Boolean) -> Unit)
+
+/** What one page of the key row holds. */
+private sealed interface KeyPage {
+    data object Lights : KeyPage
+    data object Vehicle : KeyPage
+    class Game(val keys: List<GameKey>) : KeyPage
+}
+
+/** The most keys one page may hold: what the lights page has, the width a thumb is used to. */
+private const val MAX_KEYS_PER_PAGE = 6
+
+/** The page key's share of the row, against 1 for an ordinary key. */
+private const val PAGE_KEY_WEIGHT = 0.8f
+
+/** Splits [keys] into as few pages as [MAX_KEYS_PER_PAGE] allows, as evenly as possible (8 = 4 + 4, not 6 + 2). */
+private fun <T> evenPages(keys: List<T>): List<List<T>> {
+    if (keys.isEmpty()) return emptyList()
+    val pages = (keys.size + MAX_KEYS_PER_PAGE - 1) / MAX_KEYS_PER_PAGE
+    return keys.chunked((keys.size + pages - 1) / pages)
+}
 
 /**
- * The key row under the gauges, one page at a time; the last, narrow key steps to
- * the next page. Lights: lights, signals and recover — the signal keys light up
- * with the car's own indicators, so the row doubles as a repeater. Vehicle: the
- * car's optional systems, only those this car has. Game: camera, gearbox mode,
- * reset, pause.
+ * The key row under the gauges, one page at a time. Lights: lights, signals and
+ * recover; the signal keys light up with the car's own indicators, so the row
+ * doubles as a repeater. Vehicle: the car's optional systems, only those this car
+ * has. Game: the keys you would otherwise reach for the keyboard for, split over
+ * as many pages as it takes to keep every key thumb-sized.
+ *
+ * The last key steps through the pages and shows where you are: one dot per page,
+ * the current one lit.
  */
 @Composable
 fun ModKeyRow(mod: ModControls, telemetry: TelemetryUiState, page: Int, onPage: (Int) -> Unit, u: Dp, modifier: Modifier) {
     val pages = buildList {
-        if (mod.showLights) add(KeyPage.LIGHTS)
-        if (mod.showVehicle) add(KeyPage.VEHICLE)
-        if (mod.showGame) add(KeyPage.GAME)
+        if (mod.showLights) add(KeyPage.Lights)
+        if (mod.showVehicle) add(KeyPage.Vehicle)
+        for (keys in evenPages(gameKeys(mod))) add(KeyPage.Game(keys))
     }
     if (pages.isEmpty()) return
     // A page can vanish under us (another car, a setting): fall back to the first.
-    val current = pages[if (page in pages.indices) page else 0]
+    val index = if (page in pages.indices) page else 0
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(u * 1.6f)) {
-        when (current) {
-            KeyPage.LIGHTS -> LightKeys(mod, telemetry, u)
-            KeyPage.VEHICLE -> VehicleKeys(mod, u)
-            KeyPage.GAME -> GameKeys(mod, u)
+        // Keyed by page: a key still held when the page turns is released as itself,
+        // not as whichever key takes its place.
+        key(index) {
+            when (val current = pages[index]) {
+                KeyPage.Lights -> LightKeys(mod, telemetry, u)
+                KeyPage.Vehicle -> VehicleKeys(mod, u)
+                is KeyPage.Game -> GameKeys(current.keys, u)
+            }
         }
-        if (pages.size > 1) {
-            val currentOnPage by rememberUpdatedState(onPage)
-            val next = (pages.indexOf(current) + 1) % pages.size
-            val currentNext by rememberUpdatedState(next)
-            HoldKey(u, Modifier.weight(0.62f).fillMaxHeight(), lit = current != pages[0], onPress = { pressed ->
-                if (pressed) currentOnPage(currentNext)
-            }) { tint -> KeyLabel(KeyGlyph.MORE, tint, u, u * 5.4f) }
+        if (pages.size > 1) PageKey(pages.size, index, onPage, u, Modifier.weight(PAGE_KEY_WEIGHT).fillMaxHeight())
+    }
+}
+
+/**
+ * Steps through the pages of the key row. A tap goes to the next page (and round
+ * to the first); dragging the thumb off it to the right goes back one instead.
+ * It acts on release, so the drag can be told from the tap.
+ */
+@Composable
+private fun PageKey(count: Int, index: Int, onPage: (Int) -> Unit, u: Dp, modifier: Modifier) {
+    var pressed by remember { mutableStateOf(false) }
+    val currentOnPage by rememberUpdatedState(onPage)
+    val currentCount by rememberUpdatedState(count)
+    val currentIndex by rememberUpdatedState(index)
+    KeyFace(false, pressed, Graphite.Orange, u, modifier.pointerInput(u) {
+        val backDrag = (u * 5).toPx()
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            var dx = 0f
+            var lifted = false
+            try {
+                pressed = true
+                while (true) {
+                    val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                    dx = change.position.x - down.position.x
+                    if (!change.pressed) {
+                        lifted = true
+                        break
+                    }
+                }
+            } finally {
+                pressed = false
+            }
+            // A cancelled gesture turns no page.
+            if (lifted) currentOnPage((currentIndex + if (dx > backDrag) -1 else 1).mod(currentCount))
+        }
+    }) { tint ->
+        val here = Graphite.Orange
+        val elsewhere = Graphite.Muted
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            // A chevron: there is more this way.
+            val cy = h * 0.37f
+            val k = h * 0.13f
+            val chevron = Path().apply {
+                moveTo(w / 2f - k * 0.5f, cy - k)
+                lineTo(w / 2f + k * 0.5f, cy)
+                lineTo(w / 2f - k * 0.5f, cy + k)
+            }
+            drawPath(chevron, tint, style = Stroke(h * 0.05f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            // One dot per page, the current one bigger and lit.
+            val step = minOf(h * 0.2f, w * 0.8f / count)
+            val dot = minOf(h * 0.04f, step * 0.3f)
+            for (i in 0 until count) {
+                val x = w / 2f + (i - (count - 1) / 2f) * step
+                drawCircle(if (i == index) here else elsewhere, if (i == index) dot * 1.5f else dot, Offset(x, h * 0.72f))
+            }
         }
     }
 }
 
-/** Things you would otherwise reach for the keyboard for. */
+/** Things you would otherwise reach for the keyboard for: the keys switched on, in row order. */
+private fun gameKeys(mod: ModControls): List<GameKey> = buildList {
+    fun button(glyph: KeyGlyph, label: Int, bit: Int, accent: Color = Graphite.Orange) =
+        add(GameKey(glyph, label, accent) { pressed -> mod.onButton(bit, pressed) })
+    // MENU sends nothing itself: on release it opens the game's menu and the phone's menu pad.
+    if (mod.showMenu) add(GameKey(KeyGlyph.MENU, R.string.mod_key_menu, Graphite.Blue) { pressed -> if (!pressed) mod.onMenuPad() })
+    if (mod.showCamera) button(KeyGlyph.CAMERA, R.string.mod_key_camera, ModProtocol.BUTTON_CAMERA)
+    if (mod.showGearbox) button(KeyGlyph.GEARBOX, R.string.mod_key_gearbox, ModProtocol.BUTTON_GEARBOX_MODE)
+    if (mod.showReset) button(KeyGlyph.RESET, R.string.mod_key_reset, ModProtocol.BUTTON_RESET, Graphite.Red)
+    if (mod.showPause) button(KeyGlyph.PAUSE, R.string.mod_key_pause, ModProtocol.BUTTON_PAUSE)
+    if (mod.showMap) button(KeyGlyph.MAP, R.string.mod_key_map, ModProtocol.BUTTON_MAP)
+    if (mod.showWalk) button(KeyGlyph.WALK, R.string.mod_key_walk, ModProtocol.BUTTON_WALK)
+    if (mod.showInteract) button(KeyGlyph.INTERACT, R.string.mod_key_interact, ModProtocol.BUTTON_INTERACT)
+}
+
 @Composable
-private fun RowScope.GameKeys(mod: ModControls, u: Dp) {
-    val keys = buildList {
-        if (mod.showCamera) add(Triple(KeyGlyph.CAMERA, R.string.mod_key_camera, ModProtocol.BUTTON_CAMERA))
-        if (mod.showGearbox) add(Triple(KeyGlyph.GEARBOX, R.string.mod_key_gearbox, ModProtocol.BUTTON_GEARBOX_MODE))
-        if (mod.showReset) add(Triple(KeyGlyph.RESET, R.string.mod_key_reset, ModProtocol.BUTTON_RESET))
-        if (mod.showPause) add(Triple(KeyGlyph.PAUSE, R.string.mod_key_pause, ModProtocol.BUTTON_PAUSE))
-        if (mod.showMap) add(Triple(KeyGlyph.MAP, R.string.mod_key_map, ModProtocol.BUTTON_MAP))
-        if (mod.showWalk) add(Triple(KeyGlyph.WALK, R.string.mod_key_walk, ModProtocol.BUTTON_WALK))
-        if (mod.showInteract) add(Triple(KeyGlyph.INTERACT, R.string.mod_key_interact, ModProtocol.BUTTON_INTERACT))
-    }
-    for ((glyph, label, bit) in keys) {
-        val accent = if (bit == ModProtocol.BUTTON_RESET) Graphite.Red else Graphite.Orange
-        HoldKey(u, Modifier.weight(1f).fillMaxHeight(), accent, onPress = { pressed -> mod.onButton(bit, pressed) }) { tint ->
-            KeyStack(glyph, stringResource(label), tint, u)
+private fun RowScope.GameKeys(keys: List<GameKey>, u: Dp) {
+    for (gameKey in keys) {
+        HoldKey(u, Modifier.weight(1f).fillMaxHeight(), gameKey.accent, onPress = gameKey.onPress) { tint ->
+            KeyStack(gameKey.glyph, stringResource(gameKey.label), tint, u)
         }
     }
 }
@@ -294,8 +382,10 @@ private fun RowScope.VehicleKeys(mod: ModControls, u: Dp) {
     }
     if (!mod.showDoors) return
     // Doors: the game has separate "open" and "close" actions; one key alternates.
+    // Wider while there is room; on a car with every system it is a key like the others.
+    val doorsWeight = if (keys.size < MAX_KEYS_PER_PAGE - 1) 1.5f else 1f
     var doorsOpen by remember { mutableStateOf(false) }
-    HoldKey(u, Modifier.weight(1.5f).fillMaxHeight(), Graphite.Blue, lit = doorsOpen, onPress = { pressed ->
+    HoldKey(u, Modifier.weight(doorsWeight).fillMaxHeight(), Graphite.Blue, lit = doorsOpen, onPress = { pressed ->
         val bit = if (doorsOpen) ModProtocol.BUTTON_DOORS_CLOSE else ModProtocol.BUTTON_DOORS_OPEN
         mod.onButton(bit, pressed)
         if (!pressed) doorsOpen = !doorsOpen
@@ -663,6 +753,10 @@ internal fun DrawScope.drawGlyph(glyph: KeyGlyph, color: Color) {
             drawLine(color, Offset(c.x + r * 0.25f, c.y + r * 0.25f), Offset(c.x + r * 0.85f, c.y + r * 0.85f), line.width * 1.4f, StrokeCap.Round)
             drawLine(color, Offset(c.x - r * 0.42f, c.y - r * 0.15f), Offset(c.x + r * 0.12f, c.y - r * 0.15f), line.width * 0.8f, StrokeCap.Round)
             drawLine(color, Offset(c.x - r * 0.15f, c.y - r * 0.42f), Offset(c.x - r * 0.15f, c.y + r * 0.12f), line.width * 0.8f, StrokeCap.Round)
+        }
+        KeyGlyph.MENU -> {
+            // Three lines: a menu.
+            for (k in -1..1) drawLine(color, Offset(c.x - r * 0.8f, c.y + k * r * 0.55f), Offset(c.x + r * 0.8f, c.y + k * r * 0.55f), line.width * 1.1f, StrokeCap.Round)
         }
         KeyGlyph.MORE -> {
             for (i in -1..1) drawCircle(color, s * 0.085f, Offset(c.x + i * r * 0.72f, c.y))

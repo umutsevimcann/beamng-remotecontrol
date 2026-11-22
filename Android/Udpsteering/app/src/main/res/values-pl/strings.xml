@@ -296,6 +296,17 @@
     <string name="mod_key_map">MAPA</string>
     <string name="mod_show_map">Mapa</string>
     <string name="mod_show_map_sub">Otwiera i zamyka dużą mapę. Wymaga moda 2.3</string>
+    <string name="mod_key_menu">MENU</string>
+    <string name="mod_show_menu">Sterowanie menu</string>
+    <string name="mod_show_menu_sub">Otwiera menu gry i zmienia telefon w pad do menu: strzałki, wybór, wstecz i karty. Wymaga moda 2.4</string>
+    <string name="menu_pad_title">Menu gry · mod RemoteControlPro</string>
+    <string name="menu_pad_menu">MENU</string>
+    <string name="menu_pad_tab_left">◀ KARTA</string>
+    <string name="menu_pad_tab_right">KARTA ▶</string>
+    <string name="menu_pad_ok">WYBIERZ</string>
+    <string name="menu_pad_back">WSTECZ</string>
+    <string name="menu_pad_close">WRÓĆ DO JAZDY</string>
+    <string name="mod_what_10">Steruj menu gry z telefonu: strzałki, wybór, wstecz i karty</string>
     <string name="mod_key_walk">CHODŹ</string>
     <string name="mod_show_walk">Tryb chodzenia</string>
     <string name="mod_show_walk_sub">Wysiada z auta i wsiada z powrotem. Pieszo telefon przełącza się na ekran chodzenia. Wymaga moda 2.3</string>

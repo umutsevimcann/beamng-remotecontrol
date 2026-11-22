@@ -296,6 +296,17 @@
     <string name="mod_key_map">MAPA</string>
     <string name="mod_show_map">Mapa</string>
     <string name="mod_show_map_sub">Abre e fecha o mapa grande. Requer o mod 2.3</string>
+    <string name="mod_key_menu">MENU</string>
+    <string name="mod_show_menu">Controle de menu</string>
+    <string name="mod_show_menu_sub">Abre o menu do jogo e transforma o celular num controle de menu: setas, selecionar, voltar e abas. Requer o mod 2.4</string>
+    <string name="menu_pad_title">Menu do jogo · mod RemoteControlPro</string>
+    <string name="menu_pad_menu">MENU</string>
+    <string name="menu_pad_tab_left">◀ ABA</string>
+    <string name="menu_pad_tab_right">ABA ▶</string>
+    <string name="menu_pad_ok">SELECIONAR</string>
+    <string name="menu_pad_back">VOLTAR</string>
+    <string name="menu_pad_close">VOLTAR A DIRIGIR</string>
+    <string name="mod_what_10">Controle os menus do jogo pelo celular: setas, selecionar, voltar e abas</string>
     <string name="mod_key_walk">ANDAR</string>
     <string name="mod_show_walk">Modo a pé</string>
     <string name="mod_show_walk_sub">Sai do carro e entra de novo. A pé, o celular muda para uma tela de caminhada. Requer o mod 2.3</string>

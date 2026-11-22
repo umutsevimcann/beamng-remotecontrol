@@ -296,6 +296,17 @@
     <string name="mod_key_map">MAP</string>
     <string name="mod_show_map">Map</string>
     <string name="mod_show_map_sub">Opens and closes the big map. Needs mod 2.3</string>
+    <string name="mod_key_menu">MENU</string>
+    <string name="mod_show_menu">Menu control</string>
+    <string name="mod_show_menu_sub">Opens the game\'s menu and turns the phone into a menu pad: arrows, select, back and tabs. Needs mod 2.4</string>
+    <string name="menu_pad_title">Game menu · RemoteControlPro mod</string>
+    <string name="menu_pad_menu">MENU</string>
+    <string name="menu_pad_tab_left">◀ TAB</string>
+    <string name="menu_pad_tab_right">TAB ▶</string>
+    <string name="menu_pad_ok">SELECT</string>
+    <string name="menu_pad_back">BACK</string>
+    <string name="menu_pad_close">BACK TO DRIVING</string>
+    <string name="mod_what_10">Steer the game\'s menus from the phone: arrows, select, back and tabs</string>
     <string name="mod_key_walk">WALK</string>
     <string name="mod_show_walk">Walking mode</string>
     <string name="mod_show_walk_sub">Gets out of the car and back in. On foot the phone switches to a walking screen. Needs mod 2.3</string>

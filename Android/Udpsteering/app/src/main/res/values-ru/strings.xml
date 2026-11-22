@@ -296,6 +296,17 @@
     <string name="mod_key_map">КАРТА</string>
     <string name="mod_show_map">Карта</string>
     <string name="mod_show_map_sub">Открывает и закрывает большую карту. Нужен мод 2.3</string>
+    <string name="mod_key_menu">МЕНЮ</string>
+    <string name="mod_show_menu">Управление меню</string>
+    <string name="mod_show_menu_sub">Открывает меню игры и превращает телефон в пульт меню: стрелки, выбор, назад и вкладки. Нужен мод 2.4</string>
+    <string name="menu_pad_title">Меню игры · мод RemoteControlPro</string>
+    <string name="menu_pad_menu">МЕНЮ</string>
+    <string name="menu_pad_tab_left">◀ ВКЛ.</string>
+    <string name="menu_pad_tab_right">ВКЛ. ▶</string>
+    <string name="menu_pad_ok">ВЫБРАТЬ</string>
+    <string name="menu_pad_back">НАЗАД</string>
+    <string name="menu_pad_close">К ВОЖДЕНИЮ</string>
+    <string name="mod_what_10">Управляйте меню игры с телефона: стрелки, выбор, назад и вкладки</string>
     <string name="mod_key_walk">ПЕШКОМ</string>
     <string name="mod_show_walk">Режим ходьбы</string>
     <string name="mod_show_walk_sub">Выйти из машины и сесть обратно. Пешком телефон переключается на экран ходьбы. Нужен мод 2.3</string>

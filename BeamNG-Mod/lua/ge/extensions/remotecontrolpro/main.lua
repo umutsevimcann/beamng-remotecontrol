@@ -13,6 +13,7 @@
 --     drive mode / ESC, 4WD, low range, diff lock, nitrous, door latches,
 --     camera, gearbox mode (automatic / manual), pause, big map, walking mode,
 --     interact (start missions and jobs), zoom on foot
+--   * the game's menus from the phone: arrows, select, back, tabs, menu (2.4)
 --   * look around: the phone's drag turns the camera, in the car and on foot
 --   * walking: on foot, the same phone walks the character — gas forward, brake
 --     back, wheel left/right, shift up jumps, shift down crouches, handbrake sprints
@@ -33,6 +34,8 @@
 --                    float throttle, brake, clutch, handbrake   0 .. 1
 --                    uint32 buttons   (bit n = button n held)
 --                    float lookX, lookY (2.3, optional): look drag since the last packet
+--                    uint32 menu keys (2.4, optional): menu, up, down, left, right, select,
+--                    back, tab left, tab right (bits 0-8), sent straight to the game's UI
 --   mod   -> phone "RCPW|<0|1>"     the player is on foot (2.3): sent on every change
 --                    and with the vehicle info
 --   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicleName>|<features>"   ~2 Hz while driving
@@ -47,7 +50,7 @@
 local M = {}
 
 local logTag = 'remotecontrolpro'
-local MOD_VERSION = '2.3.0'
+local MOD_VERSION = '2.4.0'
 local PROTOCOL = 1
 local PORT = 4450
 local DEVICE_TYPE = 'bngremotectrlprov2' -- must match the inputmap file name
@@ -59,6 +62,8 @@ local FLAG_WHEEL_FREE = 0x80000000 -- control buttons bit 31
 local BIT_SHIFT_UP, BIT_SHIFT_DOWN = 0, 1
 local BIT_MAP = 21
 local BIT_VIEW = 24
+-- Menu key field bit (n + 1) -> the game's UI navigation event (core/input/actions/menu.json).
+local MENU_NAV = {'menu', 'focus_u', 'focus_d', 'focus_l', 'focus_r', 'ok', 'back', 'tab_l', 'tab_r'}
 local WALK_PERIOD = 0.033 -- seconds between walking updates sent to the character
 
 local min, max = math.min, math.max
@@ -76,6 +81,7 @@ if ffi then
     uint32_t buttons;
   } rcp_control_t;
   typedef struct { float lookX, lookY; } rcp_look_t;
+  typedef struct { uint32_t keys; } rcp_menu_t;
   #pragma pack(pop)
   ]])
 end
@@ -236,6 +242,26 @@ local function handleControl(phone, data)
     if lx == lx and ly == ly and math.abs(lx) < 5000 and math.abs(ly) < 5000 then
       phone.lookX = (phone.lookX or 0) + lx
       phone.lookY = (phone.lookY or 0) + ly
+    end
+  end
+
+  -- Menu keys: a second field, passed straight to the game's UI navigation, the
+  -- same events its own menu actions raise. Not as device buttons: the virtual
+  -- device has 32, and a button 32 would land on button 0 (shift up).
+  if #data >= 40 then
+    local m = ffi.new('rcp_menu_t')
+    ffi.copy(m, data:sub(37, 40), 4)
+    local keys = tonumber(m.keys)
+    local was = phone.menuKeys or 0
+    if keys ~= was then
+      for i, name in ipairs(MENU_NAV) do
+        local mask = bit.lshift(1, i - 1)
+        local now = bit.band(keys, mask) ~= 0
+        if now ~= (bit.band(was, mask) ~= 0) then
+          guihooks.trigger('UINavigation', name, now and 1 or 0)
+        end
+      end
+      phone.menuKeys = keys
     end
   end
 

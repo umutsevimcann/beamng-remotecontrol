@@ -17,6 +17,8 @@ import java.nio.ByteOrder
  *                    float throttle, brake, clutch, handbrake (0..1), uint32 buttons,
  *                    then (mod 2.3+) float lookX, lookY: the look drag since the last
  *                    packet; older mods read the first 28 bytes and ignore the rest
+ *                    then (mod 2.4+) uint32 menu keys (MENU_*), which the mod passes
+ *                    straight to the game's UI navigation
  *   mod   -> phone "RCPV|<maxRpm>|<steeringLockDeg>|<vehicle>[|<features>]"
  *                    features (mod 2.1+): 1 drive modes/ESC, 2 4WD, 4 nitrous
  *   mod   -> phone "RCPS|<angle>"                          released wheel, ~30 Hz (mod 2.2+)
@@ -26,7 +28,7 @@ import java.nio.ByteOrder
  */
 object ModProtocol {
     const val VERSION = 1
-    const val CONTROL_SIZE = 36
+    const val CONTROL_SIZE = 40
 
     /** Largest look drag one packet may carry; more is a glitch, not a flick. */
     const val LOOK_LIMIT = 2000f
@@ -62,6 +64,19 @@ object ModProtocol {
     /** On foot: zoom the view in and out (the game has no third-person walking camera). */
     const val BUTTON_VIEW = 1 shl 24
 
+    // Menu keys (mod 2.4+), in a second field after the look drag: the first one has
+    // only bits 25-30 left. The mod raises the game's UI navigation events for them
+    // (menu, focus_u/d/l/r, ok, back, tab_l/r), not device buttons: its device has 32.
+    const val MENU_TOGGLE = 1 shl 0
+    const val MENU_UP = 1 shl 1
+    const val MENU_DOWN = 1 shl 2
+    const val MENU_LEFT = 1 shl 3
+    const val MENU_RIGHT = 1 shl 4
+    const val MENU_OK = 1 shl 5
+    const val MENU_BACK = 1 shl 6
+    const val MENU_TAB_LEFT = 1 shl 7
+    const val MENU_TAB_RIGHT = 1 shl 8
+
     /**
      * Not a button: "nobody is holding the wheel". Mod 2.2+ then turns the wheel
      * itself with the game's force feedback and reports its angle; older mods
@@ -80,6 +95,9 @@ object ModProtocol {
 
         /** Camera, gearbox mode and pause keys arrived with mod 2.2 (reset works on any mod). */
         val hasGameKeys: Boolean get() = atLeast(2, 2)
+
+        /** Steering the game's menus from the phone arrived with mod 2.4. */
+        val hasMenuKeys: Boolean get() = atLeast(2, 4)
 
         /** The map key arrived with mod 2.3. */
         val hasMapKey: Boolean get() = atLeast(2, 3)
@@ -125,7 +143,7 @@ object ModProtocol {
 
     fun control(
         steering: Float, throttle: Float, brake: Float, clutch: Float, handbrake: Float, buttons: Int,
-        lookX: Float = 0f, lookY: Float = 0f,
+        lookX: Float = 0f, lookY: Float = 0f, menuButtons: Int = 0,
     ): ByteArray {
         val buf = ByteBuffer.allocate(CONTROL_SIZE).order(ByteOrder.LITTLE_ENDIAN)
         buf.put('R'.code.toByte()).put('C'.code.toByte()).put('P'.code.toByte()).put(VERSION.toByte())
@@ -137,6 +155,7 @@ object ModProtocol {
         buf.putInt(buttons)
         buf.putFloat(look(lookX))
         buf.putFloat(look(lookY))
+        buf.putInt(menuButtons)
         return buf.array()
     }
 

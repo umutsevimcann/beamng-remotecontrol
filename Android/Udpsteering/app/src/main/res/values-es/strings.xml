@@ -296,6 +296,17 @@
     <string name="mod_key_map">MAPA</string>
     <string name="mod_show_map">Mapa</string>
     <string name="mod_show_map_sub">Abre y cierra el mapa grande. Requiere el mod 2.3</string>
+    <string name="mod_key_menu">MENÚ</string>
+    <string name="mod_show_menu">Control de menús</string>
+    <string name="mod_show_menu_sub">Abre el menú del juego y convierte el móvil en un mando de menú: flechas, seleccionar, atrás y pestañas. Requiere el mod 2.4</string>
+    <string name="menu_pad_title">Menú del juego · mod RemoteControlPro</string>
+    <string name="menu_pad_menu">MENÚ</string>
+    <string name="menu_pad_tab_left">◀ PEST.</string>
+    <string name="menu_pad_tab_right">PEST. ▶</string>
+    <string name="menu_pad_ok">ELEGIR</string>
+    <string name="menu_pad_back">ATRÁS</string>
+    <string name="menu_pad_close">VOLVER A CONDUCIR</string>
+    <string name="mod_what_10">Maneja los menús del juego desde el móvil: flechas, seleccionar, atrás y pestañas</string>
     <string name="mod_key_walk">CAMINAR</string>
     <string name="mod_show_walk">Modo a pie</string>
     <string name="mod_show_walk_sub">Sale del coche y vuelve a entrar. A pie, el móvil cambia a una pantalla de caminar. Requiere el mod 2.3</string>

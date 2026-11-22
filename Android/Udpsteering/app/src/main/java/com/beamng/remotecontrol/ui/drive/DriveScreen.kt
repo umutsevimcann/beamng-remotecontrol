@@ -113,7 +113,7 @@ fun DriveScreen(
             }
         }
         var touchValue by remember(controlType) { mutableFloatStateOf(0f) }
-        // Which page of the mod's key row is showing: 0 lights, 1 vehicle systems.
+        // Which page of the mod's key row is showing, as an index into the pages it has.
         var keyPage by rememberSaveable { mutableIntStateOf(0) }
         // Both arrows can be down at once; the bar shows their sum.
         var leftDown by remember(controlType) { mutableStateOf(false) }

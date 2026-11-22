@@ -118,6 +118,7 @@ remote cannot:
 | — | Drive mode / ESC, 4WD, low range, diff lock, nitrous, doors (shown only on cars that have them) |
 | — | Camera, automatic/manual gearbox, reset, pause, big map, interact (start missions and jobs) |
 | — | Drag the gauges to look around from the car |
+| — | **Menu control**: open the game's menu and steer it from the phone like a gamepad (D-pad, select, back, tabs) |
 | — | **Walking screen**: get out and walk with a stick, drag (or turn the phone) to look, jump, crouch, zoom, get back in |
 
 Install:
@@ -207,7 +208,8 @@ All communication is UDP on the local network.
   curve of `input^2.5`, which the app cancels by sending `input^(1/2.5)`.
 * **RemoteControlPro mod (port 4450, protocol 1):** hello `RCP?|1|<device>` →
   reply `RCP!|1|<pc-name>|<mod-version>`; control is 28 bytes Little-Endian
-  (36 from app 3.0.5: two more floats, the look drag) —
+  (36 from app 3.0.5: two more floats, the look drag; 40 with mod 2.4: a uint32 of
+  menu keys, which the mod passes straight to the game's UI navigation) —
   `"RCP"`, version byte, floats steering (-1..1), throttle, brake, clutch,
   handbrake (0..1), then a uint32 button mask (bit 0 shift up, 1 shift down,
   2 horn, 3 headlights, 4 fog, 5 left signal, 6 right signal, 7 hazards,

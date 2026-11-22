@@ -296,6 +296,17 @@
     <string name="mod_key_map">KARTE</string>
     <string name="mod_show_map">Karte</string>
     <string name="mod_show_map_sub">Öffnet und schließt die große Karte. Erfordert Mod 2.3</string>
+    <string name="mod_key_menu">MENÜ</string>
+    <string name="mod_show_menu">Menüsteuerung</string>
+    <string name="mod_show_menu_sub">Öffnet das Spielmenü und macht das Handy zum Menü-Pad: Pfeile, Auswählen, Zurück und Tabs. Erfordert Mod 2.4</string>
+    <string name="menu_pad_title">Spielmenü · RemoteControlPro-Mod</string>
+    <string name="menu_pad_menu">MENÜ</string>
+    <string name="menu_pad_tab_left">◀ TAB</string>
+    <string name="menu_pad_tab_right">TAB ▶</string>
+    <string name="menu_pad_ok">WÄHLEN</string>
+    <string name="menu_pad_back">ZURÜCK</string>
+    <string name="menu_pad_close">ZURÜCK ZUM FAHREN</string>
+    <string name="mod_what_10">Die Spielmenüs vom Handy aus steuern: Pfeile, Auswählen, Zurück und Tabs</string>
     <string name="mod_key_walk">GEHEN</string>
     <string name="mod_show_walk">Gehmodus</string>
     <string name="mod_show_walk_sub">Steigt aus dem Auto aus und wieder ein. Zu Fuß wechselt das Handy auf einen Geh-Bildschirm. Erfordert Mod 2.3</string>

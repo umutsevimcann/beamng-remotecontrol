@@ -191,7 +191,7 @@ class ModProtocolTest {
     fun control_carriesTheLookDrag_afterTheOriginal28Bytes() {
         // A mod older than 2.3 reads only the first 28 bytes; the look drag rides behind them.
         val packet = ModProtocol.control(0f, 0f, 0f, 0f, 0f, 0, lookX = 12.5f, lookY = -4f)
-        assertEquals(36, packet.size)
+        assertEquals(ModProtocol.CONTROL_SIZE, packet.size)
         val buf = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN)
         assertEquals(12.5f, buf.getFloat(28), 0f)
         assertEquals(-4f, buf.getFloat(32), 0f)
@@ -229,5 +229,30 @@ class ModProtocolTest {
     fun interactAndViewKeys_areButtons23And24() {
         assertEquals(1 shl 23, ModProtocol.BUTTON_INTERACT)
         assertEquals(1 shl 24, ModProtocol.BUTTON_VIEW)
+    }
+
+    @Test
+    fun menuKeys_rideInASecondButtonField_afterTheLookDrag() {
+        // Mods before 2.4 read 36 bytes at most; the menu keys come after that.
+        val packet = ModProtocol.control(0f, 0f, 0f, 0f, 0f, 0, menuButtons = ModProtocol.MENU_OK or ModProtocol.MENU_UP)
+        assertEquals(40, packet.size)
+        val buf = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals((1 shl 5) or (1 shl 1), buf.getInt(36))
+    }
+
+    @Test
+    fun menuKeyBits_followTheModsInputmapOrder() {
+        // Second field, in the order of the mod's MENU_NAV list.
+        assertEquals(1 shl 0, ModProtocol.MENU_TOGGLE)
+        assertEquals(1 shl 1, ModProtocol.MENU_UP)
+        assertEquals(1 shl 2, ModProtocol.MENU_DOWN)
+        assertEquals(1 shl 3, ModProtocol.MENU_LEFT)
+        assertEquals(1 shl 4, ModProtocol.MENU_RIGHT)
+        assertEquals(1 shl 5, ModProtocol.MENU_OK)
+        assertEquals(1 shl 6, ModProtocol.MENU_BACK)
+        assertEquals(1 shl 7, ModProtocol.MENU_TAB_LEFT)
+        assertEquals(1 shl 8, ModProtocol.MENU_TAB_RIGHT)
+        assertEquals(false, ModProtocol.ModInfo("PC", "2.3.0").hasMenuKeys)
+        assertEquals(true, ModProtocol.ModInfo("PC", "2.4.0").hasMenuKeys)
     }
 }

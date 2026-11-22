@@ -433,6 +433,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     var map by remember { mutableStateOf(settings.modShowMap) }
     var walk by remember { mutableStateOf(settings.modShowWalk) }
     var interact by remember { mutableStateOf(settings.modShowInteract) }
+    var menu by remember { mutableStateOf(settings.modShowMenu) }
     var lookDrag by remember { mutableStateOf(settings.isLookDrag) }
     var handbrakeHold by remember { mutableStateOf(settings.isHandbrakeHold) }
     var hornPlace by remember { mutableIntStateOf(settings.hornPlace) }
@@ -453,7 +454,7 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
     CardBox(u) {
         val points = listOf(
             R.string.mod_what_1, R.string.mod_what_2, R.string.mod_what_3, R.string.mod_what_4, R.string.mod_what_6, R.string.mod_what_5,
-            R.string.mod_what_7, R.string.mod_what_8, R.string.mod_what_9,
+            R.string.mod_what_7, R.string.mod_what_8, R.string.mod_what_9, R.string.mod_what_10,
         )
         for ((i, point) in points.withIndex()) {
             if (i > 0) Spacer(Modifier.height(u * 1.2f))
@@ -653,6 +654,10 @@ private fun ModSection(settings: SettingsManager, u: Dp) {
             lookDrag = it
             settings.isLookDrag = it
         }
+    }
+    ToggleCard(stringResource(R.string.mod_show_menu), stringResource(R.string.mod_show_menu_sub), menu, u, Modifier.fillMaxWidth()) {
+        menu = it
+        settings.modShowMenu = it
     }
 }
 

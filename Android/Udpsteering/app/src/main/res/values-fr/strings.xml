@@ -296,6 +296,17 @@
     <string name="mod_key_map">CARTE</string>
     <string name="mod_show_map">Carte</string>
     <string name="mod_show_map_sub">Ouvre et ferme la grande carte. Nécessite le mod 2.3</string>
+    <string name="mod_key_menu">MENU</string>
+    <string name="mod_show_menu">Contrôle des menus</string>
+    <string name="mod_show_menu_sub">Ouvre le menu du jeu et transforme le téléphone en manette de menu : flèches, valider, retour et onglets. Nécessite le mod 2.4</string>
+    <string name="menu_pad_title">Menu du jeu · mod RemoteControlPro</string>
+    <string name="menu_pad_menu">MENU</string>
+    <string name="menu_pad_tab_left">◀ ONGLET</string>
+    <string name="menu_pad_tab_right">ONGLET ▶</string>
+    <string name="menu_pad_ok">VALIDER</string>
+    <string name="menu_pad_back">RETOUR</string>
+    <string name="menu_pad_close">RETOUR À LA CONDUITE</string>
+    <string name="mod_what_10">Pilotez les menus du jeu depuis le téléphone : flèches, valider, retour et onglets</string>
     <string name="mod_key_walk">MARCHE</string>
     <string name="mod_show_walk">Mode marche</string>
     <string name="mod_show_walk_sub">Sort de la voiture et y remonte. À pied, le téléphone passe sur un écran de marche. Nécessite le mod 2.3</string>

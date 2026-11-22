@@ -139,6 +139,10 @@ class SettingsManager private constructor(context: Context) {
         get() = prefs.getFloat(KEY_WALK_GYRO_SPEED, 1f).let { if (it.isFinite()) it.coerceIn(0.3f, 3f) else 1f }
         set(v) = prefs.edit().putFloat(KEY_WALK_GYRO_SPEED, v.coerceIn(0.3f, 3f)).apply()
 
+    var modShowMenu: Boolean
+        get() = prefs.getBoolean(KEY_MOD_MENU, true)
+        set(v) = prefs.edit().putBoolean(KEY_MOD_MENU, v).apply()
+
     var modShowMap: Boolean
         get() = prefs.getBoolean(KEY_MOD_MAP, true)
         set(v) = prefs.edit().putBoolean(KEY_MOD_MAP, v).apply()
@@ -284,6 +288,7 @@ class SettingsManager private constructor(context: Context) {
         const val KEY_HORN_PLACE = "horn_place"
         const val KEY_MOD_MAP = "mod_show_map"
         const val KEY_MOD_WALK = "mod_show_walk"
+        const val KEY_MOD_MENU = "mod_show_menu"
         const val KEY_WALK_SPRINT_KEY = "walk_sprint_key"
         const val KEY_WALK_LOOK = "walk_look_speed"
         const val KEY_WALK_STICK_RIGHT = "walk_stick_right"

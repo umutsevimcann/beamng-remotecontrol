@@ -55,6 +55,7 @@ import com.beamng.remotecontrol.ui.AppLanguage
 import com.beamng.remotecontrol.ui.dash.DashLayout
 import com.beamng.remotecontrol.ui.dash.RpmScale
 import com.beamng.remotecontrol.ui.dash.RpmScaleTracker
+import com.beamng.remotecontrol.ui.drive.MenuPad
 import com.beamng.remotecontrol.ui.drive.WalkScreen
 import com.beamng.remotecontrol.ui.drive.WheelStyle
 import com.beamng.remotecontrol.ui.drive.DriveScreen
@@ -120,6 +121,11 @@ class MainActivity : AppCompatActivity() {
     // Written on the UI thread, read by the sender coroutine.
     @Volatile private var handbrakeValue = 0f
     @Volatile private var modButtons = 0
+    // Menu pad (mod 2.4+): the phone steers the game's menus.
+    @Volatile private var menuButtons = 0
+    private var menuPad by mutableStateOf(false)
+    private var modHasMenuKeys = false
+    private var modShowMenu by mutableStateOf(true)
     // Force-feedback wheel (mod 2.2+): the game turns the wheel while no finger holds it.
     @Volatile private var modHasWheelFeedback = false
     @Volatile private var wheelHeld = false
@@ -216,6 +222,7 @@ class MainActivity : AppCompatActivity() {
         modHasWheelFeedback = modInfo?.hasWheelFeedback == true
         modHasGameKeys = modInfo?.hasGameKeys == true
         modHasMapKey = modInfo?.hasMapKey == true
+        modHasMenuKeys = modInfo?.hasMenuKeys == true
         // A latched handbrake survives the language rebuild (onResume drops it
         // again if the key was hidden or switched to hold meanwhile).
         if (modLinked && savedInstanceState?.getBoolean(STATE_HANDBRAKE_ON) == true) {
@@ -228,7 +235,18 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             RemoteTheme {
-                if (modLinked && walking && !dashboardOnly) {
+                if (modLinked && menuPad) {
+                    MenuPad(
+                        connected = telemetry.connected,
+                        onMenu = { bit, pressed ->
+                            menuButtons = if (pressed) menuButtons or bit else menuButtons and bit.inv()
+                        },
+                        onClose = {
+                            menuButtons = 0
+                            menuPad = false
+                        },
+                    )
+                } else if (modLinked && walking && !dashboardOnly) {
                     WalkScreen(
                         connected = telemetry.connected,
                         sprintOnEdge = !walkSprintKey,
@@ -281,6 +299,8 @@ class MainActivity : AppCompatActivity() {
                             // Walking mode came in the same mod release as the map key.
                             showWalk = modShowWalk && modHasMapKey,
                             showInteract = modShowInteract && modHasMapKey,
+                            showMenu = modShowMenu && modHasMenuKeys,
+                            onMenuPad = { openMenuPad() },
                             handbrakeHold = handbrakeHold,
                             hornOnHub = modShowHorn && hornPlace != SettingsManager.HORN_KEY,
                             features = modFeatures,
@@ -406,6 +426,7 @@ class MainActivity : AppCompatActivity() {
         modShowPause = settingsManager.modShowPause
         modShowMap = settingsManager.modShowMap
         modShowWalk = settingsManager.modShowWalk
+        modShowMenu = settingsManager.modShowMenu
         splitPedals = settingsManager.isSplitPedals
         hornPlace = settingsManager.hornPlace
         // Switched to hold while the handbrake was latched on: let it off.
@@ -648,7 +669,7 @@ class MainActivity : AppCompatActivity() {
                                     ModProtocol.control(
                                         steering = w.steering, throttle = w.throttle, brake = w.brake,
                                         clutch = 0f, handbrake = w.handbrake, buttons = modButtons,
-                                        lookX = look.first, lookY = look.second,
+                                        lookX = look.first, lookY = look.second, menuButtons = menuButtons,
                                     )
                                 } else {
                                 val steering = steeringInputHandler?.getSteeringValue() ?: 0f
@@ -666,7 +687,7 @@ class MainActivity : AppCompatActivity() {
                                     } else {
                                         modButtons
                                     },
-                                    lookX = look.first, lookY = look.second,
+                                    lookX = look.first, lookY = look.second, menuButtons = menuButtons,
                                 )
                                 }
                                 socket.send(DatagramPacket(buffer, buffer.size, host, Ports.MOD))
@@ -779,6 +800,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** UI thread: the player got out of the car or back in. Nothing held carries over. */
+    /**
+     * UI thread: the MENU key. Lets go of the pedals (they are off screen now) and
+     * opens the game's menu with one tap of its menu key.
+     */
+    private fun openMenuPad() {
+        thrpushed = 0f
+        brpushed = 0f
+        modButtons = 0
+        menuPad = true
+        lifecycleScope.launch {
+            menuButtons = ModProtocol.MENU_TOGGLE
+            delay(MENU_TAP_MS)
+            menuButtons = menuButtons and ModProtocol.MENU_TOGGLE.inv()
+        }
+    }
+
     private fun onWalkingChanged(onFoot: Boolean) {
         if (isFinishing || isDestroyed) return
         walkingNow = onFoot
@@ -988,6 +1025,7 @@ class MainActivity : AppCompatActivity() {
         private const val HEARTBEAT_EVERY_TICKS = 300 // ~3s at the 10ms send rate
         private const val SEND_RETRY_DELAY_MS = 250L
         private const val NEUTRAL_PACKETS = 3
+        private const val MENU_TAP_MS = 120L // long enough for several packets
         // Look drag sent per dp of finger travel at speed 1: a 200 dp swipe turns about 80°.
         private const val LOOK_UNITS_PER_DP = 5f
         private const val GAME_WHEEL_FRESH_MS = 250L // the mod reports the free wheel ~30 times a second

@@ -296,6 +296,17 @@
     <string name="mod_key_map">HARİTA</string>
     <string name="mod_show_map">Harita</string>
     <string name="mod_show_map_sub">Büyük haritayı açar ve kapatır. Mod 2.3 gerekir</string>
+    <string name="mod_key_menu">MENÜ</string>
+    <string name="mod_show_menu">Menü kumandası</string>
+    <string name="mod_show_menu_sub">Oyunun menüsünü açar ve telefonu menü kumandasına çevirir: yön tuşları, seç, geri ve sekmeler. Mod 2.4 gerekir</string>
+    <string name="menu_pad_title">Oyun menüsü · RemoteControlPro modu</string>
+    <string name="menu_pad_menu">MENÜ</string>
+    <string name="menu_pad_tab_left">◀ SEKME</string>
+    <string name="menu_pad_tab_right">SEKME ▶</string>
+    <string name="menu_pad_ok">SEÇ</string>
+    <string name="menu_pad_back">GERİ</string>
+    <string name="menu_pad_close">SÜRÜŞE DÖN</string>
+    <string name="mod_what_10">Oyunun menülerini telefondan yönet: yön tuşları, seç, geri ve sekmeler</string>
     <string name="mod_key_walk">YÜRÜ</string>
     <string name="mod_show_walk">Yürüme modu</string>
     <string name="mod_show_walk_sub">Arabadan iner ve geri biner. Yaya iken telefon yürüme ekranına geçer. Mod 2.3 gerekir</string>
