@@ -14,9 +14,9 @@ horn and lights.
 **v3.0.4** adds force-feedback steering (let go of the wheel and the car turns
 it), eight steering-wheel designs, four more dashboards, and keys for drive
 modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
-The next update adds **walking**: get out of the car and the phone turns into a
-walking screen (stick, drag to look, jump, crouch, interact), plus finer
-vibration and more choices for how the controls work.
+**v3.0.5** adds **walking** (with mod 2.3): get out of the car and the phone turns
+into a walking screen (stick, drag to look, jump, crouch, interact, zoom), plus
+finer vibration and more choices for how the controls work.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
