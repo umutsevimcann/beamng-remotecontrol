@@ -17,6 +17,8 @@ modes, 4WD, nitrous, doors, camera, gearbox mode and pause.
 **v3.0.5** adds **walking** (with mod 2.3): get out of the car and the phone turns
 into a walking screen (stick, drag to look, jump, crouch, interact, zoom), plus
 finer vibration and more choices for how the controls work.
+**v3.0.6** adds **menu control** (with mod 2.4): open the game's menu and steer it
+from the phone like a gamepad.
 
 ➡️ **[Download the latest APK](https://github.com/umutsevimcann/beamng-remotecontrol/releases/latest)** · Android 5.0+ (minSdk 21)
 
